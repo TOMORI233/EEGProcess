@@ -1,50 +1,32 @@
 function rulesDefault = rulesConfig()
-% active section 1
-controlTypes = [];
-
-regTypes = [];
-regICIs = [];
-irregTypes = [];
-irregICIs = [];
-
-rulesDefault(1).rules = struct("regTypes", regTypes, "regICIs", regICIs, ...
-                               "irregTypes", irregTypes, "irregICIs", irregICIs, ...
-                               "controlTypes", controlTypes);
-rulesDefault(1).protocol = "Active Section 1";
-
-% active section 2
-controlTypes = [101, 104];
-
-regTypes = [101, 102, 103];
-regICIs = [4, 4.02, 4.06];
-regInts = [0.2, 0.2, 0.2];
-irregTypes = [104, 105];
-irregICIs = [4, 4.06];
-irregInts = [0.2, 0.2, 0.2];
-
-rulesDefault(2).rules = struct("regTypes", regTypes, "regICIs", regICIs, "regInts", regInts, ...
-                               "irregTypes", irregTypes, "irregICIs", irregICIs, "irregInts", irregInts, ...
-                               "controlTypes", controlTypes);
-rulesDefault(2).protocol = "Active Section 2";
+basicRegICIs = [4, 4.01, 4.02, 4.03, 4.06];
 
 % passive
-controlTypes = [];
+controlCodes = [31, 36, 61, 66];
+regCodes = [31:35, 61:65, 151:157];
+regICIs = [basicRegICIs, basicRegICIs, 2:8];
+regInts = [zeros(1, 5), 0.5 * ones(1, 5), zeros(1, 7)];
+irregCodes = [36, 37, 66, 67, 158:164];
+irregICIs = [4, 4.06, 4, 4.06, 2:8];
+irregInts = [0, 0, 0.5, 0.5, zeros(1, 7)];
 
-regTypes = [151, 152];
-regICIs = [4.06, 4.02];
-irregTypes = [153, 154];
-irregICIs = [4.06, 4.02];
+rulesDefault(1).rules = struct("regCodes", regCodes, "regICIs", regICIs, "regInts", regInts, ...
+                               "irregCodes", irregCodes, "irregICIs", irregICIs, "irregInts", irregInts, ...
+                               "controlCodes", controlCodes);
+rulesDefault(1).protocol = "Passive";
+rulesDefault(1).codeRange = {[30, 60], [60, 90], [150, 200]};
 
-rulesDefault(3).rules = struct("regTypes", regTypes, "regICIs", regICIs, ...
-                               "irregTypes", irregTypes, "irregICIs", irregICIs, ...
-                               "controlTypes", controlTypes);
-rulesDefault(3).protocol = "Passive";
+% active
+controlCodes = [91, 96, 121, 126];
+regCodes = [91:95, 121:125];
+regICIs = [basicRegICIs, basicRegICIs];
+regInts = [zeros(1, 5), 0.5 * ones(1, 5)];
+irregCodes = [96, 97, 126, 127];
+irregICIs = [4, 4.06, 4, 4.06];
+irregInts = [0, 0, 0.5, 0.5];
 
-% decoding
-regTypes = 201:207;
-regICIs = 2:8;
-irregTypes = 208:214;
-irregICIs = 2:8;
-rulesDefault(4).rules = struct("regTypes", regTypes, "regICIs", regICIs, ...
-                               "irregTypes", irregTypes, "irregICIs", irregICIs);
-rulesDefault(4).protocol = "Decoding";
+rulesDefault(2).rules = struct("regCodes", regCodes, "regICIs", regICIs, "regInts", regInts, ...
+                               "irregCodes", irregCodes, "irregICIs", irregICIs, "irregInts", irregInts, ...
+                               "controlCodes", controlCodes);
+rulesDefault(2).protocol = "Active";
+rulesDefault(2).codeRange = {[90, 120], [120, 150]};
