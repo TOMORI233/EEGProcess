@@ -1,4 +1,4 @@
-function [trials1, trials2, trials3, trials4] = EEGBehaviorProcess(EEG, rulesAll)
+function [trialsPassive, trialsActive] = EEGBehaviorProcess(EEG, rulesAll)
     narginchk(1, 2);
 
     if nargin < 2
@@ -6,83 +6,74 @@ function [trials1, trials2, trials3, trials4] = EEGBehaviorProcess(EEG, rulesAll
     end
 
     eventsAll = EEG.event;
-    btnsAll = eventsAll([eventsAll.type] == 1 | [eventsAll.type] == 2);
+    btns = eventsAll([eventsAll.type] == 2 | [eventsAll.type] == 3);
     fs = EEG.srate; % Hz
-    
-    %% 50: active section 1
-    evts = eventsAll([eventsAll.type] > 50 & [eventsAll.type] < 100);
-    temp = cell(length(evts), 1);
-    trials1 = struct("trialNum", temp, ...
-                     "type", temp, ...
-                     "onset", temp, ...
-                     "isReg", temp, ...
-                     "isControl", temp, ...
-                     "ICI", temp, ...
-                     "push", temp, ...
-                     "correct", temp);
 
+    %% passive/decoding
     rules = rulesAll(1).rules;
+    idx = zeros(1, length(eventsAll));
+    
+    for index = 1:length(rulesAll(1).codeRange)
+        idx = idx | ([eventsAll.type] > rulesAll(1).codeRange{index}(1) & [eventsAll.type] < rulesAll(1).codeRange{index}(2));
+    end
+
+    evts = eventsAll(idx);
+    temp = cell(length(evts), 1);
+    trialsPassive = struct("trialNum", temp, ...
+                     "onset", temp, ...
+                     "type", temp, ...
+                     "interval", temp, ...
+                     "isControl", temp, ...
+                     "ICI", temp);
 
     for tIndex = 1:length(evts)
-        trials1(tIndex, 1).trialNum = tIndex;
-        trials1(tIndex, 1).type = evts(tIndex).type;
-        trials1(tIndex, 1).onset = evts(tIndex).latency;
-        btns = btnsAll([btnsAll.type] == 2); % left arrow, diff
+        trialsPassive(tIndex).trialNum = tIndex;
+        trialsPassive(tIndex).onset = evts(tIndex).latency;
 
-        if tIndex < length(evts)
-            firstPush = btns(find([btns.latency] > evts(tIndex).latency & [btns.latency] < evts(tIndex + 1).latency, 1));
+        if any(rules.controlCodes == evts(tIndex).type)
+            trialsPassive(tIndex).isControl = true;
         else
-            firstPush = btns(find([btns.latency] > evts(tIndex).latency & [btns.latency] < evts(tIndex).latency + 3 * fs, 1));
+            trialsPassive(tIndex).isControl = false;
         end
 
-        if ~isempty(firstPush)
-            trials1(tIndex, 1).push = firstPush.latency;
-        end
-
-        if any(rules(1).controlTypes == evts(tIndex).type)
-            trials1(tIndex, 1).isControl = true;
-        else
-            trials1(tIndex, 1).isControl = false;
-        end
-
-        if any([rules.regTypes] == evts(tIndex).type) % reg
-            trials1(tIndex, 1).isReg = true;
-            trials1(tIndex, 1).ICI = rules.regICIs([rules.regTypes] == evts(tIndex).type);
-        elseif any([rules.irregTypes] == evts(tIndex).type) % irreg
-            trials1(tIndex, 1).isReg = false;
-            trials1(tIndex, 1).ICI = rules.irregICIs([rules.irregTypes] == evts(tIndex).type);
-        else
-            error("Undefined type");
-        end
-
-        if (~isempty(firstPush) && ~trials1(tIndex).isControl) || (isempty(firstPush) && trials1(tIndex).isControl)
-            trials1(tIndex, 1).correct = true;
-        else
-            trials1(tIndex, 1).correct = false;
+        if any([rules.regCodes] == evts(tIndex).type) % reg
+            trialsPassive(tIndex).type = "REG";
+            trialsPassive(tIndex).ICI = rules.regICIs([rules.regCodes] == evts(tIndex).type);
+            trialsPassive(tIndex).interval = rules.regInts([rules.regCodes] == evts(tIndex).type);
+        elseif any([rules.irregCodes] == evts(tIndex).type) % irreg
+            trialsPassive(tIndex).type = "IRREG";
+            trialsPassive(tIndex).ICI = rules.irregICIs([rules.irregCodes] == evts(tIndex).type);
+            trialsPassive(tIndex).interval = rules.irregInts([rules.irregCodes] == evts(tIndex).type);
+        else % pure tone
+            trialsPassive(tIndex).type = "PT";
+            trialsPassive(tIndex).interval = 0;
         end
 
     end
 
-    %% 100: active section 2
-    evts = eventsAll([eventsAll.type] > 100 & [eventsAll.type] < 150);
+    %% active
+    rules = rulesAll(2).rules;
+    idx = zeros(1, length(eventsAll));
+    
+    for index = 1:length(rulesAll(2).codeRange)
+        idx = idx | ([eventsAll.type] > rulesAll(2).codeRange{index}(1) & [eventsAll.type] < rulesAll(2).codeRange{index}(2));
+    end
+
+    evts = eventsAll(idx);
     temp = cell(length(evts), 1);
-    trials2 = struct("trialNum", temp, ...
-                     "type", temp, ...
+    trialsActive = struct("trialNum", temp, ...
                      "onset", temp, ...
-                     "isReg", temp, ...
+                     "type", temp, ...
                      "isControl", temp, ...
                      "ICI", temp, ...
                      "interval", temp, ...
                      "push", temp, ...
+                     "isDiff", temp, ...
                      "correct", temp);
 
-    rules = rulesAll(2).rules;
-
     for tIndex = 1:length(evts)
-        trials2(tIndex, 1).trialNum = tIndex;
-        trials2(tIndex, 1).type = evts(tIndex).type;
-        trials2(tIndex, 1).onset = evts(tIndex).latency;
-        btns = btnsAll([btnsAll.type] == 2 | [btnsAll.type] == 3);
+        trialsActive(tIndex).trialNum = tIndex;
+        trialsActive(tIndex).onset = evts(tIndex).latency;
 
         if tIndex < length(evts)
             firstPush = btns(find([btns.latency] > evts(tIndex).latency & [btns.latency] < evts(tIndex + 1).latency, 1));
@@ -91,96 +82,42 @@ function [trials1, trials2, trials3, trials4] = EEGBehaviorProcess(EEG, rulesAll
         end
 
         if ~isempty(firstPush)
-            trials2(tIndex, 1).push = firstPush.latency;
+            trialsActive(tIndex).push = firstPush.latency;
+
+            if firstPush.type == 2
+                trialsActive(tIndex).isDiff = true;
+            else
+                trialsActive(tIndex).isDiff = false;
+            end
+
         end
 
-        if any(rules(1).controlTypes == evts(tIndex).type)
-            trials2(tIndex, 1).isControl = true;
+        if any(rules.controlCodes == evts(tIndex).type)
+            trialsActive(tIndex).isControl = true;
         else
-            trials2(tIndex, 1).isControl = false;
+            trialsActive(tIndex).isControl = false;
         end
 
-        if any([rules.regTypes] == evts(tIndex).type) % reg
-            trials2(tIndex, 1).isReg = true;
-            trials2(tIndex, 1).ICI = rules.regICIs([rules.regTypes] == evts(tIndex).type);
-            trials2(tIndex, 1).interval = rules.regInts([rules.regTypes] == evts(tIndex).type);
-        elseif any([rules.irregTypes] == evts(tIndex).type) % irreg
-            trials2(tIndex, 1).isReg = false;
-            trials2(tIndex, 1).ICI = rules.irregICIs([rules.irregTypes] == evts(tIndex).type);
-            trials2(tIndex, 1).interval = rules.irregInts([rules.irregTypes] == evts(tIndex).type);
-        else
-            error("Undefined type");
+        if any([rules.regCodes] == evts(tIndex).type) % reg
+            trialsActive(tIndex).type = "REG";
+            trialsActive(tIndex).ICI = rules.regICIs([rules.regCodes] == evts(tIndex).type);
+            trialsActive(tIndex).interval = rules.regInts([rules.regCodes] == evts(tIndex).type);
+        elseif any([rules.irregCodes] == evts(tIndex).type) % irreg
+            trialsActive(tIndex).type = "IRREG";
+            trialsActive(tIndex).ICI = rules.irregICIs([rules.irregCodes] == evts(tIndex).type);
+            trialsActive(tIndex).interval = rules.irregInts([rules.irregCodes] == evts(tIndex).type);
+        else % PT
+            trialsPassive(tIndex).type = "PT";
+            trialsPassive(tIndex).interval = 0;
         end
 
-        if ~isempty(firstPush) && ((firstPush.type == 2 && ~trials2(tIndex).isControl) || (firstPush.type == 3 && trials2(tIndex).isControl))
-            trials2(tIndex, 1).correct = true;
+        if ~isempty(firstPush) && ((firstPush.type == 2 && ~trialsActive(tIndex).isControl) || (firstPush.type == 3 && trialsActive(tIndex).isControl))
+            trialsActive(tIndex).correct = true;
         else
-            trials2(tIndex, 1).correct = false;
+            trialsActive(tIndex).correct = false;
         end
 
     end
 
-    %% 150: passive
-    evts = eventsAll([eventsAll.type] > 150 & [eventsAll.type] < 200);
-    temp = cell(length(evts), 1);
-    trials3 = struct("trialNum", temp, ...
-                     "type", temp, ...
-                     "onset", temp, ...
-                     "isReg", temp, ...
-                     "isControl", temp, ...
-                     "ICI", temp);
-
-    rules = rulesAll(3).rules;
-
-    for tIndex = 1:length(evts)
-        trials3(tIndex, 1).trialNum = tIndex;
-        trials3(tIndex, 1).type = evts(tIndex).type;
-        trials3(tIndex, 1).onset = evts(tIndex).latency;
-
-        if any(rules(1).controlTypes == evts(tIndex).type)
-            trials3(tIndex, 1).isControl = true;
-        else
-            trials3(tIndex, 1).isControl = false;
-        end
-
-        if any([rules.regTypes] == evts(tIndex).type) % reg
-            trials3(tIndex, 1).isReg = true;
-            trials3(tIndex, 1).ICI = rules.regICIs([rules.regTypes] == evts(tIndex).type);
-        elseif any([rules.irregTypes] == evts(tIndex).type) % irreg
-            trials3(tIndex, 1).isReg = false;
-            trials3(tIndex, 1).ICI = rules.irregICIs([rules.irregTypes] == evts(tIndex).type);
-        else
-            error("Undefined type");
-        end
-
-    end
-
-    %% 200: decoding
-    evts = eventsAll([eventsAll.type] > 200);
-    temp = cell(length(evts), 1);
-    trials4 = struct("trialNum", temp, ...
-                     "type", temp, ...
-                     "onset", temp, ...
-                     "isReg", temp, ...
-                     "ICI", temp);
-
-    rules = rulesAll(4).rules;
-
-    for tIndex = 1:length(evts)
-        trials4(tIndex, 1).trialNum = tIndex;
-        trials4(tIndex, 1).type = evts(tIndex).type;
-        trials4(tIndex, 1).onset = evts(tIndex).latency;
-
-        if any([rules.regTypes] == evts(tIndex).type) % reg
-            trials4(tIndex, 1).isReg = true;
-            trials4(tIndex, 1).ICI = rules.regICIs([rules.regTypes] == evts(tIndex).type);
-        elseif any([rules.irregTypes] == evts(tIndex).type) % irreg
-            trials4(tIndex, 1).isReg = false;
-            trials4(tIndex, 1).ICI = rules.irregICIs([rules.irregTypes] == evts(tIndex).type);
-        else
-            error("Undefined type");
-        end
-
-    end
-
+    return;
 end
