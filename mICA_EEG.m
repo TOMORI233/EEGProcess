@@ -38,7 +38,7 @@ function comp = mICA_EEG(EEGDataset, trials, window, fs)
     cfg.lpfilter = 'yes';
     cfg.lpfreq = 100;
     cfg.hpfilter = 'yes';
-    cfg.hpfreq = 0.5;
+    cfg.hpfreq = 1;
     cfg.hpfiltord = 3;
     cfg.dftfreq = [50 100 150]; % line noise frequencies in Hz for DFT filter (default = [50 100 150])
     data = ft_preprocessing(cfg, data);
@@ -62,5 +62,7 @@ function comp = mICA_EEG(EEGDataset, trials, window, fs)
     comp = ft_componentanalysis(cfg, data);
 
     disp("ICA done.");
+
+    save("comp.mat", "comp");
     return;
 end

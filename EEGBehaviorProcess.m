@@ -1,4 +1,4 @@
-function [trialsPassive, trialsActive] = EEGBehaviorProcess(EEG, rulesAll)
+ function [trialsPassive, trialsActive] = EEGBehaviorProcess(EEG, rulesAll)
     narginchk(1, 2);
 
     if nargin < 2
@@ -107,8 +107,8 @@ function [trialsPassive, trialsActive] = EEGBehaviorProcess(EEG, rulesAll)
             trialsActive(tIndex).ICI = rules.irregICIs([rules.irregCodes] == evts(tIndex).type);
             trialsActive(tIndex).interval = rules.irregInts([rules.irregCodes] == evts(tIndex).type);
         else % PT
-            trialsPassive(tIndex).type = "PT";
-            trialsPassive(tIndex).interval = 0;
+            trialsActive(tIndex).type = "PT";
+            trialsActive(tIndex).interval = 0;
         end
 
         if ~isempty(firstPush) && ((firstPush.type == 2 && ~trialsActive(tIndex).isControl) || (firstPush.type == 3 && trialsActive(tIndex).isControl))
