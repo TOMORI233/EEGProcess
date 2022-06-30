@@ -7,7 +7,7 @@ function [Fig, mAxe] = plotBehaviorEEG(trials, fs, color, legendStr, Fig, mAxe)
     end
 
     if nargin == 5
-        error("The number of input params should be 1 or 3");
+        error("[Fig] and [mAxe] should be input together");
     end
     
     ICI = [trials.ICI];

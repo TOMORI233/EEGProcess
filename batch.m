@@ -47,7 +47,7 @@ plotBehaviorEEG(trials4([trials4.type] == "REG"), fs0, "b", "Reg Interval 600", 
 [Fig2, mAxe2] = plotBehaviorEEG(trials3([trials3.type] == "IRREG"), fs0, "r", "Irreg Interval 0");
 plotBehaviorEEG(trials4([trials4.type] == "IRREG"), fs0, "b", "Irreg Interval 600", Fig2, mAxe2);
 
-%% passive 1
+%% Passive 1
 window = [-1000, 3000];
 chData = [];
 ICIs = unique([trials1.ICI]);
@@ -70,7 +70,7 @@ Fig = plotRawWaveMulti(chData, window, "passive 1", [1, 2], [50, 51]);
 scaleAxes(Fig, "y");
 scaleAxes(Fig, "x", [800, 1600]);
 
-%% passive 2
+%% Passive 2
 window = [-1000, 3000];
 chData = [];
 ICIs = unique([trials2.ICI]);
@@ -91,5 +91,23 @@ Fig = plotRawWaveMulti(chData, window, "passive 2", [4, 4], 50);
 scaleAxes(Fig, "y", [-10, 10]);
 scaleAxes(Fig, "x", [0, 3000]);
 
-%% Active
+%% Active 1
 window = [-1000, 3000];
+chData = [];
+ICIs = unique([trials3.ICI]);
+colors = generateColorGrad(length(ICIs), 'rgb');
+EEGDataset.data = EEG3.data(1:end - 1, :);
+EEGDataset.fs = fs0;
+EEGDataset.channels = 1:(size(EEG3.data, 1) - 1);
+EEGDataset = EEGFilter(EEGDataset);
+
+for index = 1:length(ICIs)
+    trials = trials3([trials3.ICI] == ICIs(index) & [trials3.correct]);
+    [~, chData(index).chMean, ~] = selectEEG(EEGDataset, trials, window);
+    chData(index).color = colors{index};
+    chData(index).legend = string(num2str(ICIs(index)));
+end
+
+Fig = plotRawWaveMulti(chData, window, "active 1 correct", [4, 4], 50);
+scaleAxes(Fig, "y", [-10, 10]);
+scaleAxes(Fig, "x", [0, 3000]);
