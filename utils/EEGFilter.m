@@ -2,14 +2,13 @@ function EEGDataset = EEGFilter(EEGDataset, fhp, flp)
     narginchk(1, 3);
 
     if nargin < 2
-        fhp = 1;
+        fhp = 0.5;
     end
 
     if nargin < 3
         flp = 100;
     end
 
-    %% Preprocessing
     fs0 = EEGDataset.fs;
     channels = EEGDataset.channels;
 
@@ -24,6 +23,7 @@ function EEGDataset = EEGFilter(EEGDataset, fhp, flp)
     data = ft_selectdata(cfg, data);
 
     % Filter
+    disp("Filtering...");
     cfg = [];
     cfg.demean = 'no';
     cfg.lpfilter = 'yes';

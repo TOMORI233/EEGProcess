@@ -21,7 +21,7 @@ function Fig = plotRawWaveEEG(chMean, chStd, window, EEGPos, titleStr, plotSize)
         for cIndex = 1:plotSize(2)
             chNum = (rIndex - 1) * plotSize(2) + cIndex;
 
-            if chNum > size(chMean, 1) | ismember(chNum, [33, 43])
+            if chNum > size(chMean, 1) || ismember(chNum, [33, 43])
                 continue;
             end
             
@@ -35,13 +35,13 @@ function Fig = plotRawWaveEEG(chMean, chStd, window, EEGPos, titleStr, plotSize)
                 hold on;
             end
 
-            plot(t, chMean(chNum, :), "r", "LineWidth", 1.5);
+            plot(t, chMean(chNum, :), "k", "LineWidth", 1.5);
             hold on;
 
             xlim(window);
-            title(['CH ', num2str(chNum), titleStr]);
+%             title(['CH ', num2str(chNum), titleStr]);
 
-            if ~mod((chNum - 1), plotSize(2)) == 0
+            if ~any([1, 4, 6, 15, 24, 34, 44, 53, 60, 61] == chNum)
                 yticks([]);
                 yticklabels('');
             end
@@ -58,7 +58,8 @@ function Fig = plotRawWaveEEG(chMean, chStd, window, EEGPos, titleStr, plotSize)
     allAxes = findobj(Fig, "Type", "axes");
 
     for aIndex = 1:length(allAxes)
-        plot(allAxes(aIndex), [0, 0], yRange, "k--", "LineWidth", 0.6);
+%         plot(allAxes(aIndex), [0, 0], yRange, "k--", "LineWidth", 0.6);
+        plot(allAxes(aIndex), [1000, 1000], yRange, "k--", "LineWidth", 1);
     end
 
     return;

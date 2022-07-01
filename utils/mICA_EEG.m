@@ -1,18 +1,18 @@
-function comp = mICA_EEG(EEGDataset, trials, window, fs)
+function comp = mICA_EEG(EEGDataset, trials, window, fsD)
     % Description: Split data by trials onset time and window. Filter and
     %              resample data. Perform ICA on data.
     % Input:
     %     EEGDataset: a struct with fields [data], [fs] and [channels]
     %     trials: n*1 struct array of trial information
     %     window: time window of interest of each trial
-    %     fs: sample rate for downsampling, < fs0
+    %     fsD: sample rate for downsampling, < fs0
     % Output:
     %     comp: result of ICA (FieldTrip)
 
     narginchk(3, 4);
 
     if nargin < 4
-        fs = 500; % Hz, for downsampling
+        fsD = 500; % Hz, for downsampling
     end
 
     %% Preprocessing
@@ -38,7 +38,7 @@ function comp = mICA_EEG(EEGDataset, trials, window, fs)
     cfg.lpfilter = 'yes';
     cfg.lpfreq = 100;
     cfg.hpfilter = 'yes';
-    cfg.hpfreq = 1;
+    cfg.hpfreq = 0.5;
     cfg.hpfiltord = 3;
     cfg.dftfreq = [50 100 150]; % line noise frequencies in Hz for DFT filter (default = [50 100 150])
     data = ft_preprocessing(cfg, data);
@@ -46,9 +46,9 @@ function comp = mICA_EEG(EEGDataset, trials, window, fs)
     %% Resampling
     disp("Resampling...");
 
-    if fs < fs0
+    if fsD < fs0
         cfg = [];
-        cfg.resamplefs = fs;
+        cfg.resamplefs = fsD;
         cfg.trials = (1:length(data.trial))';
         data = ft_resampledata(cfg, data);
     else

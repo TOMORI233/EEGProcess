@@ -1,12 +1,12 @@
-function trialAll = EEGBehaviorProcess2(trialsData, EEGData, pID, rulesAll)
+function trialAll = EEGBehaviorProcess2(trialsData, EEGDataset, pID, rulesAll)
     narginchk(3, 4);
 
     if nargin < 4
         rulesAll = rulesConfig();
     end
 
-    evts = EEGData.event;
-    fs = EEGData.srate; % Hz
+    evts = EEGDataset.event;
+    fs = EEGDataset.fs; % Hz
 
     switch pID
         case 1
