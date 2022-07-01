@@ -36,7 +36,29 @@ for index = 1:length(ICIs)
 
     [~, chMean, ~] = selectEEG(EEGDataset, trials, window);
     legendStr = strcat("passive 1 | ", string(num2str(ICIs(index))));
-    Fig = plotRawWaveEEG(chMean, [], window, EEGPos, legendStr);
+    Fig = plotRawWaveEEG(chMean, [], window, 1000, legendStr);
+    scaleAxes(Fig, "y", [-10, 10]);
+    scaleAxes(Fig, "x", [0, 2000]);
+%     setAxes(Fig, "Visible", "off");
+    plotLayoutEEG(Fig, 0.3);
+%     print(Fig, strcat("..\Figs\Irreg_", strrep(num2str(ICIs(index)), '.', '_')), "-djpeg", "-r300");
+end
+
+%% Passive 2
+trialAll = trialDatasets(2).trialAll;
+EEGDataset = EEGDatasets(2);
+ICIs = unique([trialAll.ICI]);
+    
+for index = 1:length(ICIs)
+    trials = trialAll([trialAll.ICI] == ICIs(index) & [trialAll.type] == "REG");
+
+    if isempty(trials)
+        continue;
+    end
+
+    [~, chMean, ~] = selectEEG(EEGDataset, trials, window);
+    legendStr = strcat("passive 2 | ", string(num2str(ICIs(index))));
+    Fig = plotRawWaveEEG(chMean, [], window, 1600, legendStr);
     scaleAxes(Fig, "y", [-10, 10]);
     scaleAxes(Fig, "x", [0, 2000]);
     setAxes(Fig, "Visible", "off");
@@ -58,7 +80,28 @@ for index = 1:length(ICIs)
 
     [~, chMean, ~] = selectEEG(EEGDataset, trials, window);
     legendStr = strcat("active 1 | ", string(num2str(ICIs(index))));
-    Fig = plotRawWaveEEG(chMean, [], window, EEGPos, legendStr);
+    Fig = plotRawWaveEEG(chMean, [], window, 1000, legendStr);
+    scaleAxes(Fig, "y", [-10, 10]);
+    scaleAxes(Fig, "x", [0, 2000]);
+    setAxes(Fig, "Visible", "off");
+    plotLayoutEEG(Fig, 0.3);
+end
+
+%% Active 2
+trialAll = trialDatasets(4).trialAll;
+EEGDataset = EEGDatasets(4);
+ICIs = unique([trialAll.ICI]);
+    
+for index = 1:length(ICIs)
+    trials = trialAll([trialAll.ICI] == ICIs(index) & [trialAll.correct] & [trialAll.type] == "REG");
+    
+    if isempty(trials)
+        continue;
+    end
+
+    [~, chMean, ~] = selectEEG(EEGDataset, trials, window);
+    legendStr = strcat("active 2 | ", string(num2str(ICIs(index))));
+    Fig = plotRawWaveEEG(chMean, [], window, 1600, legendStr);
     scaleAxes(Fig, "y", [-10, 10]);
     scaleAxes(Fig, "x", [0, 2000]);
     setAxes(Fig, "Visible", "off");
