@@ -1,6 +1,10 @@
 function [Fig, mAxe] = plotBehaviorEEG(trials, fs, color, legendStr, Fig, mAxe)
-    narginchk(4, 6);
+    narginchk(3, 6);
     margins = [0.1, 0.1, 0.1, 0.1];
+
+    if nargin < 4
+        legendStr = "";
+    end
 
     if nargin < 5
         Fig = figure;

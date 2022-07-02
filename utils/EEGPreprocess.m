@@ -59,12 +59,15 @@ function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
     end
 
     disp("Data loading success.");
-    disp("Saving...");
-    temp = string(split(ROOTPATH, '\'));
-    temp(end - 1) = "MAT";
-    SAVEPATH = join(temp, "\");
-    mkdir(SAVEPATH);
-    uisave(["EEGDatasets", "trialDatasets"], fullfile(SAVEPATH, "subject1.mat"));
+
+    if opts.save
+        disp("Saving...");
+        temp = string(split(ROOTPATH, '\'));
+        temp(end - 1) = "MAT";
+        SAVEPATH = join(temp, "\");
+        mkdir(SAVEPATH);
+        uisave(["EEGDatasets", "trialDatasets"], fullfile(SAVEPATH, "subject1.mat"));
+    end
 
     return;
 end

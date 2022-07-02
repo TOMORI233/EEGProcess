@@ -8,19 +8,25 @@ window = [-1000, 3000];
 run("EEGPosConfig.m");
 
 %% Load data
-opts.fhp = 1;
+opts.fhp = 0.5;
+opts.save = false;
 [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts);
 fs0 = EEGDatasets(1).fs;
 
 %% Behavior process
 trialsActive1 = trialDatasets([trialDatasets.protocol] == "active1").trialAll;
 trialsActive2 = trialDatasets([trialDatasets.protocol] == "active2").trialAll;
+trialsPassive1 = trialDatasets([trialDatasets.protocol] == "passive1").trialAll;
+trialsPassive2 = trialDatasets([trialDatasets.protocol] == "passive2").trialAll;
 
 [FigB1, mAxeB1] = plotBehaviorEEG(trialsActive1([trialsActive1.type] == "REG"), fs0, "r", "Reg Interval 0");
 plotBehaviorEEG(trialsActive2([trialsActive2.type] == "REG"), fs0, "b", "Reg Interval 600", FigB1, mAxeB1);
 
 [FigB2, mAxeB2] = plotBehaviorEEG(trialsActive1([trialsActive1.type] == "IRREG"), fs0, "r", "Irreg Interval 0");
 plotBehaviorEEG(trialsActive2([trialsActive2.type] == "IRREG"), fs0, "b", "Irreg Interval 600", FigB2, mAxeB2);
+
+%% Compare
+run("compare.m");
 
 %% Passive 1
 trialAll = trialDatasets(1).trialAll;
