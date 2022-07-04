@@ -10,6 +10,7 @@ run("EEGPosConfig.m");
 %% Load data
 opts.fhp = 0.5;
 opts.save = false;
+opts.rules = rulesConfig([]);
 [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts);
 fs0 = EEGDatasets(1).fs;
 

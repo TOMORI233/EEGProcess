@@ -2,11 +2,10 @@ function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
     narginchk(1, 2);
 
     if nargin < 2
-        opts = preprocessConfig();
+        opts = [];
     end
 
     opts = getOrFull(opts, preprocessConfig());
-    protocols = ["passive1", "passive2", "active1", "active2", "decoding"];
 
     try
         disp("Try loading data from MAT.");
@@ -28,7 +27,8 @@ function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
     end
 
     files = dir(ROOTPATH);
-    load(fullfile(ROOTPATH, string(what(ROOTPATH).mat)), "-mat", "data1", "data2", "data3", "data4", "data5");
+    load(fullfile(ROOTPATH, string(what(ROOTPATH).mat)), "-mat", "data");
+    protocols = [data.protocol];
 
     for index = 1:length(files)
         [~, filename, ext] = fileparts(files(index).name);
@@ -49,7 +49,7 @@ function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
                 EEGDatasets(idx) = EEGFilter(EEGDatasets(idx), opts.fhp, opts.flp);
 
                 trialDatasets(idx).protocol = protocols(idx);
-                trialDatasets(idx).trialAll = EEGBehaviorProcess2(eval(['data', num2str(idx)]), EEGDatasets(idx), idx, opts.rules);
+                trialDatasets(idx).trialAll = EEGBehaviorProcess(data(idx).trialsData, EEGDatasets(idx), idx, opts.rules);
             else
                 error("Invalid file name for *.cdt");
             end
@@ -66,7 +66,7 @@ function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
         temp(end - 1) = "MAT";
         SAVEPATH = join(temp, "\");
         mkdir(SAVEPATH);
-        uisave(["EEGDatasets", "trialDatasets"], fullfile(SAVEPATH, "subject1.mat"));
+        uisave(["EEGDatasets", "trialDatasets"], fullfile(SAVEPATH, "data.mat"));
     end
 
     return;
