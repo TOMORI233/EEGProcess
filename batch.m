@@ -5,7 +5,6 @@ addpath(genpath(fileparts(mfilename("fullpath"))));
 ROOTPATH = "D:\Education\Lab\Projects\EEG\Data\CDT\20220630";
 fs = 500; % Hz, for downsampling
 window = [-1000, 3000];
-run("EEGPosConfig.m");
 
 %% Load data
 opts.fhp = 0.5;

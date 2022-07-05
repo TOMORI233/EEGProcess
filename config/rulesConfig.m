@@ -8,7 +8,7 @@ function rules = rulesConfig(TABLEPATH)
     try
         tb = readtable(TABLEPATH);
     catch
-        disp("Configuration file is not found or invalid. Please reselect");
+        disp("Configuration file is missing or invalid. Please reselect");
         [file, path] = uigetfile("*.xlsx");
         tb = readtable(fullfile(path, file));
     end
