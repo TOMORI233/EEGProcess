@@ -28,7 +28,7 @@ function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
 
     files = dir(ROOTPATH);
     load(fullfile(ROOTPATH, string(what(ROOTPATH).mat)), "-mat", "data");
-    protocols = [data.protocol];
+    protocols = cellfun(@string, {data.protocol});
 
     for index = 1:length(files)
         [~, filename, ext] = fileparts(files(index).name);

@@ -1,4 +1,4 @@
-clearvars -except data3;
+clearvars -except data;
 clc; close all force;
 addpath(genpath(fileparts(mfilename("fullpath"))));
 run("EEGPosConfig.m");
@@ -10,8 +10,8 @@ opts.fhp = 0.5;
 opts.flp = 100;
 
 % specify protocol here
-trialsData = data3;
-pID = 3;
+trialsData = data(4);
+pID = 4;
 
 %% Load data
 EEG = loadcurry(char(CDTPATH));
@@ -23,7 +23,7 @@ EEGDataset.event = EEG.event;
 EEGDataset = EEGFilter(EEGDataset, opts.fhp, opts.flp);
 fs0 = EEGDataset.fs;
 
-trialAll = EEGBehaviorProcess2(trialsData, EEGDataset, pID);
+trialAll = EEGBehaviorProcess(trialsData, EEGDataset, pID);
 
 %% Behavior
 plotBehaviorEEG(trialAll([trialAll.type] == "REG" & ~[trialAll.miss]), fs0, "r", "Reg interval 0");

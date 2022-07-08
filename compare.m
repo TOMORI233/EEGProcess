@@ -7,7 +7,7 @@ for index = 1:length(ICIs)
     chData(1).color = "k";
     chData(1).legend = "passive";
 
-    trials2 = trialsActive1([trialsActive1.ICI] == ICIs(index) & [trialsActive1.correct] & ([trialsActive1.type] == "REG" | [trialsActive1.type] == "PT"));
+    trials2 = trialsActive1([trialsActive1.ICI] == ICIs(index) & ([trialsActive1.type] == "REG" | [trialsActive1.type] == "PT"));
     [~, chData(2).chMean, ~, ~] = selectEEG(EEGDatasets(3), trials2, window);
     chData(2).color = "r";
     chData(2).legend = "active";

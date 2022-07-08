@@ -10,7 +10,11 @@ function trialAll = EEGBehaviorProcess(trialsData, EEGDataset, pID, rules)
 
     rules = rules([rules.pID] == pID);
     protocol = rules(1).protocol;
-    firstSoundOnset = evts(find([evts.type] == min([rules.code] - 1), 1) + 1).latency;
+
+    % Abort the first trial
+    sIdx = find(ismember([evts.type], [rules.code]));
+    firstSoundOnset = evts(sIdx(2)).latency;
+    trialsData = trialsData(2:end);
 
     if contains(protocol, "passive") || contains(protocol, "decoding") % Passive/Decoding
 

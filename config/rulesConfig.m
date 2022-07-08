@@ -2,7 +2,7 @@ function rules = rulesConfig(TABLEPATH)
     narginchk(0, 1);
 
     if nargin < 1
-        TABLEPATH = "D:\Education\Lab\Projects\EEG\ClickTrian Behavior 3\sounds\rules.xlsx";
+        TABLEPATH = "rules\rules.xlsx";
     end
 
     try
