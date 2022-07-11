@@ -49,7 +49,7 @@ function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
                 EEGDatasets(idx) = EEGFilter(EEGDatasets(idx), opts.fhp, opts.flp);
 
                 trialDatasets(idx).protocol = protocols(idx);
-                trialDatasets(idx).trialAll = EEGBehaviorProcess(data(idx).trialsData, EEGDatasets(idx), idx, opts.rules);
+                trialDatasets(idx).trialAll = EEGBehaviorProcess(data(idx).trialsData, EEGDatasets(idx), opts.rules);
             else
                 error("Invalid file name for *.cdt");
             end
