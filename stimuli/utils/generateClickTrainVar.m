@@ -5,10 +5,6 @@ clear all; clc
 opts.fs = 384e3;
 opts.rootPath = '..\sounds';
 
-% for decode
-decodeICI = [2 3 4 5 6 7 8];
-decodeDuration = 1000; % ms
-
 % for continuous / seperated
 % s1ICI = 4; % ms
 % s2ICI = [4 4.01 4.02 4.03 4.06]';
@@ -22,35 +18,6 @@ opts.Amp = 1;
 opts.riseFallTime = 0; % ms
 opts.clickDur = 0.2 ; % ms
 click = generateClick(opts);
-
-%% for single click train
-opts.click = click;
-opts.trainLength = 100; % ms, single train
-opts.soundLength = decodeDuration; % ms, sound length, composed of N single trains
-opts.ICIs = decodeICI; % ms
-
-% generate regular click train
-[singleRegWave, regDur] = generateRegClickTrain(opts);
-
-% save regular single click train
-% opts.ICIName = opts.ICIs; 
-% opts.folderName = 'decoding';
-% opts.fileNameTemp = '[ICI]_Reg.wav';
-% opts.fileNameRep = '[ICI]';
-% exportSoundFile(singleRegWave, opts)
-
-% generate irregular click train
-opts.baseICI =  4; % ms
-opts.sigmaPara = 2; % sigma = μ / sigmaPara
-opts.irregICISampNBase = cell2mat(irregICISampN(opts));
-opts.irregSingleSampN = opts.irregICISampNBase;
-singleIrregWave = generateIrregClickTrain(opts);
-
-% save irregular single click train
-% opts.folderName = 'decoding';
-% opts.fileNameTemp = '[ICI]_Irreg.wav';
-% opts.fileNameRep = '[ICI]';
-% exportSoundFile(singleIrregWave, opts)
 
 %% for click train long term
 opts.repN = 3; % 
@@ -66,25 +33,9 @@ s2RegWave = RegWave(2:end, 1);
 longTermRegWaveContinuous = mergeSingleWave(s1RegWave, s2RegWave, 0, opts, 1);
 longTermRegWaveSepatated = mergeSingleWave(s1RegWave, s2RegWave, interval, opts, 1); % interval unit: ms
 
-% save continuous regular long term click train
-% opts.ICIName = s2ICI; 
-% opts.folderName = 'interval 0';
-% opts.fileNameTemp = '[s2ICI]_Reg.wav';
-% opts.fileNameRep = '[s2ICI]';
-% exportSoundFile({longTermRegWaveContinuous.s1s2}, opts)
-
-% save seperated regular long term click train
-% opts.ICIName = s2ICI; 
-% opts.folderName = 'interval 600';
-% opts.fileNameTemp = '[s2ICI]_Reg.wav';
-% opts.fileNameRep = '[s2ICI]';
-% exportSoundFile({longTermRegWaveSepatated.s1s2}, opts)
-
-
-
 % generate irregular click train
 opts.baseICI =  4; % ms
-opts.sigmaPara = 20; % sigma = μ / sigmaPara
+opts.sigmaPara = 50; % sigma = μ / sigmaPara
 opts.irregICISampNBase = cell2mat(irregICISampN(opts));
 opts.irregLongTermSampN = opts.irregICISampNBase;
 [~, ~, ~, irregSampN] = generateIrregClickTrain(opts);
