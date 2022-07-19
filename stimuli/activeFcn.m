@@ -1,8 +1,17 @@
 function data = activeFcn(pID, nRepeat, ISI, choiceWin, fsDevice, deviceID, volumn, ioObj, address)
     [sounds, fsSound] = loadSounds(pID);
     sounds = cellfun(@(x) resampleData(reshape(x, [1, length(x)]), fsSound, fsDevice), sounds, 'UniformOutput', false);
-    orders = repmat(1:(length(sounds) - 2), 1, nRepeat);
-    orders = [orders, repmat((length(sounds) - 1):length(sounds), 1, ceil(nRepeat / 3))];
+    
+    if pID == 4
+        orders = repmat(1:(length(sounds) - 2), 1, nRepeat);
+        orders = [orders, repmat((length(sounds) - 1):length(sounds), 1, ceil(nRepeat / 3))];
+    elseif pID == 5
+        orders = repmat(1:(length(sounds) - 1), 1, nRepeat);
+        orders = [orders, repmat(length(sounds), 1, ceil(nRepeat / 3))];
+    else
+        error("Invalid active protocol ID");
+    end
+
     orders = orders(randperm(length(orders)));
     
     reqlatencyclass = 2;

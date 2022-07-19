@@ -6,10 +6,6 @@ opts.fs = 384e3;
 opts.rootPath = '..\sounds';
 mkdir(opts.rootPath);
 
-% for decode
-decodeICI = [2 3 4 5 6 7 8];
-decodeDuration = 1000; % ms
-
 % for continuous / seperated
 s1ICI = 8; % ms, 8-8.12, 16-16.24, 32-32.48
 s2ICI = 8.12;
@@ -21,15 +17,6 @@ opts.Amp = 1;
 opts.riseFallTime = 0; % ms
 opts.clickDur = 0.2 ; % ms
 click = generateClick(opts);
-
-%% for single click train
-opts.click = click;
-opts.trainLength = 100; % ms, single train
-opts.soundLength = decodeDuration; % ms, sound length, composed of N single trains
-opts.ICIs = decodeICI; % ms
-
-% generate regular click train
-[singleRegWave, regDur] = generateRegClickTrain(opts);
 
 %% for click train long term
 opts.repN = 3; % 
