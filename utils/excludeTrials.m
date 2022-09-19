@@ -7,7 +7,13 @@ function [trialsEEG, chIdx] = excludeTrials(trialsEEG, th)
     chStd2 = std(chMean, 1, 2);
     chIdx = chStd2 <= mean(chStd2) + 3 * std(chStd2);
     idx = cellfun(@(x) ~any(x > th), idx);
-    disp(['Trial ', num2str(find(~idx)'), ' are excluded.']);
+
+    if ~isempty(find(~idx, 1))
+        disp(['Trial ', num2str(find(~idx)'), ' are excluded.']);
+    else
+        disp('All pass');
+    end
+
     trialsEEG = trialsEEG(idx);
     return;
 end

@@ -60,7 +60,11 @@ function Fig = plotRawWaveMultiEEG(chData, window, transTime, titleStr, EEGPos)
 
     for aIndex = 1:length(allAxes)
         plot(allAxes(aIndex), [0, 0], yRange, "k--", "LineWidth", 1);
-        plot(allAxes(aIndex), transTime * ones(1, 2), yRange, "k--", "LineWidth", 1);
+
+        if ~isempty(transTime)
+            plot(allAxes(aIndex), transTime * ones(1, 2), yRange, "k--", "LineWidth", 1);
+        end
+        
     end
 
     return;

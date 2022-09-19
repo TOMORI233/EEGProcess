@@ -1,20 +1,22 @@
-function trialAll = EEGBehaviorProcess(trialsData, EEGDataset, pID, rules)
-    narginchk(3, 4);
+function trialAll = EEGBehaviorProcess(trialsData, EEGDataset, rules)
+    narginchk(2, 3);
 
-    if nargin < 4
+    if nargin < 3
         rules = rulesConfig();
     end
 
     evts = EEGDataset.event;
     fs = EEGDataset.fs; % Hz
 
-    rules = rules([rules.pID] == pID);
-    protocol = rules(1).protocol;
+    protocol = EEGDataset.protocol;
+    rules = rules(cellfun(@string, {rules.protocol}) == EEGDataset.protocol);
+
+    % sIdx = find(ismember([evts.type], [rules.code]));
+    % firstSoundOnset = evts(sIdx(2)).latency;
+    firstSoundOnset = evts(find([evts.type] == trialsData(1).code, 1)).latency;
 
     % Abort the first trial
-    sIdx = find(ismember([evts.type], [rules.code]));
-    firstSoundOnset = evts(sIdx(2)).latency;
-    trialsData = trialsData(2:end);
+    % trialsData = trialsData(2:end);
 
     if contains(protocol, "passive") || contains(protocol, "decoding") % Passive/Decoding
 
