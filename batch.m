@@ -3,9 +3,9 @@ close all force;
 addpath(genpath(fileparts(mfilename("fullpath"))));
 
 %% Parameter settings
-ROOTPATH = "D:\Education\Lab\Projects\EEG\Data\CDT\20220708\Subject1";
+ROOTPATH = "D:\Education\Lab\Projects\EEG\Data\CDT\20220906\Subject1";
 th = 0.2;
-yscale = [-5, 5];
+yscale = [-10, 10];
 
 temp = string(split(ROOTPATH, "\"));
 dateStr = strcat(temp(end - 1), "-", temp(end));
@@ -14,7 +14,7 @@ dateStr = strcat(temp(end - 1), "-", temp(end));
 opts.fhp = 0.5;
 opts.flp = 40;
 opts.save = false;
-opts.rules = rulesConfig([]);
+opts.rules = rulesConfig();
 [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts);
 fs0 = EEGDatasets(1).fs;
 warning off;
@@ -41,6 +41,13 @@ print(FigB3, strcat(BPATH, "BEHAVIOR_PT"), "-djpeg", "-r300");
 window = [0, 2000];
 trialAll = trialDatasets([trialDatasets.protocol] == "passive3").trialAll;
 EEGDataset = EEGDatasets([trialDatasets.protocol] == "passive3");
+
+comp = mICA_EEG(EEGDataset, trialAll, window);
+ICMean = cell2mat(cellfun(@mean, changeCellRowNum(comp.trial), "UniformOutput", false));
+plotRawWave(ICMean, [], window, "ICA");
+plotTopoEEG(comp);
+
+
 ICIs = unique([trialAll.ICI]);
 FIGPATH = strcat("..\Figs\", dateStr, "\Passive 3\");
 mkdir(FIGPATH);
@@ -56,7 +63,7 @@ for index = 1:length(ICIs)
     [~, chMean, ~] = selectEEG(EEGDataset, trials, window, th);
     legendStr = strcat("passive 3 | REG ", string(num2str(ICIs(index))));
     Fig = plotRawWaveEEG(chMean, [], window, 1000, legendStr);
-    scaleAxes(Fig, "y", yscale);
+    scaleAxes(Fig, "y", [], yscale);
     scaleAxes(Fig, "x", [0, 2000]);
     setAxes(Fig, "Visible", "off");
     plotLayoutEEG(Fig, 0.3);
@@ -74,7 +81,7 @@ for index = 1:length(ICIs)
     [~, chMean, ~] = selectEEG(EEGDataset, trials, window, th);
     legendStr = strcat("passive 3 | IRREG", string(num2str(ICIs(index))));
     Fig = plotRawWaveEEG(chMean, [], window, 1000, legendStr);
-    scaleAxes(Fig, "y", yscale);
+    scaleAxes(Fig, "y", [], yscale);
     scaleAxes(Fig, "x", [0, 2000]);
     setAxes(Fig, "Visible", "off");
     plotLayoutEEG(Fig, 0.3);
@@ -89,7 +96,7 @@ ICIs = unique([trialAll.ICI]);
 FIGPATH = strcat("..\Figs\", dateStr, "\Active 1\");
 mkdir(FIGPATH);
 
-% Reg
+% Reg Correct
 for index = 1:length(ICIs)
     trials = trialAll([trialAll.ICI] == ICIs(index) & [trialAll.correct] & ([trialAll.type] == "REG" | ([trialAll.type] == "PT" & [trialAll.freq] ~= 250)));
 
@@ -100,7 +107,7 @@ for index = 1:length(ICIs)
     [~, chMean, ~] = selectEEG(EEGDataset, trials, window, th);
     legendStr = strcat("active 1 | REG ", string(num2str(ICIs(index))));
     Fig = plotRawWaveEEG(chMean, [], window, 1000, legendStr);
-    scaleAxes(Fig, "y", yscale);
+    scaleAxes(Fig, "y", [], yscale);
     scaleAxes(Fig, "x", [0, 2000]);
     setAxes(Fig, "Visible", "off");
     plotLayoutEEG(Fig, 0.3);
@@ -118,11 +125,29 @@ for index = 1:length(ICIs)
     [~, chMean, ~] = selectEEG(EEGDataset, trials, window, th);
     legendStr = strcat("active 1 | IRREG", string(num2str(ICIs(index))));
     Fig = plotRawWaveEEG(chMean, [], window, 1000, legendStr);
-    scaleAxes(Fig, "y", yscale);
+    scaleAxes(Fig, "y", [], yscale);
     scaleAxes(Fig, "x", [0, 2000]);
     setAxes(Fig, "Visible", "off");
     plotLayoutEEG(Fig, 0.3);
     print(Fig, strcat(FIGPATH, "Irreg_", strrep(num2str(ICIs(index)), '.', '_')), "-djpeg", "-r300");
+end
+
+% Reg Wrong
+for index = 1:length(ICIs)
+    trials = trialAll([trialAll.ICI] == ICIs(index) & ~[trialAll.correct] & ~[trialAll.miss] & ([trialAll.type] == "REG" | ([trialAll.type] == "PT" & [trialAll.freq] ~= 250)));
+
+    if isempty(trials)
+        continue;
+    end
+
+    [~, chMean, ~] = selectEEG(EEGDataset, trials, window, th);
+    legendStr = strcat("active 1 | REG ", string(num2str(ICIs(index))));
+    Fig = plotRawWaveEEG(chMean, [], window, 1000, legendStr);
+    scaleAxes(Fig, "y", [], yscale);
+    scaleAxes(Fig, "x", [0, 2000]);
+    setAxes(Fig, "Visible", "off");
+    plotLayoutEEG(Fig, 0.3);
+    print(Fig, strcat(FIGPATH, "Reg_", strrep(num2str(ICIs(index)), '.', '_')), "-djpeg", "-r300");
 end
 
 %% Active 2
@@ -144,7 +169,7 @@ for index = 1:length(ICIs)
     [~, chMean, ~] = selectEEG(EEGDataset, trials, window, th);
     legendStr = strcat("active 2 | REG ", string(num2str(ICIs(index))));
     Fig = plotRawWaveEEG(chMean, [], window, 1600, legendStr);
-    scaleAxes(Fig, "y", yscale);
+    scaleAxes(Fig, "y", [], yscale);
     scaleAxes(Fig, "x", [0, 2600]);
     lines.X = 1000;
     addLines2Axes(Fig, lines);
@@ -164,7 +189,7 @@ for index = 1:length(ICIs)
     [~, chMean, ~] = selectEEG(EEGDataset, trials, window, th);
     legendStr = strcat("active 2 | IRREG", string(num2str(ICIs(index))));
     Fig = plotRawWaveEEG(chMean, [], window, 1600, legendStr);
-    scaleAxes(Fig, "y", yscale);
+    scaleAxes(Fig, "y", [], yscale);
     scaleAxes(Fig, "x", [0, 2600]);
     lines.X = 1000;
     addLines2Axes(Fig, lines);
@@ -196,7 +221,7 @@ for index = 1:length(ICIs)
     chData(1).color = "k";
     chData(2).color = "r";
     Fig = plotRawWaveMultiEEG(chData, [0, 1000], [], num2str(ICIs(index)));
-    scaleAxes(Fig, "y", yscale);
+    scaleAxes(Fig, "y", [], yscale);
     scaleAxes(Fig, "x", [0, 500]);
     setAxes(Fig, "Visible", "off");
     plotLayoutEEG(Fig, 0.3);
@@ -217,7 +242,7 @@ for index = 1:length(ICIs)
     chData(1).color = "k";
     chData(2).color = "r";
     Fig = plotRawWaveMultiEEG(chData, [0, 1000], [], num2str(ICIs(index)));
-    scaleAxes(Fig, "y", yscale);
+    scaleAxes(Fig, "y", [], yscale);
     scaleAxes(Fig, "x", [0, 500]);
     setAxes(Fig, "Visible", "off");
     plotLayoutEEG(Fig, 0.3);

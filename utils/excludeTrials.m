@@ -1,4 +1,4 @@
-function trialsEEG = excludeTrials(trialsEEG, th)
+function idx = excludeTrials(trialsEEG, th)
     temp = changeCellRowNum(trialsEEG);
     chMean = cell2mat(cellfun(@mean, temp, "UniformOutput", false));
     chStd = cell2mat(cellfun(@std, temp, "UniformOutput", false));
@@ -6,11 +6,12 @@ function trialsEEG = excludeTrials(trialsEEG, th)
     idx = cellfun(@(x) ~any(x > th), idx);
 
     if ~isempty(find(~idx, 1))
-        disp(['Trial ', num2str(find(~idx)'), ' are excluded.']);
+        idx = find(~idx)';
+        disp(['Trial ', num2str(idx), ' excluded.']);
     else
+        idx = [];
         disp('All pass');
     end
 
-    trialsEEG = trialsEEG(idx);
     return;
 end

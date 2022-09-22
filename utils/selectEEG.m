@@ -23,7 +23,9 @@ function [trialsEEG, chMean, chStd, sampleinfo] = selectEEG(EEGDataset, trials, 
     trialsEEG = cellfun(@(x) x * scaleFactor, trialsEEG, "UniformOutput", false);
 
     % reject trials with artifact
-    trialsEEG = excludeTrials(trialsEEG, excludeTh);
+    idx = excludeTrials(trialsEEG, excludeTh);
+    trialsEEG(idx) = [];
+    sampleinfo(idx, :) = [];
 
     % by channel
     nChs = length(EEGDataset.channels);

@@ -42,7 +42,7 @@ function [Fig, mAxe] = plotBehaviorEEG_Tone(trials, fs, color, legendStr, Fig, m
         stem(mAxe(2 * index), meanRTSame, yaxis(2), "Color", color, "LineStyle", "-", "LineWidth", 1.5);
         xlim(mAxe(2 * index), [0, 2000]);
         xlabel(mAxe(2 * index), 'Reaction Time (ms)');
-        title(mAxe(2 * index), ['Press for same, ICI = ', num2str(freqUnique(index))]);
+        title(mAxe(2 * index), ['Press for same, f = ', num2str(freqUnique(index)), ' Hz']);
 
         scatter(mAxe(2 * index + 1), RTDiff, 1:length(RTDiff), 40, color, "filled");
         hold(mAxe(2 * index + 1), "on");
@@ -51,7 +51,7 @@ function [Fig, mAxe] = plotBehaviorEEG_Tone(trials, fs, color, legendStr, Fig, m
         stem(mAxe(2 * index + 1), meanRTDiff, yaxis(2), "Color", color, "LineStyle", "-", "LineWidth", 1.5);
         xlim(mAxe(2 * index + 1), [0, 2000]);
         xlabel(mAxe(2 * index + 1), 'Reaction Time (ms)');
-        title(mAxe(2 * index + 1), ['Press for diff, ICI = ', num2str(freqUnique(index))]);
+        title(mAxe(2 * index + 1), ['Press for diff, f = ', num2str(freqUnique(index)), ' Hz']);
     end
 
     if nargin < 6
@@ -64,7 +64,7 @@ function [Fig, mAxe] = plotBehaviorEEG_Tone(trials, fs, color, legendStr, Fig, m
     xticklabels(mAxe(1), freqUnique);
     ylim(mAxe(1), [0 1]);
     yticks(mAxe(1), 0:0.2:1);
-    xlabel(mAxe(1), "ICI");
+    xlabel(mAxe(1), "Deviant Frequency (Hz)");
     ylabel(mAxe(1), "Press-for-diff Ratio");
     legend(mAxe(1), "Location", "best");
 
