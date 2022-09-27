@@ -1,4 +1,10 @@
 function idx = excludeTrials(trialsEEG, th)
+    narginchk(1, 2);
+
+    if nargin < 2
+        th = 0.1;
+    end
+
     temp = changeCellRowNum(trialsEEG);
     chMean = cell2mat(cellfun(@mean, temp, "UniformOutput", false));
     chStd = cell2mat(cellfun(@std, temp, "UniformOutput", false));
