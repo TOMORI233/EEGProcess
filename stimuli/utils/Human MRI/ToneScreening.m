@@ -1,32 +1,17 @@
 clear; clc;
 
 fs = 48e3; % Hz
-f = [250, 246]; % Hz
-durTotal = 10; % sec
-N = 10;
-randRange = 0.7:0.05:1.3;
+f = [88,125,177,250,354,500,707,1000,1414,2000,2828,4000,5657,8000]; % Hz
+duration = 2; % sec
 rtTime = 2e-3; % sec
 
-try
-    load("randTimeSeq.mat");
-catch
-    randTimeSeq = generateRandTimeSeq(durTotal, N, randRange);
-    save("randTimeSeq.mat", "randTimeSeq", "-mat");
+y = genRiseFallEdge(generateTone(f(1), duration, fs, [], "complete"), fs, rtTime, "rise");
+for index = 2:length(f) - 1
+    y = [y, generateTone(f(index), duration, fs, [], "complete")];
 end
+y = [y, genRiseFallEdge(generateTone(f(end), duration, fs, [], "complete"), fs, rtTime, "fall")];
 
-for sIndex = 1:length(randTimeSeq)
-
-    if sIndex == 1
-        y = genRiseFallEdge(generateTone(f(1), randTimeSeq(sIndex), fs, [], "complete"), fs, rtTime, "rise");
-    elseif sIndex == length(randTimeSeq)
-        y = [y, genRiseFallEdge(generateTone(f(2), randTimeSeq(sIndex), fs, [], "complete"), fs, rtTime, "fall")];
-    else
-        y = [y, generateTone(f(2 - mod(sIndex, 2)), randTimeSeq(sIndex), fs, [], "complete")];
-    end
-    
-end
-
-audiowrite('..\..\sounds\MRI usage\250_246.wav', y, fs);
+audiowrite('..\..\sounds\MRI usage\Tone Screening.wav', y, fs);
 
 %% Fcn
 function [y, t] = generateTone(f, duration, fs, tShift, edgeOpt)

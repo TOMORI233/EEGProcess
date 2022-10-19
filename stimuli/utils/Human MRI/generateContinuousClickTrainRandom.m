@@ -23,8 +23,8 @@ click = generateClick(opts);
 try
     load("randTimeSeq.mat");
 catch
-    randTimeSeq = generateRandTimeSeq(durTotal, NTrans, 0.5:0.05:1.5); % sec
-    save("randTimeSeq", "randTimeSeq", "-mat");
+    randTimeSeq = generateRandTimeSeq(durTotal, NTrans, 0.7:0.05:1.3); % sec
+    save("randTimeSeq.mat", "randTimeSeq", "-mat");
 end
 singleDuration = randTimeSeq * 1000; % ms
 opts.repN = 3; % 
