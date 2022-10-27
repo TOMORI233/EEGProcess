@@ -5,12 +5,18 @@ f = [88,125,177,250,354,500,707,1000,1414,2000,2828,4000,5657,8000]; % Hz
 duration = 2; % sec
 rtTime = 2e-3; % sec
 
-y = genRiseFallEdge(generateTone(f(1), duration, fs, [], "complete"), fs, rtTime, "rise");
+y0 = generateTone(f(1), duration, fs, [], "complete");
+y = genRiseFallEdge(y0, fs, rtTime, "rise");
 for index = 2:length(f) - 1
-    y = [y, generateTone(f(index), duration, fs, [], "complete")];
+    temp = generateTone(f(index), duration, fs, [], "complete");
+    y = [y, f(1)^2*norm(y0(1:fix(fs/f(1))))^2 / (f(index)^2*norm(temp(1:fix(fs/f(index))))^2) * temp];
 end
-y = [y, genRiseFallEdge(generateTone(f(end), duration, fs, [], "complete"), fs, rtTime, "fall")];
+y = [y, f(1) / f(end) * genRiseFallEdge(generateTone(f(end), duration, fs, [], "complete"), fs, rtTime, "fall")];
 
+figure;
+plot(y);
+
+% playAudio(y, fs);
 audiowrite('..\..\sounds\MRI usage\Tone Screening.wav', y, fs);
 
 %% Fcn

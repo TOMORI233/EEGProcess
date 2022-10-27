@@ -1,7 +1,7 @@
 clear; clc;
 
 fs = 48e3; % Hz
-f = [250, 246]; % Hz
+f = [250, 200]; % Hz
 durTotal = 10; % sec
 N = 10;
 randRange = 0.7:0.05:1.3;
@@ -26,7 +26,7 @@ for sIndex = 1:length(randTimeSeq)
     
 end
 
-audiowrite('..\..\sounds\MRI usage\250_246.wav', y, fs);
+audiowrite(['..\..\sounds\MRI usage\', num2str(f(1)), '_', num2str(f(2)), '.wav'], y, fs);
 
 %% Fcn
 function [y, t] = generateTone(f, duration, fs, tShift, edgeOpt)
