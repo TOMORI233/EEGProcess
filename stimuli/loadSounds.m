@@ -79,9 +79,8 @@ function [sounds, fs] = loadSounds(protocolID)
 
 
          case 7 % TITS: code 211~212
-            [sounds{1}, fs] = audioread('sounds\2022-11-09_TITS\3s_24_26.4_RegStdDev.wav');
-            sounds{2} = audioread('sounds\2022-11-09_TITS\3s_24_60_RegDevStd.wav');
-            sounds = cellfun(@(x) x(1:min(fix(fs), length(x))), sounds, 'UniformOutput', false);
+            [sounds{1}, fs] = audioread('sounds\2022-11-10_TITS\interval 0\3s_24_26.4_RegStdDev.wav');
+            sounds{2} = audioread('sounds\2022-11-10_TITS\interval 0\3s_24_60_RegDevStd.wav');
     end
 
     return;

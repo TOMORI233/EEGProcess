@@ -79,7 +79,7 @@ data(6).trialsData = passiveFcn(6, nRepeat, 2, fsDevice, deviceID, volumn, ioObj
 data(6).protocol = "decoding";
 PsychPortAudio('Close');
 
-%% Part 7
+%% Part 7： TITS
 PsychPortAudio('Close');
 disp('Press any key to start Part 7 - TITS');
 KbWait;
