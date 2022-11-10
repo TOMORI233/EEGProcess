@@ -25,10 +25,10 @@ function comp = mICA_EEG(EEGDataset, trials, window, fsD)
     cfg = [];
     cfg.trials = true(length(trialsEEG), 1);
     data.trial = trialsEEG';
-    data.time = repmat({t}, 1, length(trials));
+    data.time = repmat({t}, 1, length(trialsEEG));
     data.label = cellfun(@(x) num2str(x), num2cell(channels)', 'UniformOutput', false);
     data.fsample = fs0;
-    data.trialinfo = ones(length(trials), 1);
+    data.trialinfo = ones(length(trialsEEG), 1);
     data.sampleinfo = sampleinfo;
     data = ft_selectdata(cfg, data);
 
@@ -62,7 +62,5 @@ function comp = mICA_EEG(EEGDataset, trials, window, fsD)
     comp = ft_componentanalysis(cfg, data);
 
     disp("ICA done.");
-
-    save("comp.mat", "comp");
     return;
 end

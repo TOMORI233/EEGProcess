@@ -2,7 +2,7 @@ clear all; clc
 
 %% important parameters
 % basic
-opts.fs = 384e3;
+opts.fs = 97656;
 opts.rootPath = '..\sounds';
 mkdir(opts.rootPath);
 
@@ -11,9 +11,9 @@ decodeICI = [2 3 4 5 6 7 8];
 decodeDuration = 1000; % ms
 
 % for continuous / seperated
-s1ICI = 4; % ms
-s2ICI = [4 4.01 4.02 4.03 4.06 8]';
-singleDuration = 1000; % ms
+s1ICI = 4; % ms, 8-8.12, 16-16.24, 32-32.48
+s2ICI = 4.06;
+singleDuration = 5000; % ms
 interval = 600; % ms
 
 %% generate single click
@@ -30,26 +30,6 @@ opts.ICIs = decodeICI; % ms
 
 % generate regular click train
 [singleRegWave, regDur] = generateRegClickTrain(opts);
-
-% save regular single click train
-opts.ICIName = opts.ICIs; 
-opts.folderName = 'decoding';
-opts.fileNameTemp = '[ICI]_Reg.wav';
-opts.fileNameRep = '[ICI]';
-exportSoundFile(singleRegWave, opts)
-
-% generate irregular click train
-opts.baseICI =  4; % ms
-opts.sigmaPara = 2; % sigma = μ / sigmaPara
-opts.irregICISampNBase = cell2mat(irregICISampN(opts));
-opts.irregSingleSampN = opts.irregICISampNBase;
-singleIrregWave = generateIrregClickTrain(opts);
-
-% save irregular single click train
-opts.folderName = 'decoding';
-opts.fileNameTemp = '[ICI]_Irreg.wav';
-opts.fileNameRep = '[ICI]';
-exportSoundFile(singleIrregWave, opts)
 
 %% for click train long term
 opts.repN = 3; % 
@@ -71,14 +51,6 @@ opts.folderName = 'interval 0';
 opts.fileNameTemp = '[s2ICI]_Reg.wav';
 opts.fileNameRep = '[s2ICI]';
 exportSoundFile({longTermRegWaveContinuous.s1s2}, opts)
-
-% save seperated regular long term click train
-opts.ICIName = s2ICI; 
-opts.folderName = 'interval 600';
-opts.fileNameTemp = '[s2ICI]_Reg.wav';
-opts.fileNameRep = '[s2ICI]';
-exportSoundFile({longTermRegWaveSepatated.s1s2}, opts)
-
 
 
 % generate irregular click train
@@ -118,10 +90,3 @@ opts.fileNameTemp = '[s2ICI]_Irreg.wav';
 opts.fileNameRep = '[s2ICI]';
 exportSoundFile({longTermIrregWaveStdDevContinuous.s1s2}, opts)
 
-% save seperated irregular long term click train
-opts.ICIName = s2ICI; 
-opts.folderName = 'interval 600';
-opts.fileNameTemp = '[s2ICI]_Irreg.wav';
-opts.fileNameRep = '[s2ICI]';
-exportSoundFile({longTermIrregWaveStdDevSeperated.s1s2}, opts)
-save(fullfile(opts.rootPath, 'opts'), 'opts');

@@ -1,17 +1,14 @@
 clear; clc;
 Amp = 1;
-fs = 384e3;
+fs = 48e3;
 toneLength = 1000; % ms
 riseFallTime = 5; % ms
-
-% InitializePsychSound
-% PsychPortAudio('Close');
-% pahandle = PsychPortAudio('Open', [], 1, 1, fs, 2);
+nRepeat = 5;
 
 f1 = 250;
-f2 = [250, 246.3054];
+f2 = [250, 247];
 
-for index = 1:2
+for index = 1:length(f2)
     t = 1/fs : 1 /fs : (toneLength / 1000);
     
     tR = find(t*1000 < riseFallTime);
@@ -25,13 +22,21 @@ for index = 1:2
     
     tone1 = Amp * sin(2 * pi * f1 * t);
     tone2 = Amp * sin(2 * pi * f2(index) * t);
-    tone1(tR) = tone1(tR) .* sigRise;
-    tone2(tF) = tone2(tF) .* sigFall;
+
+    tone1Head = tone1;
+    tone2Tail = tone2;
+    tone1Head(tR) = tone1(tR) .* sigRise;
+    tone2Tail(tF) = tone2(tF) .* sigFall;
+
+    toneBody = [];
+
+    for n = 1:nRepeat - 2
+        toneBody = [toneBody, tone1, tone2];
+    end
     
-    wave = [tone1 tone2];
+    wave = [tone1Head, tone2, toneBody, tone1, tone2Tail];
+
+%     playAudio(wave, fs);
     
-    audiowrite(['..\sounds\interval 0\', num2str(fix(f2(index))), '_PT.wav'], wave, fs);
-    
-%     PsychPortAudio('FillBuffer', pahandle, repmat(wave, 2, 1));
-%     PsychPortAudio('Start', pahandle, 1, 0, 1);
+    audiowrite(['..\..\sounds\', num2str(fix(f2(index))), '_PT.wav'], wave, fs);
 end
