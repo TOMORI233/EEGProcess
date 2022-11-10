@@ -248,3 +248,40 @@ for index = 1:length(ICIs)
     plotLayoutEEG(Fig, 0.3);
     print(Fig, strcat(FIGPATH, "Irreg_", strrep(num2str(ICIs(index)), '.', '_')), "-djpeg", "-r300");
 end
+
+%% decoding
+window = [0, 1000];
+trialAll = trialDatasets([trialDatasets.protocol] == "passive1").trialAll;
+EEGDataset = EEGDatasets([trialDatasets.protocol] == "passive1");
+fs = EEGDataset.fs;
+ICIs = unique([trialAll.ICI]);
+FIGPATH = strcat("..\Figs\", dateStr, "\Decoding\");
+mkdir(FIGPATH);
+
+
+
+
+% Reg
+for index = 1:length(ICIs)
+
+    trials = trialAll([trialAll.ICI] == ICIs(index) & [trialAll.type] == "REG");
+    [trialsEEG, ~, ~] = selectEEG(EEGDataset, trials, window, th);
+
+    t = linspace(window(1), window(2), size(trialsEEG{1}, 2));
+
+    if isempty(trials)
+        continue;
+    end
+
+    % FFT
+    [~, tIdx] = findWithinWindow(t, window);
+    [ff, PMean]  = trialsECOGFFT(trialsEEG, fs, tIdx, [], "magnitude");
+
+    legendStr = strcat("decoding | REG ", string(num2str(ICIs(index))));
+    Fig = plotRawWaveEEG(PMean, [], [ff(1), ff(end)], [], legendStr);
+    scaleAxes(Fig, "y", [], yscale);
+    scaleAxes(Fig, "x", [0, 100]);
+    setAxes(Fig, "Visible", "off");
+    plotLayoutEEG(Fig, 0.3);
+    print(Fig, strcat(FIGPATH, "Reg_", strrep(num2str(ICIs(index)), '.', '_')), "-djpeg", "-r300");
+end

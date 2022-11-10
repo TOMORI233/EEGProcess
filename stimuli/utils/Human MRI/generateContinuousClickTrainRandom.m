@@ -1,5 +1,6 @@
 clear; clc;
-nRepeat = 5;
+durTotal = 10; % sec
+NTrans = 10;
 
 %% important parameters
 % basic
@@ -9,8 +10,8 @@ mkdir(opts.rootPath);
 
 % for continuous / seperated
 s1ICI = 4; % ms
-s2ICI = [4 4.06]';
-singleDuration = 1000; % ms
+s2ICI = 4.06;
+% singleDuration = 1000; % ms
 
 %% generate single click
 opts.Amp = 1;
@@ -19,36 +20,51 @@ opts.clickDur = 0.2 ; % ms
 click = generateClick(opts);
 
 %% for click train long term
+try
+    load("randTimeSeq.mat");
+catch
+    randTimeSeq = generateRandTimeSeq(durTotal, NTrans, 0.7:0.05:1.3); % sec
+    save("randTimeSeq.mat", "randTimeSeq", "-mat");
+end
+singleDuration = randTimeSeq * 1000; % ms
 opts.repN = 3; % 
 opts.click = click;
 opts.trainLength = 100; % ms, single train
-opts.soundLength = singleDuration; % ms, sound length, composed of N single trains
 opts.ICIs = [s1ICI; s2ICI]; % ms
 
-% generate regular long term click train
-[RegWave, ~, ~, regClickTrainSampN] = generateRegClickTrain(opts);
-s1RegWave = repmat(RegWave(1), length(RegWave) - 1, 1);
-s2RegWave = RegWave(2:end, 1);
+opts.soundLength = singleDuration(1); % ms, sound length, composed of N single trains
+RegWave = generateRegClickTrain(opts);
+y = mergeSingleWave({[]}, RegWave(1), 0, opts, 1);
 
-longTermRegWaveContinuous0 = mergeSingleWave(s1RegWave, s2RegWave, 0, opts, 1);
-% longTermRegWaveContinuous0.s1s2 = cellfun(@(x, y) x * y, {longTermRegWaveContinuous0.s1s2}', num2cell(ampNorm), "UniformOutput", false);
-longTermRegWaveContinuous = mergeSingleWave({longTermRegWaveContinuous0.s1s2}', {longTermRegWaveContinuous0.s1s2}', 0, opts, 1);
-for index = 1:nRepeat - 2
-    longTermRegWaveContinuous = mergeSingleWave({longTermRegWaveContinuous.s1s2}', {longTermRegWaveContinuous0.s1s2}', 0, opts, 1);
+for sIndex = 2:length(singleDuration)
+    opts.soundLength = singleDuration(sIndex); % ms, sound length, composed of N single trains
+
+    % generate regular long term click train
+    [RegWave, ~, ~, regClickTrainSampN] = generateRegClickTrain(opts);
+    s1RegWave = repmat(RegWave(1), length(RegWave) - 1, 1);
+    s2RegWave = RegWave(2:end, 1);
+    
+    if mod(sIndex, 2) == 1
+        y = mergeSingleWave({y.s1s2}', s1RegWave, 0, opts, 1);
+    else
+        y = mergeSingleWave({y.s1s2}', s2RegWave, 0, opts, 1);
+    end
+
 end
 
 % save continuous regular long term click train
 opts.ICIName = s2ICI; 
-opts.folderName = 'continuous';
+opts.folderName = 'MRI usage';
 opts.fileNameTemp = '[s2ICI]_Reg.wav';
 opts.fileNameRep = '[s2ICI]';
-exportSoundFile({longTermRegWaveContinuous.s1s2}, opts)
+exportSoundFile({y.s1s2}, opts);
 
 % generate irregular click train
-opts.baseICI =  4; % ms
+opts.baseICI =  s1ICI; % ms
 opts.sigmaPara = 2; % sigma = μ / sigmaPara
 
-for index = 1:nRepeat
+for sIndex = 1:length(singleDuration)
+    opts.soundLength = singleDuration(sIndex); % ms, sound length, composed of N single trains
     opts.irregICISampNBase = cell2mat(irregICISampN(opts));
     opts.irregLongTermSampN = opts.irregICISampNBase;
     [~, ~, ~, irregSampN] = generateIrregClickTrain(opts);
@@ -60,30 +76,28 @@ for index = 1:nRepeat
     s2IrregRepN = repmat(regClickTrainSampN(1), length(regClickTrainSampN) - 1, 1);
     
     opts.pos = 'head';
-    [s1IrregWaveHeadRep, ~, s1IrregSampNHeadRep] = repIrregByReg(s1IrregSampN, s1IrregRepN, opts);
-    [s2IrregWaveHeadRep, ~, s2IrregSampNHeadRep] = repIrregByReg(s2IrregSampN, s2IrregRepN, opts);
+    [s1IrregWaveHead, ~, s1IrregSampNHead] = repIrregByReg(s1IrregSampN, s1IrregRepN, opts);
+    [s2IrregWaveHead, ~, s2IrregSampNHead] = repIrregByReg(s2IrregSampN, s2IrregRepN, opts);
     
     opts.pos = 'tail';
-    [sound1, ~, ~] = repIrregByReg(s1IrregSampNHeadRep, s1IrregRepN, opts);
-    [sound2, ~, ~] = repIrregByReg(s2IrregSampNHeadRep, s2IrregRepN, opts);
-    [s1IrregWaveTailRep, ~, s1IrregSampNTailRep] = repIrregByReg(s1IrregSampN, s1IrregRepN, opts);
-    [s2IrregWaveTailRep, ~, s2IrregSampNTailRep] = repIrregByReg(s2IrregSampN, s2IrregRepN, opts);
+    [sound1, ~, ~] = repIrregByReg(s1IrregSampNHead, s1IrregRepN, opts); % both
+    [sound2, ~, ~] = repIrregByReg(s2IrregSampNHead, s2IrregRepN, opts); % both
+    [s1IrregWaveTail, ~, s1IrregSampNTail] = repIrregByReg(s1IrregSampN, s1IrregRepN, opts);
+    [s2IrregWaveTail, ~, s2IrregSampNTail] = repIrregByReg(s2IrregSampN, s2IrregRepN, opts);
     
-    if index == 1
-        mSound = mergeSingleWave(s1IrregWaveTailRep, sound2, 0, opts);
-    elseif index == nRepeat
-        mSoundTail = mergeSingleWave(sound1, s2IrregWaveHeadRep, 0, opts);
-        mSound = mergeSingleWave({mSound.s1s2}', {mSoundTail.s1s2}', 0, opts);
+    if sIndex == 1
+        mSound = mergeSingleWave({[]}, s1IrregWaveTail, 0, opts);
+    elseif mod(sIndex, 2) == 1
+        mSound = mergeSingleWave({mSound.s1s2}', sound1, 0, opts);
     else
-        mSoundBody = mergeSingleWave(sound1, sound2, 0, opts);
-        mSound = mergeSingleWave({mSound.s1s2}', {mSoundBody.s1s2}', 0, opts);
+        mSound = mergeSingleWave({mSound.s1s2}', sound2, 0, opts);
     end
 
 end
 
 % save continuous irregular long term click train
 opts.ICIName = s2ICI; 
-opts.folderName = 'continuous';
+opts.folderName = 'MRI usage';
 opts.fileNameTemp = '[s2ICI]_Irreg.wav';
 opts.fileNameRep = '[s2ICI]';
 exportSoundFile({mSound.s1s2}, opts)
