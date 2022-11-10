@@ -79,6 +79,17 @@ data(6).trialsData = passiveFcn(6, nRepeat, 2, fsDevice, deviceID, volumn, ioObj
 data(6).protocol = "decoding";
 PsychPortAudio('Close');
 
+%% Part 7
+PsychPortAudio('Close');
+disp('Press any key to start Part 7 - TITS');
+KbWait;
+mTrigger(ioObj, address, 210);
+disp('Part 7 start');
+WaitSecs(2);
+data(7).trialsData = passiveFcn(7, nRepeat, 7, fsDevice, deviceID, volumn, ioObj, address);
+data(7).protocol = "TITS";
+PsychPortAudio('Close');
+
 %% Saving
 mkdir(['Data\', datestr(now, 'yyyymmdd')]);
 save(['Data\', datestr(now, 'yyyymmdd'), '\trialsData.mat'], 'data');
