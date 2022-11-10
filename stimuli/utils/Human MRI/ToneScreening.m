@@ -3,7 +3,7 @@ clear; clc;
 fs = 48e3; % Hz
 f = [88,125,177,250,354,500,707,1000,1414,2000,2828,4000,5657,8000]; % Hz
 duration = 2; % sec
-rtTime = 2e-3; % sec
+rtTime = 5e-3; % sec
 
 A = zeros(length(f), 1);
 A(1) = 1;
@@ -21,7 +21,7 @@ y = [y, genRiseFallEdge(A(end) * generateTone(f(end), duration, fs, [], "complet
 figure;
 plot(y);
 
-playAudio(y, fs);
+% playAudio(y, fs);
 audiowrite('..\..\sounds\MRI usage\Tone Screening.wav', y, fs);
 
 %% Fcn

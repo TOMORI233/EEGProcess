@@ -1,11 +1,11 @@
 clear; clc;
 
 fs = 48e3; % Hz
-f = [250, 200]; % Hz
+f = [250, 246]; % Hz
 durTotal = 10; % sec
 N = 10;
 randRange = 0.7:0.05:1.3;
-rtTime = 2e-3; % sec
+rtTime = 5e-3; % sec
 
 try
     load("randTimeSeq.mat");
@@ -25,6 +25,9 @@ for sIndex = 1:length(randTimeSeq)
     end
     
 end
+
+figure;
+plot(y);
 
 audiowrite(['..\..\sounds\MRI usage\', num2str(f(1)), '_', num2str(f(2)), '.wav'], y, fs);
 
