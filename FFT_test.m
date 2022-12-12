@@ -42,7 +42,7 @@ for index = 1:length(ICIs)
     end
 
     % FFT
-    [~, tIdx] = findWithinWindow(t, window);
+    [~, tIdx] = findWithinInterval(t, window);
     [ff, PMean]  = trialsECOGFFT(trialsEEG, fs, tIdx, [], "magnitude");
 
     legendStr = strcat("decoding | REG ", string(num2str(ICIs(index))));
