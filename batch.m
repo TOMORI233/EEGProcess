@@ -1,9 +1,10 @@
 clear; clc;
 close all force;
 addpath(genpath(fileparts(mfilename("fullpath"))));
+ft_setPath2Top;
 
 %% Parameter settings
-ROOTPATH = "D:\Education\Lab\Projects\EEG\Data\CDT\20220906\Subject1";
+ROOTPATH = "D:\Education\Lab\Projects\EEG\Data\CDT\20230224\subject29";
 th = 0.2;
 yscale = [-10, 10];
 
@@ -14,7 +15,7 @@ dateStr = strcat(temp(end - 1), "-", temp(end));
 opts.fhp = 0.5;
 opts.flp = 40;
 opts.save = false;
-opts.rules = rulesConfig();
+opts.rules = rulesConfig('rules\rules_20230224.xlsx');
 [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts);
 fs0 = EEGDatasets(1).fs;
 warning off;

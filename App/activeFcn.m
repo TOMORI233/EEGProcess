@@ -1,10 +1,13 @@
-function data = activeFcn(app)
+function trialsData = activeFcn(app)
     parseStruct(app.params);
     pID = app.pIDList(app.pIDIndex);
     dataPath = fullfile(app.dataPath, [datestr(now, 'yyyymmdd'), '-', app.subjectInfo.ID]);
     fsDevice = fs * 1e3;
 
     [sounds, fsSound, controlIdx] = loadSounds(pID);
+    [hintSound, fsHint] = audioread(['sounds\hint\', num2str(pID), '.mp3']);
+    playAudio(hintSound(:, 1)', fsHint);
+    KbGet(32, 60);
     sounds = cellfun(@(x) resampleData(reshape(x, [1, length(x)]), fsSound, fsDevice), sounds, 'UniformOutput', false);
     
     orders0 = 1:length(sounds);
@@ -26,6 +29,8 @@ function data = activeFcn(app)
 
     mTrigger(ioObj, address, 30 * pID);
     WaitSecs(2);
+
+    nMiss = 0;
     
     for index = 1:length(orders)
         PsychPortAudio('FillBuffer', pahandle, repmat(sounds{orders(index)}, 2, 1));
@@ -46,7 +51,11 @@ function data = activeFcn(app)
             mTrigger(ioObj, address, 2); % diff
         elseif key{index} == 39 % right arrow
             mTrigger(ioObj, address, 3); % same
+        else
+            nMiss = nMiss + 1;
         end
+
+        app.StateLabel.Text = strcat(app.protocolList{app.pIDList(app.pIDIndex)}, '(Total: ', num2str(index), '/', num2str(length(orders)), ', Miss: ', num2str(nMiss), ')');
         
         % For termination
         pause(0.1);
@@ -58,14 +67,14 @@ function data = activeFcn(app)
     end
     
     PsychPortAudio('Close');
-    data = struct('onset', startTime, 'offset', estStopTime, 'code', num2cell(codes'), 'push', pressTime, 'key', key);
-    data(cellfun(@isempty, startTime)) = [];
-    protocolName = app.protocolList{pID};
+    trialsData = struct('onset', startTime, 'offset', estStopTime, 'code', num2cell(codes'), 'push', pressTime, 'key', key);
+    trialsData(cellfun(@isempty, startTime)) = [];
+    protocol = app.protocol{pID};
 
     if ~exist(fullfile(dataPath, [num2str(pID), '.mat']), 'file')
-        save(fullfile(dataPath, [num2str(pID), '.mat']), "data", "protocolName");
+        save(fullfile(dataPath, [num2str(pID), '.mat']), "trialsData", "protocol");
     else
-        save(fullfile(dataPath, [num2str(pID), '_redo.mat']), "data", "protocolName");
+        save(fullfile(dataPath, [num2str(pID), '_redo.mat']), "trialsData", "protocol");
     end
 
     if strcmp(app.status, 'start')
@@ -86,5 +95,8 @@ function data = activeFcn(app)
         drawnow;
     end
 
+    WaitSecs(5);
+    [hintSound, fsHint] = audioread('sounds\hint\end.mp3');
+    playAudio(hintSound(:, 1)', fsHint);
     return;
 end

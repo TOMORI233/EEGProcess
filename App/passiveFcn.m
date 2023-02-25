@@ -5,6 +5,9 @@ function passiveFcn(app)
     fsDevice = fs * 1e3;
 
     [sounds, fsSound] = loadSounds(pID);
+    [hintSound, fsHint] = audioread(['sounds\hint\', num2str(pID), '.mp3']);
+    playAudio(hintSound(:, 1)', fsHint);
+    KbGet(32, 20);
     sounds = cellfun(@(x) resampleData(reshape(x, [1, length(x)]), fsSound, fsDevice), sounds, 'UniformOutput', false);
     orders = repmat(1:length(sounds), 1, nRepeat);
     orders = orders(randperm(length(orders)));
@@ -38,6 +41,8 @@ function passiveFcn(app)
         
         [startTime{index}, ~, ~, estStopTime{index}] = PsychPortAudio('Stop', pahandle, 1, 1);
 
+        app.StateLabel.Text = strcat(app.protocolList{app.pIDList(app.pIDIndex)}, '(Total: ', num2str(index), '/', num2str(length(orders)), ')');
+
         % For termination
         pause(0.1);
 
@@ -48,14 +53,14 @@ function passiveFcn(app)
     end
     
     PsychPortAudio('Close');
-    data = struct('onset', startTime, 'offset', estStopTime, 'code', num2cell(codes'), 'push', pressTime, 'key', key);
-    data(cellfun(@isempty, startTime)) = [];
-    protocolName = app.protocolList{pID};
+    trialsData = struct('onset', startTime, 'offset', estStopTime, 'code', num2cell(codes'), 'push', pressTime, 'key', key);
+    trialsData(cellfun(@isempty, startTime)) = [];
+    protocol = app.protocol{pID};
 
     if ~exist(fullfile(dataPath, [num2str(pID), '.mat']), 'file')
-        save(fullfile(dataPath, [num2str(pID), '.mat']), "data", "protocolName");
+        save(fullfile(dataPath, [num2str(pID), '.mat']), "trialsData", "protocol");
     else
-        save(fullfile(dataPath, [num2str(pID), '_redo.mat']), "data", "protocolName");
+        save(fullfile(dataPath, [num2str(pID), '_redo.mat']), "trialsData", "protocol");
     end
 
     if strcmp(app.status, 'start')
@@ -76,5 +81,8 @@ function passiveFcn(app)
         drawnow;
     end
 
+    WaitSecs(5);
+    [hintSound, fsHint] = audioread('sounds\hint\end.mp3');
+    playAudio(hintSound(:, 1)', fsHint);
     return;
 end
