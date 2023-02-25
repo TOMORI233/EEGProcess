@@ -86,6 +86,10 @@ function trialsData = activeFcn(app)
         save(fullfile(dataPath, [num2str(pID), '_redo.mat']), "trialsData", "protocol");
     end
 
+    WaitSecs(5);
+    [hintSound, fsHint] = audioread('sounds\hint\end.mp3');
+    playAudio(hintSound(:, 1)', fsHint);
+
     if strcmp(app.status, 'start')
 
         if pID == app.pIDList(end)
@@ -104,8 +108,5 @@ function trialsData = activeFcn(app)
         drawnow;
     end
 
-    WaitSecs(5);
-    [hintSound, fsHint] = audioread('sounds\hint\end.mp3');
-    playAudio(hintSound(:, 1)', fsHint);
     return;
 end
