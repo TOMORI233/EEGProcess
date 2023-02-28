@@ -8,7 +8,7 @@ function trialsData = activeFcn(app)
 
     % Hint for manual starting
     [hintSound, fsHint] = audioread(['sounds\hint\', num2str(pID), '.mp3']);
-    playAudio(hintSound(:, 1)', fsHint);
+    playAudio(hintSound(:, 1)', fsHint, fsDevice);
     KbGet(32, 60);
 
     sounds = cellfun(@(x) resampleData(reshape(x, [1, length(x)]), fsSound, fsDevice), sounds, 'UniformOutput', false);
@@ -88,7 +88,7 @@ function trialsData = activeFcn(app)
 
     WaitSecs(5);
     [hintSound, fsHint] = audioread('sounds\hint\end.mp3');
-    playAudio(hintSound(:, 1)', fsHint);
+    playAudio(hintSound(:, 1)', fsHint, fsDevice);
 
     if strcmp(app.status, 'start')
 
