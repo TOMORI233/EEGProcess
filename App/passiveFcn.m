@@ -84,6 +84,7 @@ function passiveFcn(app)
             app.StartButton.Enable = 'off';
             app.NextButton.Enable = 'off';
             app.StopButton.Enable = 'off';
+            app.PhaseSelectTree.Enable = 'on';
             app.StateLabel.Text = '本次试验已完成';
         else
             app.NextButton.Enable = 'on';
