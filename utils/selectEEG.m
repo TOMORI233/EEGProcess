@@ -4,7 +4,11 @@ function [trialsEEG, chMean, chStd, sampleinfo, reservedIdx] = selectEEG(EEGData
     windowIndex = fix(window / 1000 * EEGDataset.fs);
     segIndex = [trials.onset];
     reservedIdx = segIndex + windowIndex(1) > 0 & segIndex + windowIndex(2) < size(EEGDataset.data, 2);
-    segIndex = segIndex(reservedIdx);
+    
+    if sum(reservedIdx) ~= length(segIndex)
+        disp(['Trial ', num2str(find(~reservedIdx)), ' exceeds data range.']);
+        segIndex = segIndex(reservedIdx);
+    end
 
     % by trial
     trialsEEG = cell(length(segIndex), 1);

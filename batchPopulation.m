@@ -1,5 +1,7 @@
 clear; clc; close all force;
 
+addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
+
 ROOTPATH = "F:\EEG\DATA\";
 SAVEROOTPATH = "D:\Lab\Projects\EEG\MAT DATA\";
 

@@ -5,78 +5,99 @@ function trialAll = EEGBehaviorProcess(trialsData, EEGDataset, rules)
         rules = rulesConfig();
     end
 
-    evts = EEGDataset.event;
-    fs = EEGDataset.fs; % Hz
+    maxError = 1; % For adjusting, sec
 
+    evtAll = EEGDataset.event;
+    fs = EEGDataset.fs; % Hz
     protocol = EEGDataset.protocol;
     rules = rules(cellfun(@string, {rules.protocol}) == EEGDataset.protocol);
+    ISI = rules(1).ISI; % sec
+    evtAll = evtAll(find(ismember([evtAll.type], [rules.code]), 1):end);
+    codeEEG = [evtAll.type]';
+    codeMATLAB = [trialsData.code]';
+    trialsData = trialsData(find(codeMATLAB == codeEEG(1), 1):end);
+    codeMATLAB = [trialsData.code]';
+    evtTrial = evtAll(ismember([evtAll.type], [rules.code]));
+    trialOnsetAll = [evtTrial.latency]';
 
-    % 1. Align to CDT event
-    % sIdx = find(ismember([evts.type], [rules.code]));
-    % firstSoundOnset = evts(sIdx(2)).latency;
+    nTrial = 1;
+    rIdx = find([rules.code] == codeMATLAB(1));
+    trialAll(1).trialNum = 1;
+    trialAll(1).code = codeMATLAB(1);
+    trialAll(1).onset = evtAll(1).latency;
+    trialAll(1).isControl = rules(rIdx).isControl;
+    trialAll(1).type = string(rules(rIdx).type);
+    trialAll(1).freq = rules(rIdx).freq;
+    trialAll(1).variance = rules(rIdx).variance;
+    trialAll(1).ICI = rules(rIdx).ICI;
+    trialAll(1).interval = rules(rIdx).interval;
+    trialAll(1).ISI = ISI;
 
-    % 2. Align to MATLAB event
-    firstSoundOnset = evts(find([evts.type] == trialsData(1).code, 1)).latency;
+    for cIndex = 2:length(codeMATLAB)
 
-    % Abort the first trial
-    % trialsData = trialsData(2:end);
+        if cIndex <= length(trialOnsetAll)
+            tIdx = find(trialOnsetAll >= trialAll(nTrial).onset + (ISI - maxError) * fs & trialOnsetAll <= trialAll(nTrial).onset + (ISI + maxError) * fs, 1);
+            
+            if isempty(tIdx) || ~isequal(evtTrial(tIdx).type, codeMATLAB(cIndex))
+                disp(['Trial ', num2str(cIndex), ' is missing in EEG recording.']);
+            else
+                nTrial = nTrial + 1;
+                rIdx = find([rules.code] == codeMATLAB(cIndex));
 
-    if contains(protocol, "passive") || contains(protocol, "decoding") % Passive/Decoding
+                trialAll(nTrial).trialNum = cIndex;
+                trialAll(nTrial).code = codeMATLAB(cIndex);
+                trialAll(nTrial).onset = evtTrial(tIdx).latency; % sample
+                trialAll(nTrial).isControl = rules(rIdx).isControl;
+                trialAll(nTrial).type = string(rules(rIdx).type);
+                trialAll(nTrial).freq = rules(rIdx).freq;
+                trialAll(nTrial).variance = rules(rIdx).variance;
+                trialAll(nTrial).ICI = rules(rIdx).ICI;
+                trialAll(nTrial).interval = rules(rIdx).interval;
+                trialAll(nTrial).ISI = ISI;
+            end
 
-        for tIndex = 1:length(trialsData)
-            trialAll(tIndex).trialNum = tIndex;
-            trialAll(tIndex).onset = firstSoundOnset + fix((trialsData(tIndex).onset - trialsData(1).onset) * fs);
-            trialAll(tIndex).offset = firstSoundOnset + fix((trialsData(tIndex).offset - trialsData(1).onset) * fs);
-            idx = find([rules.code] == trialsData(tIndex).code);
-            trialAll(tIndex).isControl = rules(idx).isControl;
-            trialAll(tIndex).type = string(rules(idx).type);
-            trialAll(tIndex).freq = rules(idx).freq;
-            trialAll(tIndex).variance = rules(idx).variance;
-            trialAll(tIndex).ICI = rules(idx).ICI;
-            trialAll(tIndex).interval = rules(idx).interval;
+        else
+            disp(['Trial ', num2str(cIndex), ' is missing in EEG recording.']);
         end
 
-    elseif contains(protocol, "active") % Active
+    end
+
+    if contains(protocol, "active") % Active
     
-        for tIndex = 1:length(trialsData)
-            trialAll(tIndex).trialNum = tIndex;
-            trialAll(tIndex).onset = firstSoundOnset + fix((trialsData(tIndex).onset - trialsData(1).onset) * fs);
-            trialAll(tIndex).offset = firstSoundOnset + fix((trialsData(tIndex).offset - trialsData(1).onset) * fs);
+        for tIndex = 1:length(trialAll)
             
-            if trialsData(tIndex).key ~= 0
-                trialAll(tIndex).push = firstSoundOnset + fix((trialsData(tIndex).push - trialsData(1).onset) * fs);
+            if tIndex < length(trialAll)
+                idx = find([evtAll.latency] > trialAll(tIndex).onset & [evtAll.latency] < trialAll(tIndex + 1).onset);
+            else
+                idx = find([evtAll.latency] > trialAll(tIndex).onset);
+            end
+
+            temp = [evtAll(idx).type];
+            key = temp(find(ismember(temp, [2, 3]), 1));
+
+            if ~isempty(key)
+                trialAll(tIndex).push = evtAll(idx).latency;
                 trialAll(tIndex).miss = false;
 
-                if trialsData(tIndex).key == 37 % diff
+                if key == 2 % diff
                     trialAll(tIndex).isDiff = true;
-                elseif trialsData(tIndex).key == 39 % same
+                elseif key == 3 % same
                     trialAll(tIndex).isDiff = false;
+                end
+
+                if (key == 2 && ~trialAll(tIndex).isControl) || (key == 3 && trialAll(tIndex).isControl)
+                    trialAll(tIndex).correct = true;
                 else
-                    error("Invalid key code");
+                    trialAll(tIndex).correct = false;
                 end
 
             else
                 trialAll(tIndex).miss = true;
-            end
-    
-            idx = find([rules.code] == trialsData(tIndex).code);
-            trialAll(tIndex).isControl = rules(idx).isControl;
-            trialAll(tIndex).type = string(rules(idx).type);
-            trialAll(tIndex).freq = rules(idx).freq;
-            trialAll(tIndex).variance = rules(idx).variance;
-            trialAll(tIndex).ICI = rules(idx).ICI;
-            trialAll(tIndex).interval = rules(idx).interval;
-    
-            if ~isempty(trialsData(tIndex).key) && ((trialsData(tIndex).key == 37 && ~trialAll(tIndex).isControl) || (trialsData(tIndex).key == 39 && trialAll(tIndex).isControl))
-                trialAll(tIndex).correct = true;
-            else
                 trialAll(tIndex).correct = false;
             end
-    
+
         end
 
-    else
-        error("Invalid protocol ID");
     end
 
     return;
