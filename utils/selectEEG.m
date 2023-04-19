@@ -8,6 +8,8 @@ function [trialsEEG, chMean, chStd, sampleinfo, reservedIdx] = selectEEG(EEGData
     if sum(reservedIdx) ~= length(segIndex)
         disp(['Trial ', num2str(find(~reservedIdx)), ' exceeds data range.']);
         segIndex = segIndex(reservedIdx);
+    else
+        disp('All trials reserved.');
     end
 
     % by trial
