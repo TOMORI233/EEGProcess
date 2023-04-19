@@ -11,8 +11,11 @@ function trialAll = EEGBehaviorProcess(trialsData, EEGDataset, rules)
     protocol = EEGDataset.protocol;
     rules = rules(cellfun(@string, {rules.protocol}) == EEGDataset.protocol);
 
+    % 1. Align to CDT event
     % sIdx = find(ismember([evts.type], [rules.code]));
     % firstSoundOnset = evts(sIdx(2)).latency;
+
+    % 2. Align to MATLAB event
     firstSoundOnset = evts(find([evts.type] == trialsData(1).code, 1)).latency;
 
     % Abort the first trial

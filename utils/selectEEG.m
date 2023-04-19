@@ -1,14 +1,10 @@
-function [trialsEEG, chMean, chStd, sampleinfo] = selectEEG(EEGDataset, trials, window, excludeTh)
-    narginchk(3, 4);
-
-    if nargin < 4
-        excludeTh = 0.1;
-    end
-
+function [trialsEEG, chMean, chStd, sampleinfo, reservedIdx] = selectEEG(EEGDataset, trials, window)
     scaleFactor = 1;
 
     windowIndex = fix(window / 1000 * EEGDataset.fs);
     segIndex = [trials.onset];
+    reservedIdx = segIndex + windowIndex(1) > 0 & segIndex + windowIndex(2) < size(EEGDataset.data, 2);
+    segIndex = segIndex(reservedIdx);
 
     % by trial
     trialsEEG = cell(length(segIndex), 1);
@@ -21,11 +17,6 @@ function [trialsEEG, chMean, chStd, sampleinfo] = selectEEG(EEGDataset, trials, 
 
     % scale
     trialsEEG = cellfun(@(x) x * scaleFactor, trialsEEG, "UniformOutput", false);
-
-    % reject trials with artifact
-%     idx = excludeTrials(trialsEEG, excludeTh);
-%     trialsEEG(idx) = [];
-%     sampleinfo(idx, :) = [];
 
     % by channel
     nChs = length(EEGDataset.channels);
