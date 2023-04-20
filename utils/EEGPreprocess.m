@@ -36,7 +36,7 @@ function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
 
             idx = idx + 1;
             EEGDatasets(idx).protocol = protocols(pIndex);
-            EEGDatasets(idx).data = EEG.data(1:end - 1, :);
+            EEGDatasets(idx).data = EEG.data(1:64, :);
             EEGDatasets(idx).fs = EEG.srate;
             EEGDatasets(idx).channels = 1:size(EEGDatasets(idx).data, 1);
             EEGDatasets(idx).event = EEG.event;

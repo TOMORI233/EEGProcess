@@ -73,7 +73,7 @@ for dIndex = 1:length(DAYPATHs)
                 trialsEEG = selectEEG(EEGDatasets([EEGDatasets.protocol] == protocols(pIndex)), ...
                                                   trialAll, ...
                                                   window);
-                
+
                 % Baseline correction
                 trialsEEG = baselineCorrection(trialsEEG, fs, window, windowBase);
 
