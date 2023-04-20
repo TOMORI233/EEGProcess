@@ -25,10 +25,10 @@ for dIndex = 1:length(DAYPATHs)
     
     % For every subject in a single day
     for sIndex = 1:length(SUBJECTs)
-        MATPATH = fullfile(MATROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
+        MATDirPATH = fullfile(MATROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
         FIGPATH = fullfile(FIGROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
 
-        matfiles = what(MATPATH).mat;
+        matfiles = what(MATDirPATH).mat;
         protocols = cellfun(@(x) obtainArgoutN(@fileparts, 2, x), matfiles, "UniformOutput", false);
         idx = contains(protocols, ["passive1", "passive2", "passive3", "active1", "active2"]);
         protocols = protocols(idx);
@@ -38,11 +38,11 @@ for dIndex = 1:length(DAYPATHs)
         % For each protocol
         for pIndex = 1:length(protocols)
             protocolProcessFcn = protocolProcessFcns{pIndex};
-            MATPATH = fullfile(MATPATH, matfiles{pIndex});
+            MATPATH = fullfile(MATDirPATH, matfiles{pIndex});
             load(MATPATH);
             trialsEEG = baselineCorrection(trialsEEG, fs, window, windowBase);
             params.FIGPATH = FIGPATH;
-            params.SAVEPATH = fileparts(MATPATH);
+            params.SAVEPATH = MATDirPATH;
             params.windowBase = windowBase;
             protocolProcessFcn(trialAll, trialsEEG, window, fs, params);
         end
