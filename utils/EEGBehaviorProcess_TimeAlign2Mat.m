@@ -1,4 +1,4 @@
-function trialAll = EEGBehaviorProcess_MAT(trialsData, EEGDataset, rules)
+function trialAll = EEGBehaviorProcess_TimeAlign2Mat(trialsData, EEGDataset, rules)
     narginchk(2, 3);
 
     if nargin < 3

@@ -3,13 +3,11 @@ function [trialsEEG, chMean, chStd, sampleinfo, reservedIdx] = selectEEG(EEGData
 
     windowIndex = fix(window / 1000 * EEGDataset.fs);
     segIndex = [trials.onset];
+
     reservedIdx = segIndex + windowIndex(1) > 0 & segIndex + windowIndex(2) < size(EEGDataset.data, 2);
-    
     if sum(reservedIdx) ~= length(segIndex)
-        disp(['Trial ', num2str(find(~reservedIdx)), ' exceeds data range.']);
+        warning(['Trial ', num2str(find(~reservedIdx)), ' exceeds data range.']);
         segIndex = segIndex(reservedIdx);
-    else
-        disp('All trials reserved.');
     end
 
     % by trial

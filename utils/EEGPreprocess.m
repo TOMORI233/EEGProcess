@@ -10,7 +10,7 @@ function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
     rulesForOneDay = dir(rulesROOTPATH);
     rulesForOneDay = {rulesForOneDay(cellfun(@(x) strcmp(obtainArgoutN(@fileparts, 3, x), '.xlsx'), {rulesForOneDay.name}')).name}';
 
-    if any(contains(rulesForOneDay, opts.DATEStr))
+    if ~isempty(opts.DATEStr) && any(contains(rulesForOneDay, opts.DATEStr))
         % Specify rules for one day if rules file exists
         opts.rules = rulesConfig(fullfile(rulesROOTPATH, rulesForOneDay{contains(rulesForOneDay, opts.DATEStr)}));
     end
