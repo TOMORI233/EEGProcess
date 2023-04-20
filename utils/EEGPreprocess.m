@@ -6,69 +6,47 @@ function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
     end
 
     opts = getOrFull(opts, preprocessConfig());
+    rulesROOTPATH = fullfile(getRootDirPath(fileparts(mfilename("fullpath")), 1), "rules");
+    rulesForOneDay = dir(rulesROOTPATH);
+    rulesForOneDay = {rulesForOneDay(cellfun(@(x) strcmp(obtainArgoutN(@fileparts, 3, x), '.xlsx'), {rulesForOneDay.name}')).name}';
 
-    try
-        disp("Try loading data from MAT.");
-        temp = string(split(ROOTPATH, '\'));
-        temp(end - 1) = "MAT";
-        load(fullfile(join(temp, "\"), string(what(ROOTPATH).mat)), "-mat", "EEGDatasets", "trialDatasets");
-
-        if exist("EEGDatasets", "var") && exist("trialDatasets", "var")
-            disp("Data loading success.");
-            return;
-        else
-            ME = MException("EEGPreprocess:dataLoading", "File not found.");
-            throw(ME);
-        end
-        
-    catch ME
-        disp(ME.message);
-        disp("Try loading data from *.cdt .");
+    if any(contains(rulesForOneDay, opts.DATEStr))
+        % Specify rules for one day if rules file exists
+        opts.rules = rulesConfig(fullfile(rulesROOTPATH, rulesForOneDay{contains(rulesForOneDay, opts.DATEStr)}));
     end
 
     files = dir(ROOTPATH);
     load(fullfile(ROOTPATH, string(what(ROOTPATH).mat)), "-mat", "data");
-    protocols = cellfun(@string, {data.protocol});
 
-    for index = 1:length(files)
-        [~, filename, ext] = fileparts(files(index).name);
-        
-        if strcmp(ext, ".cdt")
-            temp = split(filename, " ");
-            temp = string(temp{2});
+    % Protocols to export defined by user (default: export all defined in trialsData)
+    protocols = getOr(opts, "protocols", cellfun(@string, {data.protocol}));
 
-            if any(contains(protocols, temp, "IgnoreCase", true))
-                idx = find(contains(protocols, temp, "IgnoreCase", true), 1);
-                EEG = loadcurry(fullfile(char(ROOTPATH), files(index).name));
+    idx = 0;
 
-                EEGDatasets(idx).protocol = protocols(idx);
-                EEGDatasets(idx).data = EEG.data(1:end - 1, :);
-                EEGDatasets(idx).fs = EEG.srate;
-                EEGDatasets(idx).channels = 1:size(EEGDatasets(idx).data, 1);
-                EEGDatasets(idx).event = EEG.event;
-                EEGDatasets(idx) = EEGFilter(EEGDatasets(idx), opts.fhp, opts.flp);
+    for pIndex = 1:length(protocols)
+        temp = {files(contains({files.name}, protocols(pIndex))).name}';
 
-                trialDatasets(idx).protocol = protocols(idx);
-                trialDatasets(idx).trialAll = EEGBehaviorProcess(data(idx).trialsData, EEGDatasets(idx), opts.rules);
-            else
-                continue;
-                % error("Invalid file name for *.cdt");
-            end
-    
+        if isempty(temp)
+            disp(['Recording missing for ', char(protocols(pIndex))]);
+        else
+            disp(['Current protocol: ', char(protocols(pIndex))]);
+            disp('Try loading data from *.cdt');
+            EEG = loadcurry(char(fullfile(ROOTPATH, temp{1})));
+
+            idx = idx + 1;
+            EEGDatasets(idx).protocol = protocols(pIndex);
+            EEGDatasets(idx).data = EEG.data(1:end - 1, :);
+            EEGDatasets(idx).fs = EEG.srate;
+            EEGDatasets(idx).channels = 1:size(EEGDatasets(idx).data, 1);
+            EEGDatasets(idx).event = EEG.event;
+            EEGDatasets(idx) = EEGFilter(EEGDatasets(idx), opts.fhp, opts.flp);
+
+            trialDatasets(idx).protocol = protocols(pIndex);
+            trialDatasets(idx).trialAll = EEGBehaviorProcess(data(cellfun(@string, {data.protocol}) == protocols(pIndex)).trialsData, EEGDatasets(idx), opts.rules);
         end
-    
     end
 
     disp("Data loading success.");
-
-    if opts.save
-        disp("Saving...");
-        temp = string(split(ROOTPATH, '\'));
-        temp(end - 1) = "MAT";
-        SAVEPATH = join(temp, "\");
-        mkdir(SAVEPATH);
-        uisave(["EEGDatasets", "trialDatasets"], fullfile(SAVEPATH, "data.mat"));
-    end
 
     return;
 end

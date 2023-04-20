@@ -7,14 +7,19 @@ SAVEROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
 
 opts.fhp = 0.5;
 opts.flp = 40;
-opts.save = false;
+opts.protocols = ["passive1", "passive2", "passive3", "active1", "active2"];
 
 % window setting
-windows = {[-500, 2000]; ... % passive1
-           [-500, 2000]; ... % passive2
-           [-500, 2000]; ... % passive3
-           [-500, 2000]; ... % active1
-           [-500, 2600]};    % active2
+windows = struct("window",   {[-500, 2000];  ...  % passive1
+                              [-500, 2000];  ...  % passive2
+                              [-500, 2000];  ...  % passive3
+                              [-500, 2000];  ...  % active1
+                              [-500, 2600]}, ... % active2
+                 "protocol", {"passive1"; ...
+                              "passive2"; ...
+                              "passive3"; ...
+                              "active1";  ...
+                              "active2"});
 
 % exclude trials
 tTh = 0.2;
@@ -43,35 +48,37 @@ for dIndex = 1:length(DAYPATHs)
         SAVEPATH = fullfile(SAVEROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
 
         if ~exist(SAVEPATH, "dir")
+            opts.DATEStr = DATESTRs{dIndex};
             [EEGDatasets, trialDatasets] = EEGPreprocess(DATAPATH, opts);
             fs = EEGDatasets(1).fs;
             protocols = [trialDatasets.protocol]';
         else
-            disp(strcat('Day ', DATESTRs{dIndex}, ' ', SUBJECTs{sIndex}, ' already exported. Skip.'));
+            disp(['Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTs{sIndex}), ' already exported. Skip.']);
             continue;
         end
 
         mkdir(SAVEPATH);
 
         % Protocols
-        protocols = protocols(contains(protocols, ["passive1", "passive2", "passive3", "active1", "active2"]));
+        protocols = protocols(contains(protocols, opts.protocols));
 
         % For each protocol
         for pIndex = 1:length(protocols)
             MATNAME = fullfile(SAVEPATH, strcat(protocols(pIndex), ".mat"));
-
+            
             if ~exist(MATNAME, "file")
-                window = windows{pIndex};
+                window = windows([windows.protocol] == protocols{pIndex}).window;
                 trialAll = trialDatasets([trialDatasets.protocol] == protocols(pIndex)).trialAll';
-                [trialsEEG, ~, ~, ~, reservedIdx] = selectEEG(EEGDatasets([EEGDatasets.protocol] == protocols(pIndex)), trialAll, window);
-                trialAll = trialAll(reservedIdx);
+                trialsEEG = selectEEG(EEGDatasets([EEGDatasets.protocol] == protocols(pIndex)), ...
+                                                  trialAll, ...
+                                                  window);
 
                 tIdx = excludeTrials(trialsEEG, tTh, chTh, "userDefineOpt", "off");
                 trialsEEG(tIdx) = [];
                 trialAll(tIdx) = [];
                 mSave(MATNAME, "window", "trialsEEG", "trialAll", "fs");
             else
-                disp(strcat('Day ', DATESTRs{dIndex}, ' ', SUBJECTs{sIndex}, ' ', protocols(pIndex), ' already exported. Skip.'));
+                disp(['Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTs{sIndex}), ' ', char(protocols(pIndex)), ' already exported. Skip.']);
             end
 
         end

@@ -18,7 +18,8 @@ function trialAll = EEGBehaviorProcess(trialsData, EEGDataset, rules)
     trialsData = trialsData(find(codeMATLAB == codeEEG(1), 1):end);
     codeMATLAB = [trialsData.code]';
     evtTrial = evtAll(ismember([evtAll.type], [rules.code]));
-    trialOnsetAll = [evtTrial.latency]';
+    trialOnsetEEG = [evtTrial.latency]';
+    trialOnsetMATLAB = fix(([trialsData.onset]' - trialsData(1).onset) * fs) + trialOnsetEEG(1);
 
     nTrial = 1;
     rIdx = find([rules.code] == codeMATLAB(1));
@@ -34,30 +35,24 @@ function trialAll = EEGBehaviorProcess(trialsData, EEGDataset, rules)
     trialAll(1).ISI = ISI;
 
     for cIndex = 2:length(codeMATLAB)
-
-        if cIndex <= length(trialOnsetAll)
-            tIdx = find(trialOnsetAll >= trialAll(nTrial).onset + (ISI - maxError) * fs & trialOnsetAll <= trialAll(nTrial).onset + (ISI + maxError) * fs, 1);
-            
-            if isempty(tIdx) || ~isequal(evtTrial(tIdx).type, codeMATLAB(cIndex))
-                disp(['Trial ', num2str(cIndex), ' is missing in EEG recording.']);
-            else
-                nTrial = nTrial + 1;
-                rIdx = find([rules.code] == codeMATLAB(cIndex));
-
-                trialAll(nTrial).trialNum = cIndex;
-                trialAll(nTrial).code = codeMATLAB(cIndex);
-                trialAll(nTrial).onset = evtTrial(tIdx).latency; % sample
-                trialAll(nTrial).isControl = rules(rIdx).isControl;
-                trialAll(nTrial).type = string(rules(rIdx).type);
-                trialAll(nTrial).freq = rules(rIdx).freq;
-                trialAll(nTrial).variance = rules(rIdx).variance;
-                trialAll(nTrial).ICI = rules(rIdx).ICI;
-                trialAll(nTrial).interval = rules(rIdx).interval;
-                trialAll(nTrial).ISI = ISI;
-            end
-
-        else
+        tIdx = find(trialOnsetEEG >= trialOnsetMATLAB(cIndex) - fix(maxError * fs) & trialOnsetEEG <= trialOnsetMATLAB(cIndex) + fix(maxError * fs), 1);
+        
+        if isempty(tIdx) || ~isequal(evtTrial(tIdx).type, codeMATLAB(cIndex))
             disp(['Trial ', num2str(cIndex), ' is missing in EEG recording.']);
+        else
+            nTrial = nTrial + 1;
+            rIdx = find([rules.code] == codeMATLAB(cIndex));
+
+            trialAll(nTrial).trialNum = cIndex;
+            trialAll(nTrial).code = codeMATLAB(cIndex);
+            trialAll(nTrial).onset = evtTrial(tIdx).latency; % sample
+            trialAll(nTrial).isControl = rules(rIdx).isControl;
+            trialAll(nTrial).type = string(rules(rIdx).type);
+            trialAll(nTrial).freq = rules(rIdx).freq;
+            trialAll(nTrial).variance = rules(rIdx).variance;
+            trialAll(nTrial).ICI = rules(rIdx).ICI;
+            trialAll(nTrial).interval = rules(rIdx).interval;
+            trialAll(nTrial).ISI = ISI;
         end
 
     end
