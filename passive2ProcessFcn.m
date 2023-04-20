@@ -2,7 +2,7 @@ function passive2ProcessFcn(trialAll, trialsEEG, window, fs, params)
     % Variance
     close all;
     parseStruct(params);
-    mkdir(fullfile(FIGPATH, "Figs"));
+    mkdir(FIGPATH);
 
     vars = unique([trialAll.variance])';
 
@@ -14,7 +14,7 @@ function passive2ProcessFcn(trialAll, trialsEEG, window, fs, params)
             plotRawWaveEEG(chMean, [], window, 1000, ['Var | ', num2str(vars(index))]);
             scaleAxes("x", [0, 2000]);
             scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
-            mPrint(gcf, fullfile(FIGPATH, "Figs", strcat("Passive2 Variance-", num2str(vars(index)), ".jpg")));
+            mPrint(gcf, fullfile(FIGPATH, strcat("Passive2 Variance-", num2str(vars(index)), ".jpg")));
         end
 
     end

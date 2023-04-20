@@ -2,7 +2,7 @@ function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
     % Length
     close all;
     parseStruct(params);
-    mkdir(fullfile(FIGPATH, "Figs"));
+    mkdir(FIGPATH);
 
     %% REG
     idx = [trialAll.type] == "REG";
@@ -18,7 +18,7 @@ function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
             plotRawWaveEEG(chMean, [], window, 1000, ['REG ', num2str(ICIs(index))]);
             scaleAxes("x", [0, 2000]);
             scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
-            mPrint(gcf, fullfile(FIGPATH, "Figs", strcat("Passive1 REG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
+            mPrint(gcf, fullfile(FIGPATH, strcat("Passive1 REG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
         end
 
     end
@@ -37,7 +37,7 @@ function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
             plotRawWaveEEG(chMean, [], window, 1000, ['IRREG ', num2str(ICIs(index))]);
             scaleAxes("x", [0, 2000]);
             scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
-            mPrint(gcf, fullfile(FIGPATH, "Figs", strcat("Passive1 IRREG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
+            mPrint(gcf, fullfile(FIGPATH, strcat("Passive1 IRREG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
         end
 
     end

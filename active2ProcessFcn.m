@@ -2,13 +2,13 @@ function active2ProcessFcn(trialAll, trialsEEG, window, fs, params)
     % Ratio - with interval
     close all;
     parseStruct(params);
-    mkdir(fullfile(FIGPATH, "Figs"));
+    mkdir(FIGPATH);
 
     interval = trialAll(1).interval;
 
     %% Behavior
     plotBehaviorEEG_Click(trialAll, fs);
-    mPrint(gcf, fullfile(FIGPATH, "Figs", "Behavior active2.jpg"));
+    mPrint(gcf, fullfile(FIGPATH, "Behavior active2.jpg"));
 
     %% REG
     idx = [trialAll.type] == "REG" & [trialAll.correct];
@@ -24,7 +24,7 @@ function active2ProcessFcn(trialAll, trialsEEG, window, fs, params)
             plotRawWaveEEG(chMean, [], window, 1000 + interval, ['REG ', num2str(ICIs(index))]);
             scaleAxes("x", [0, 2000 + interval]);
             scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
-            mPrint(gcf, fullfile(FIGPATH, "Figs", strcat("Active2 REG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
+            mPrint(gcf, fullfile(FIGPATH, strcat("Active2 REG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
         end
 
     end
@@ -43,7 +43,7 @@ function active2ProcessFcn(trialAll, trialsEEG, window, fs, params)
             plotRawWaveEEG(chMean, [], window, 1000 + interval, ['IRREG ', num2str(ICIs(index))]);
             scaleAxes("x", [0, 2000 + interval]);
             scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
-            mPrint(gcf, fullfile(FIGPATH, "Figs", strcat("Active2 IRREG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
+            mPrint(gcf, fullfile(FIGPATH, strcat("Active2 IRREG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
         end
 
     end
