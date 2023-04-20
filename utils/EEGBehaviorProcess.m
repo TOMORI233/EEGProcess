@@ -22,6 +22,7 @@ function trialAll = EEGBehaviorProcess(trialsData, EEGDataset, rules)
     trialOnsetMATLAB = fix(([trialsData.onset]' - trialsData(1).onset) * fs) + trialOnsetEEG(1);
 
     nTrial = 1;
+    lostTrialIdx = false(length(trialsData), 1);
     rIdx = find([rules.code] == codeMATLAB(1));
     trialAll(1).trialNum = 1;
     trialAll(1).code = codeMATLAB(1);
@@ -38,49 +39,57 @@ function trialAll = EEGBehaviorProcess(trialsData, EEGDataset, rules)
         tIdx = find(trialOnsetEEG >= trialOnsetMATLAB(cIndex) - fix(maxError * fs) & trialOnsetEEG <= trialOnsetMATLAB(cIndex) + fix(maxError * fs), 1);
         
         if isempty(tIdx) || ~isequal(evtTrial(tIdx).type, codeMATLAB(cIndex))
-            disp(['Trial ', num2str(cIndex), ' is missing in EEG recording.']);
+            lostTrialIdx(cIndex) = true;
         else
             nTrial = nTrial + 1;
             rIdx = find([rules.code] == codeMATLAB(cIndex));
 
-            trialAll(nTrial).trialNum = cIndex;
-            trialAll(nTrial).code = codeMATLAB(cIndex);
-            trialAll(nTrial).onset = evtTrial(tIdx).latency; % sample
-            trialAll(nTrial).isControl = rules(rIdx).isControl;
-            trialAll(nTrial).type = string(rules(rIdx).type);
-            trialAll(nTrial).freq = rules(rIdx).freq;
-            trialAll(nTrial).variance = rules(rIdx).variance;
-            trialAll(nTrial).ICI = rules(rIdx).ICI;
-            trialAll(nTrial).interval = rules(rIdx).interval;
-            trialAll(nTrial).ISI = ISI;
+            trialAll(nTrial, 1).trialNum = cIndex;
+            trialAll(nTrial, 1).code = codeMATLAB(cIndex);
+            trialAll(nTrial, 1).onset = evtTrial(tIdx).latency; % sample
+            trialAll(nTrial, 1).isControl = rules(rIdx).isControl;
+            trialAll(nTrial, 1).type = string(rules(rIdx).type);
+            trialAll(nTrial, 1).freq = rules(rIdx).freq;
+            trialAll(nTrial, 1).variance = rules(rIdx).variance;
+            trialAll(nTrial, 1).ICI = rules(rIdx).ICI;
+            trialAll(nTrial, 1).interval = rules(rIdx).interval;
+            trialAll(nTrial, 1).ISI = ISI;
         end
 
     end
+
+    if any(lostTrialIdx)
+        disp(['Trials lost in EEG recording: ', num2str(find(lostTrialIdx'))]);
+    end
+
+    trialsData(lostTrialIdx) = [];
+    pushTimeAll = fix(([trialsData.push]' - trialsData(1).onset) * fs) + trialAll(1).onset;
+    keys = [trialsData.key]';
 
     if contains(protocol, "active") % Active
     
         for tIndex = 1:length(trialAll)
             
             if tIndex < length(trialAll)
-                idx = find([evtAll.latency] > trialAll(tIndex).onset & [evtAll.latency] < trialAll(tIndex + 1).onset);
+                idx = find(pushTimeAll > trialAll(tIndex).onset & pushTimeAll < trialAll(tIndex + 1).onset, 1);
             else
-                idx = find([evtAll.latency] > trialAll(tIndex).onset);
+                idx = find(pushTimeAll > trialAll(tIndex).onset, 1);
             end
 
-            temp = [evtAll(idx).type];
-            key = temp(find(ismember(temp, [2, 3]), 1));
+            key = keys(idx);
+            key(key == 0) = [];
 
             if ~isempty(key)
-                trialAll(tIndex).push = evtAll(idx).latency;
+                trialAll(tIndex).push = pushTimeAll(idx);
                 trialAll(tIndex).miss = false;
 
-                if key == 2 % diff
+                if key == 37 % diff
                     trialAll(tIndex).isDiff = true;
-                elseif key == 3 % same
+                elseif key == 39 % same
                     trialAll(tIndex).isDiff = false;
                 end
 
-                if (key == 2 && ~trialAll(tIndex).isControl) || (key == 3 && trialAll(tIndex).isControl)
+                if (key == 37 && ~trialAll(tIndex).isControl) || (key == 39 && trialAll(tIndex).isControl)
                     trialAll(tIndex).correct = true;
                 else
                     trialAll(tIndex).correct = false;

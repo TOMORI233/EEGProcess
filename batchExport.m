@@ -10,10 +10,10 @@ opts.flp = 40;
 opts.protocols = ["passive1", "passive2", "passive3", "active1", "active2"];
 
 % window setting
-windows = struct("window",   {[-500, 2000];  ...  % passive1
-                              [-500, 2000];  ...  % passive2
-                              [-500, 2000];  ...  % passive3
-                              [-500, 2000];  ...  % active1
+windows = struct("window",   {[-500, 2000];  ... % passive1
+                              [-500, 2000];  ... % passive2
+                              [-500, 2000];  ... % passive3
+                              [-500, 2000];  ... % active1
                               [-500, 2600]}, ... % active2
                  "protocol", {"passive1"; ...
                               "passive2"; ...
