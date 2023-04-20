@@ -3,7 +3,7 @@ clear; clc; close all force;
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
 windowBase = [-300, 0];
-MATROOTPATH = "D:\Lab\Projects\EEG\MAT DATA\";
+MATROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
 
 %% Load and save
 DATESTRs = dir(MATROOTPATH);

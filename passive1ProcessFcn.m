@@ -1,17 +1,11 @@
-function active1ProcessFcn(trialAll, trialsEEG, window, fs, params)
-    % Ratio - no interval
+function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
+    % Length
     close all;
     parseStruct(params);
     mkdir(fullfile(SAVEPATH, "Figs"));
 
-    %% Behavior
-    FigClick = plotBehaviorEEG_Click(trialAll, fs);
-    mPrint(FigClick, fullfile(SAVEPATH, "Figs", "Behavior active1 ClickTrain.jpg"));
-    FigTone = plotBehaviorEEG_Tone(trialAll, fs);
-    mPrint(FigTone, fullfile(SAVEPATH, "Figs", "Behavior active1 Tone.jpg"));
-
     %% REG
-    idx = [trialAll.type] == "REG" & [trialAll.correct];
+    idx = [trialAll.type] == "REG";
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);
     ICIs = unique([trials.ICI])';
@@ -24,13 +18,13 @@ function active1ProcessFcn(trialAll, trialsEEG, window, fs, params)
             plotRawWaveEEG(chMean, [], window, 1000, ['REG ', num2str(ICIs(index))]);
             scaleAxes("x", [0, 2000]);
             scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
-            mPrint(gcf, fullfile(SAVEPATH, "Figs", strcat("Active1 REG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
+            mPrint(gcf, fullfile(SAVEPATH, "Figs", strcat("Passive1 REG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
         end
 
     end
 
     %% IRREG
-    idx = [trialAll.type] == "IRREG" & ~[trialAll.miss];
+    idx = [trialAll.type] == "IRREG";
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);
     ICIs = unique([trials.ICI])';
@@ -43,7 +37,7 @@ function active1ProcessFcn(trialAll, trialsEEG, window, fs, params)
             plotRawWaveEEG(chMean, [], window, 1000, ['IRREG ', num2str(ICIs(index))]);
             scaleAxes("x", [0, 2000]);
             scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
-            mPrint(gcf, fullfile(SAVEPATH, "Figs", strcat("Active2 IRREG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
+            mPrint(gcf, fullfile(SAVEPATH, "Figs", strcat("Passive1 IRREG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
         end
 
     end

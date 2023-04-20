@@ -51,6 +51,8 @@ for dIndex = 1:length(DAYPATHs)
             continue;
         end
 
+        mkdir(SAVEPATH);
+
         % Protocols
         protocols = protocols(contains(protocols, ["passive1", "passive2", "passive3", "active1", "active2"]));
 
@@ -67,7 +69,7 @@ for dIndex = 1:length(DAYPATHs)
                 tIdx = excludeTrials(trialsEEG, tTh, chTh, "userDefineOpt", "off");
                 trialsEEG(tIdx) = [];
                 trialAll(tIdx) = [];
-                save(MATNAME, "window", "trialsEEG", "trialAll", "fs");
+                mSave(MATNAME, "window", "trialsEEG", "trialAll", "fs");
             else
                 disp(strcat('Day ', DATESTRs{dIndex}, ' ', SUBJECTs{sIndex}, ' ', protocols(pIndex), ' already exported. Skip.'));
             end

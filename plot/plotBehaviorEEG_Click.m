@@ -1,4 +1,4 @@
-function Fig = plotBehaviorEEG(trialAll, fs)
+function Fig = plotBehaviorEEG_Click(trialAll, fs)
     margins = [0.1, 0.1, 0.1, 0.1];
     Fig = figure;
     maximizeFig(Fig);
@@ -7,6 +7,7 @@ function Fig = plotBehaviorEEG(trialAll, fs)
     colors = ["r", "b"];
     legends = ["REG", "IRREG"];
 
+    trialAll = trialAll(([trialAll.type] == "REG" | [trialAll.type] == "IRREG") & ~[trialAll.miss]);
     ICIUnique = unique([trialAll.ICI]);
     mAxe = mSubplot(Fig, 2, 2, 1, 1, margins);
     mAxe(2) = mSubplot(Fig, 2, 2, 3, 1, margins);
