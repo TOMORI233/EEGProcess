@@ -2,7 +2,6 @@ clear; clc; close all force;
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
-windowBase = [-300, 0];
 MATROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
 FIGROOTPATH = "D:\Education\Lab\Projects\EEG\Figures\";
 
@@ -39,8 +38,8 @@ for dIndex = 1:length(DAYPATHs)
         for pIndex = 1:length(protocols)
             protocolProcessFcn = protocolProcessFcns{pIndex};
             MATPATH = fullfile(MATDirPATH, matfiles{pIndex});
-            load(MATPATH);
-            trialsEEG = baselineCorrection(trialsEEG, fs, window, windowBase);
+            load(MATPATH, "windowBase", "window", "trialsEEG", "trialAll", "fs");
+
             params.FIGPATH = FIGPATH;
             params.SAVEPATH = MATDirPATH;
             params.windowBase = windowBase;

@@ -32,6 +32,7 @@ function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
             disp(['Current protocol: ', char(protocols(pIndex))]);
             disp('Try loading data from *.cdt');
             EEG = loadcurry(char(fullfile(ROOTPATH, temp{1})));
+            disp('Done.');
 
             idx = idx + 1;
             EEGDatasets(idx).protocol = protocols(pIndex);

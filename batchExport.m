@@ -9,7 +9,8 @@ opts.fhp = 0.5;
 opts.flp = 40;
 opts.protocols = ["passive1", "passive2", "passive3", "active1", "active2"];
 
-% window setting
+% window setting, ms
+windowBase = [-300, 0];
 windows = struct("window",   {[-500, 2000];  ... % passive1
                               [-500, 2000];  ... % passive2
                               [-500, 2000];  ... % passive3
@@ -72,11 +73,14 @@ for dIndex = 1:length(DAYPATHs)
                 trialsEEG = selectEEG(EEGDatasets([EEGDatasets.protocol] == protocols(pIndex)), ...
                                                   trialAll, ...
                                                   window);
+                
+                % Baseline correction
+                trialsEEG = baselineCorrection(trialsEEG, fs, window, windowBase);
 
                 tIdx = excludeTrials(trialsEEG, tTh, chTh, "userDefineOpt", "off");
                 trialsEEG(tIdx) = [];
                 trialAll(tIdx) = [];
-                mSave(MATNAME, "window", "trialsEEG", "trialAll", "fs");
+                mSave(MATNAME, "windowBase", "window", "trialsEEG", "trialAll", "fs");
             else
                 disp(['Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTs{sIndex}), ' ', char(protocols(pIndex)), ' already exported. Skip.']);
             end
