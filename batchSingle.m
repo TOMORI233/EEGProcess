@@ -4,6 +4,7 @@ addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
 windowBase = [-300, 0];
 MATROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
+FIGROOTPATH = "D:\Education\Lab\Projects\EEG\Figures\";
 
 %% Load and save
 DATESTRs = dir(MATROOTPATH);
@@ -24,10 +25,10 @@ for dIndex = 1:length(DAYPATHs)
     
     % For every subject in a single day
     for sIndex = 1:length(SUBJECTs)
-        DATAPATH = fullfile(MATROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
-        SAVEPATH = DATAPATH;
+        MATPATH = fullfile(MATROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
+        FIGPATH = fullfile(FIGROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
 
-        matfiles = what(DATAPATH).mat;
+        matfiles = what(MATPATH).mat;
         protocols = cellfun(@(x) obtainArgoutN(@fileparts, 2, x), matfiles, "UniformOutput", false);
         idx = contains(protocols, ["passive1", "passive2", "passive3", "active1", "active2"]);
         protocols = protocols(idx);
@@ -37,10 +38,11 @@ for dIndex = 1:length(DAYPATHs)
         % For each protocol
         for pIndex = 1:length(protocols)
             protocolProcessFcn = protocolProcessFcns{pIndex};
-            MATPATH = fullfile(DATAPATH, matfiles{pIndex});
+            MATPATH = fullfile(MATPATH, matfiles{pIndex});
             load(MATPATH);
             trialsEEG = baselineCorrection(trialsEEG, fs, window, windowBase);
-            params.SAVEPATH = SAVEPATH;
+            params.FIGPATH = FIGPATH;
+            params.SAVEPATH = fileparts(MATPATH);
             params.windowBase = windowBase;
             protocolProcessFcn(trialAll, trialsEEG, window, fs, params);
         end
