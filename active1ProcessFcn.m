@@ -43,7 +43,7 @@ function active1ProcessFcn(trialAll, trialsEEG, window, fs, params)
             plotRawWaveEEG(chMean, [], window, 1000, ['IRREG ', num2str(ICIs(index))]);
             scaleAxes("x", [0, 2000]);
             scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
-            mPrint(gcf, fullfile(FIGPATH, strcat("Active2 IRREG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
+            mPrint(gcf, fullfile(FIGPATH, strcat("Active1 IRREG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
         end
 
     end
