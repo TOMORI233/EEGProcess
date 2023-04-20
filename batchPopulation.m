@@ -3,7 +3,7 @@ clear; clc; close all force;
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
 ROOTPATH = "F:\EEG\DATA\";
-SAVEROOTPATH = "D:\Lab\Projects\EEG\MAT DATA\";
+SAVEROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
 
 opts.fhp = 0.5;
 opts.flp = 40;
@@ -41,13 +41,14 @@ for dIndex = 1:length(DAYPATHs)
         SAVEPATH = fullfile(SAVEROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
 
         if ~exist(SAVEPATH, "dir")
-            mkdir(SAVEPATH);
             [EEGDatasets, trialDatasets] = EEGPreprocess(DATAPATH, opts);
             protocols = [trialDatasets.protocol]';
         else
             disp(strcat('Day ', DATESTRs{dIndex}, ' ', SUBJECTs{sIndex}, ' already exported. Skip.'));
             continue;
         end
+
+        mkdir(SAVEPATH);
 
         for pIndex = 1:length(protocols)
             MATNAME = fullfile(SAVEPATH, strcat(protocols(pIndex), ".mat"));

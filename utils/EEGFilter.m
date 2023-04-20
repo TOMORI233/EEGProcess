@@ -1,5 +1,6 @@
 function EEGDataset = EEGFilter(EEGDataset, fhp, flp)
     narginchk(1, 3);
+    ft_setPath2Top;
 
     if nargin < 2
         fhp = 0.5;
