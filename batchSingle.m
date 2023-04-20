@@ -29,7 +29,9 @@ for dIndex = 1:length(DAYPATHs)
 
         matfiles = what(DATAPATH).mat;
         protocols = cellfun(@(x) obtainArgoutN(@fileparts, 2, x), matfiles, "UniformOutput", false);
-        protocols = protocols(contains(protocols, ["passive1", "passive2", "passive3", "active1", "active2"]));
+        idx = contains(protocols, ["passive1", "passive2", "passive3", "active1", "active2"]);
+        protocols = protocols(idx);
+        matfiles = matfiles(idx);
         protocolProcessFcns = cellfun(@(x) eval(strcat('@', x, 'ProcessFcn')), protocols, "UniformOutput", false);
 
         % For each protocol
