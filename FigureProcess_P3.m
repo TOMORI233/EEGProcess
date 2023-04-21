@@ -9,8 +9,7 @@ colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], 
 
 %% chMean plot
 temp = vertcat(chMeanData.chMeanData);
-ICIs = unique([temp.ICI])';
-ICIs(ICIs == 0) = [];
+ICIs = [4, 4.01, 4.02, 4.03, 4.06];
 
 nREG = 0;
 nIRREG = 0;

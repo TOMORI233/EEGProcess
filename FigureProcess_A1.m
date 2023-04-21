@@ -3,14 +3,16 @@ clear; clc; close all force;
 
 chMeanData = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_A1_Population.mat").data;
 briData = load("D:\Education\Lab\Projects\EEG\MAT Population\BRI_A1_Population.mat").data;
+load("subjectIdx_A1.mat", "subjectIdx");
+chMeanData = chMeanData(subjectIdx);
+briData = briData(subjectIdx);
 
 window = briData(1).window;
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
 %% chMean plot
 temp = vertcat(chMeanData.chMeanData);
-ICIs = unique([temp.ICI])';
-ICIs(ICIs == 0) = [];
+ICIs = [4, 4.01, 4.02, 4.03, 4.06];
 
 nREG = 0;
 nIRREG = 0;
