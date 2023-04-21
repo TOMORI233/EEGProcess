@@ -1,3 +1,4 @@
+% Collect individual data and save
 clear; clc; close all force;
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");

@@ -28,6 +28,7 @@ xticks(1:length(ICIsREG));
 xticklabels(num2str(ICIsREG));
 xlabel('ICI2');
 ylabel('Press for difference ratio');
+title('A1 REG');
 
 % IRREG
 temp = [bData([bData.type] == "IRREG").data]';
@@ -43,6 +44,7 @@ xticks(1:length(ICIsIRREG));
 xticklabels(num2str(ICIsIRREG));
 xlabel('ICI2');
 ylabel('Press for difference ratio');
+title('A1 IRREG');
 
 % PT
 temp = [bData([bData.type] == "PT").data]';
@@ -58,6 +60,7 @@ xticks(1:length(freqs));
 xticklabels(num2str(freqs));
 xlabel('frequency2');
 ylabel('Press for difference ratio');
+title('A1 Tone');
 
 %% Active 2
 DATAPATH = "D:\Education\Lab\Projects\EEG\MAT Population\Behavior_A2_Res_Population.mat";
@@ -80,6 +83,7 @@ xticks(1:length(ICIsREG));
 xticklabels(num2str(ICIsREG));
 xlabel('ICI2');
 ylabel('Press for difference ratio');
+title('A2 REG');
 
 % IRREG
 temp = [bData([bData.type] == "IRREG").data]';
@@ -94,6 +98,7 @@ xticks(1:length(ICIsIRREG));
 xticklabels(num2str(ICIsIRREG));
 xlabel('ICI2');
 ylabel('Press for difference ratio');
+title('A2 IRREG');
 
 %% Compare
 % REG

@@ -1,3 +1,4 @@
+% Process each protocol for each subject
 clear; clc; close all force;
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");

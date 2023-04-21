@@ -1,3 +1,4 @@
+% Export baseline-correted EEG wave and trials
 clear; clc; close all force;
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
