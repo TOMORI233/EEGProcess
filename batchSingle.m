@@ -8,7 +8,7 @@ FIGROOTPATH = "D:\Education\Lab\Projects\EEG\Figures\";
 params.dataOnlyOpt = true; % true - save temporal data only without plotting
 
 % protocolsToProcess = ["passive1", "passive2", "passive3", "active1", "active2"];
-protocolsToProcess = ["active1"];
+protocolsToProcess = ["passive3"];
 
 %% Load and save
 DATESTRs = dir(MATROOTPATH);
@@ -37,6 +37,7 @@ for dIndex = 1:length(DAYPATHs)
             continue;
         end
 
+        disp(['Current: Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTs{sIndex})]);
         matfiles = what(MATDirPATH).mat;
         protocols = cellfun(@(x) obtainArgoutN(@fileparts, 2, x), matfiles, "UniformOutput", false);
         idx = contains(protocols, protocolsToProcess);

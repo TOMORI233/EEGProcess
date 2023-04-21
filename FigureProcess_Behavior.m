@@ -101,19 +101,19 @@ for index = 1:5
     scatter(X, Y, 100, "k");
     hold on;
     plot([0, 1], [0, 1], 'k--', 'LineWidth', 1.5);
-    title(['ICI2 = ', num2str(ICIsREG(index)), ' ms | p=', num2str(p)]);
+    title(['REG | ICI2 = ', num2str(ICIsREG(index)), ' ms | p=', num2str(p)]);
 end
 
 % IRREG
 figure;
 maximizeFig;
-for index = 1:2
-    mSubplot(1, 2, index, 'shape', 'square-min');
-    X = cellfun(@(x) x(index), resIRREG_A1);
-    Y = cellfun(@(x) x(index), resIRREG_A2);
+for index = 1:3
+    mSubplot(1, 3, index, 'shape', 'square-min');
+    X = cellfun(@(x) x(index), resIRREG_A1([1:2, 4:end]));
+    Y = cellfun(@(x) x(index), resIRREG_A2([1:2, 4:end]));
     [~, p] = ttest(X, Y);
     scatter(X, Y, 100, "k");
     hold on;
     plot([0, 1], [0, 1], 'k--', 'LineWidth', 1.5);
-    title(['ICI2 = ', num2str(ICIsREG(index)), ' ms | p=', num2str(p)]);
+    title(['IRREG | ICI2 = ', num2str(ICIsIRREG(index)), ' ms | p=', num2str(p)]);
 end

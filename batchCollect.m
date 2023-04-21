@@ -5,9 +5,16 @@ addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 MATROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
 POPUPATH = "D:\Education\Lab\Projects\EEG\MAT Population\";
 
+mkdir(POPUPATH);
+
 matfilesToProcess = ["Behavior_A1_Res", ...
                      "Behavior_A2_Res", ...
-                     "Ratio_ttest_RMS_res"];
+                     "FindChs", ...
+                     "chMean_P1", ...
+                     "chMean_P2", ...
+                     "chMean_P3", ...
+                     "chMean_A1", ...
+                     "chMean_A2"];
 
 %% Load and save
 DATESTRs = dir(MATROOTPATH);
@@ -17,10 +24,15 @@ DAYPATHs = cellfun(@(x) fullfile(MATROOTPATH, x), DATESTRs, "UniformOutput", fal
 
 for mIndex = 1:length(matfilesToProcess)
 
+    if exist(fullfile(POPUPATH, strcat(matfilesToProcess(mIndex), "_Population.mat")), "file")
+        disp('File exists. Skip.');
+        continue;
+    end
+
     if exist("data", "var")
         clearvars data
     end
-    
+
     nSubject = 1;
 
     % For each day
@@ -39,6 +51,11 @@ for mIndex = 1:length(matfilesToProcess)
             MATDirPATH = fullfile(MATROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
             matfiles = what(MATDirPATH).mat;
             matfiles = matfiles(contains(matfiles, matfilesToProcess(mIndex)));
+
+            if length(matfiles) > 1
+                error("Duplicate MAT file name");
+            end
+
             data(nSubject, 1) = load(fullfile(MATDirPATH, matfiles{1}));
             nSubject = nSubject + 1;
         end

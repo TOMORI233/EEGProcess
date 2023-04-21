@@ -1,15 +1,11 @@
 function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
-    % Length
+    %% Length
     close all;
     parseStruct(params);
     mkdir(FIGPATH);
 
-    if dataOnlyOpt
-        return;
-    end
-
-    %% Figures
-    % REG
+    %% REG
+    n = 1;
     idx = [trialAll.type] == "REG";
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);
@@ -20,15 +16,23 @@ function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
         if ~isempty(temp)
             chMean = cell2mat(cellfun(@(x) mean(x, 1), changeCellRowNum(temp), "UniformOutput", false));
-            plotRawWaveEEG(chMean, [], window, 1000, ['REG ', num2str(ICIs(index))]);
-            scaleAxes("x", [0, 2000]);
-            scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
-            mPrint(gcf, fullfile(FIGPATH, strcat("Passive1 REG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
+            chMeanData(n, 1).chMean = chMean;
+            chMeanData(n, 1).ICI = ICIs(index);
+            chMeanData(n, 1).type = "REG";
+            n = n + 1;
+            
+            if ~dataOnlyOpt
+                plotRawWaveEEG(chMean, [], window, 1000, ['REG ', num2str(ICIs(index))]);
+                scaleAxes("x", [0, 2000]);
+                scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
+                mPrint(gcf, fullfile(FIGPATH, strcat("Passive1 REG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
+            end
+
         end
 
     end
 
-    % IRREG
+    %% IRREG
     idx = [trialAll.type] == "IRREG";
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);
@@ -39,12 +43,21 @@ function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
         if ~isempty(temp)
             chMean = cell2mat(cellfun(@(x) mean(x, 1), changeCellRowNum(temp), "UniformOutput", false));
-            plotRawWaveEEG(chMean, [], window, 1000, ['IRREG ', num2str(ICIs(index))]);
-            scaleAxes("x", [0, 2000]);
-            scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
-            mPrint(gcf, fullfile(FIGPATH, strcat("Passive1 IRREG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
+            chMeanData(n, 1).chMean = chMean;
+            chMeanData(n, 1).ICI = ICIs(index);
+            chMeanData(n, 1).type = "IRREG";
+            n = n + 1;
+            
+            if ~dataOnlyOpt
+                plotRawWaveEEG(chMean, [], window, 1000, ['IRREG ', num2str(ICIs(index))]);
+                scaleAxes("x", [0, 2000]);
+                scaleAxes("y", "cutoffRange", [-20, 20], "symOpt", "max");
+                mPrint(gcf, fullfile(FIGPATH, strcat("Passive1 IRREG-", strrep(num2str(ICIs(index)), '.', '_'), ".jpg")));
+            end
+
         end
 
     end
 
+    mSave(fullfile(SAVEPATH, "chMean_P1.mat"), "chMeanData");
 end
