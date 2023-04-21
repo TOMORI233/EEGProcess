@@ -4,7 +4,12 @@ function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
     parseStruct(params);
     mkdir(FIGPATH);
 
-    %% REG
+    if dataOnlyOpt
+        return;
+    end
+
+    %% Figures
+    % REG
     idx = [trialAll.type] == "REG";
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);
@@ -23,7 +28,7 @@ function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
     end
 
-    %% IRREG
+    % IRREG
     idx = [trialAll.type] == "IRREG";
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);

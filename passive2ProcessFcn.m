@@ -4,6 +4,11 @@ function passive2ProcessFcn(trialAll, trialsEEG, window, fs, params)
     parseStruct(params);
     mkdir(FIGPATH);
 
+    if dataOnlyOpt
+        return;
+    end
+
+    %% Figures
     vars = unique([trialAll.variance])';
 
     for index = 1:length(vars)

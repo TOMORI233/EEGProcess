@@ -3,7 +3,24 @@ function passive3ProcessFcn(trialAll, trialsEEG, window, fs, params)
     parseStruct(params);
     mkdir(FIGPATH);
 
-    %% REG
+    %% Data export
+    % Find channels with significant auditory reaction
+    % Use RMS
+    windowOnset = [0, 300]; % auditory window, ms
+    tBaseIdx = fix((windowBase(1) - window(1)) * fs / 1000) + 1:fix((windowBase(2) - window(1)) * fs / 1000);
+    tIdx = fix((windowOnset(1) - window(1)) * fs / 1000) + 1:fix((windowOnset(2) - window(1)) * fs / 1000);
+    rmsBase = cellfun(@(x) mean(x(:, tBaseIdx) .^ 2, 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
+    rmsOnset = cellfun(@(x) mean(x(:, tIdx) .^ 2, 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
+    alpha = 0.01 / size(trialsEEG{1}, 1);
+    ttestResRMS = cellfun(@(x, y) ttest(x, y, "Alpha", alpha), rmsBase, rmsOnset);
+    save(fullfile(SAVEPATH, "Ratio_ttest_RMS_res.mat"), "ttestResRMS", "rmsOnset", "rmsBase", "alpha");
+
+    if dataOnlyOpt
+        return;
+    end
+
+    %% Figures
+    % REG
     idx = [trialAll.type] == "REG";
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);
@@ -22,7 +39,7 @@ function passive3ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
     end
 
-    %% IRREG
+    % IRREG
     idx = [trialAll.type] == "IRREG";
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);
@@ -41,14 +58,4 @@ function passive3ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
     end
 
-    %% Find channels with significant auditory reaction
-    % Use RMS
-    windowOnset = [0, 300]; % auditory window, ms
-    tBaseIdx = fix((windowBase(1) - window(1)) * fs / 1000) + 1:fix((windowBase(2) - window(1)) * fs / 1000);
-    tIdx = fix((windowOnset(1) - window(1)) * fs / 1000) + 1:fix((windowOnset(2) - window(1)) * fs / 1000);
-    rmsBase = cellfun(@(x) mean(x(:, tBaseIdx) .^ 2, 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
-    rmsOnset = cellfun(@(x) mean(x(:, tIdx) .^ 2, 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
-    alpha = 0.01 / size(trialsEEG{1}, 1);
-    ttestResRMS = cellfun(@(x, y) ttest(x, y, "Alpha", alpha), rmsBase, rmsOnset);
-    mSave(fullfile(SAVEPATH, "Ratio_ttest_RMS_res.mat"), "ttestResRMS", "rmsOnset", "rmsBase", "alpha");
 end

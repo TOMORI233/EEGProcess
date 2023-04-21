@@ -6,11 +6,21 @@ function active2ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
     interval = trialAll(1).interval;
 
-    %% Behavior
+    %% Data export
+    % Behavior
+    behaviorRes = calBehaviorRes(trialAll);
+    save(fullfile(SAVEPATH, "Behavior_A2_Res.mat"), "behaviorRes");
+
+    if dataOnlyOpt
+        return;
+    end
+
+    %% Figures
+    % Behavior
     plotBehaviorEEG_Click(trialAll, fs);
     mPrint(gcf, fullfile(FIGPATH, "Behavior active2.jpg"));
 
-    %% REG
+    % REG
     idx = [trialAll.type] == "REG" & [trialAll.correct];
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);
@@ -29,7 +39,7 @@ function active2ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
     end
 
-    %% IRREG
+    % IRREG
     idx = [trialAll.type] == "IRREG" & ~[trialAll.miss];
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);

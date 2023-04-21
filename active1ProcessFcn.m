@@ -4,13 +4,23 @@ function active1ProcessFcn(trialAll, trialsEEG, window, fs, params)
     parseStruct(params);
     mkdir(FIGPATH);
 
-    %% Behavior
+    %% Data export
+    % Behavior
+    behaviorRes = calBehaviorRes(trialAll);
+    save(fullfile(SAVEPATH, "Behavior_A1_Res.mat"), "behaviorRes");
+
+    if dataOnlyOpt
+        return;
+    end
+
+    %% Figures
+    % Behavior
     FigClick = plotBehaviorEEG_Click(trialAll, fs);
     mPrint(FigClick, fullfile(FIGPATH, "Behavior active1 ClickTrain.jpg"));
     FigTone = plotBehaviorEEG_Tone(trialAll, fs);
     mPrint(FigTone, fullfile(FIGPATH, "Behavior active1 Tone.jpg"));
 
-    %% REG
+    % REG
     idx = [trialAll.type] == "REG" & [trialAll.correct];
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);
@@ -29,7 +39,7 @@ function active1ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
     end
 
-    %% IRREG
+    % IRREG
     idx = [trialAll.type] == "IRREG" & ~[trialAll.miss];
     trials = trialAll(idx);
     trialsEEG_temp = trialsEEG(idx);

@@ -5,6 +5,11 @@ addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 MATROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
 FIGROOTPATH = "D:\Education\Lab\Projects\EEG\Figures\";
 
+params.dataOnlyOpt = true; % true - save temporal data only without plotting
+
+% protocolsToProcess = ["passive1", "passive2", "passive3", "active1", "active2"];
+protocolsToProcess = ["active1"];
+
 %% Load and save
 DATESTRs = dir(MATROOTPATH);
 DATESTRs = DATESTRs([DATESTRs.isdir]);
@@ -27,14 +32,14 @@ for dIndex = 1:length(DAYPATHs)
         MATDirPATH = fullfile(MATROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
         FIGPATH = fullfile(FIGROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
 
-        if exist(FIGPATH, "dir")
+        if exist(FIGPATH, "dir") && ~params.dataOnlyOpt
             disp(['Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTs{sIndex}), ' already processed. Skip.']);
             continue;
         end
 
         matfiles = what(MATDirPATH).mat;
         protocols = cellfun(@(x) obtainArgoutN(@fileparts, 2, x), matfiles, "UniformOutput", false);
-        idx = contains(protocols, ["passive1", "passive2", "passive3", "active1", "active2"]);
+        idx = contains(protocols, protocolsToProcess);
         protocols = protocols(idx);
         matfiles = matfiles(idx);
         protocolProcessFcns = cellfun(@(x) eval(strcat('@', x, 'ProcessFcn')), protocols, "UniformOutput", false);
@@ -44,12 +49,6 @@ for dIndex = 1:length(DAYPATHs)
             protocolProcessFcn = protocolProcessFcns{pIndex};
             MATPATH = fullfile(MATDirPATH, matfiles{pIndex});
             load(MATPATH, "windowBase", "window", "trialsEEG", "trialAll", "fs");
-
-            if size(trialsEEG{1}, 1) > 64
-                % Reverse channel 1:64
-                trialsEEG = cellfun(@(x) x(1:64, :), trialsEEG, "UniformOutput", false);
-                save(MATPATH, "windowBase", "window", "trialsEEG", "trialAll", "fs");
-            end
 
             params.FIGPATH = FIGPATH;
             params.SAVEPATH = MATDirPATH;
