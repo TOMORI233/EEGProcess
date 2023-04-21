@@ -1,12 +1,14 @@
 %% 精度
 clear; clc; close all force;
 
-load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_A1_Population.mat");
+chMeanData = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_A2_Population.mat").data;
+briData = load("D:\Education\Lab\Projects\EEG\MAT Population\BRI_A2_Population.mat").data;
 
-window = [-500, 2000];
+window = briData(1).window;
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
-temp = vertcat(data.chMeanData);
+%% chMean plot
+temp = vertcat(chMeanData.chMeanData);
 ICIs = unique([temp.ICI])';
 ICIs(ICIs == 0) = [];
 
@@ -33,10 +35,10 @@ for index = 1:length(ICIs)
     end
 end
 
-FigREG = plotRawWaveMultiEEG(chMeanREG, window, 1000, "REG");
-scaleAxes(FigREG, "x", [1000, 1500]);
+FigREG = plotRawWaveMultiEEG(chMeanREG, window, 1600, "REG");
+scaleAxes(FigREG, "x", [1000, 2100]);
 scaleAxes(FigREG, "y", "on", "symOpt", "max", "uiOpt", "show");
 
-FigIRREG = plotRawWaveMultiEEG(chMeanIRREG, window, 1000, "IRREG");
-scaleAxes(FigIRREG, "x", [0, 2000]);
+FigIRREG = plotRawWaveMultiEEG(chMeanIRREG, window, 1600, "IRREG");
+scaleAxes(FigIRREG, "x", [0, 2600]);
 scaleAxes(FigIRREG, "y", "on", "symOpt", "max", "uiOpt", "show");

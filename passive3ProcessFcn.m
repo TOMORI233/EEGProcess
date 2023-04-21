@@ -4,11 +4,25 @@ function passive3ProcessFcn(trialAll, trialsEEG, window, fs, params)
     parseStruct(params);
     mkdir(FIGPATH);
 
+    if exist("chsAvg.mat", "file") && exist("windowBRI.mat", "file")
+        load("chsAvg.mat", "chsAvg");
+        load("windowBRI.mat", "windowBRI");
+        windowBeforeChange = [900, 1000];
+        tIdxBase = fix((windowBase(1) - window(1)) * fs / 1000) + 1:fix((windowBase(2) - window(1)) * fs / 1000);
+        tIdxBase2 = fix((windowBeforeChange(1) - window(1)) * fs / 1000) + 1:fix((windowBeforeChange(2) - window(1)) * fs / 1000);
+        tIdxBRI = fix((windowBRI(1) - window(1)) * fs / 1000) + 1:fix((windowBRI(2) - window(1)) * fs / 1000);
+        BRI = cellfun(@(x) mean(x(chsAvg, tIdxBRI), 'all'), trialsEEG);
+        BRIbase = cellfun(@(x) mean(x(chsAvg, tIdxBase), 'all'), trialsEEG);
+        BRIbase2 = cellfun(@(x) mean(x(chsAvg, tIdxBase2), 'all'), trialsEEG); % BRI of wave before change
+        save(fullfile(SAVEPATH, "BRI_P3.mat"), "BRI", "BRIbase", "BRIbase2", "window", "windowBRI", "windowBase", "windowBeforeChange", "chsAvg", "trialAll", "fs");
+        return;
+    end
+
     %% Find channels with significant auditory reaction | Use mean
     windowOnset = [70, 120]; % auditory window, ms
-    tBaseIdx = fix((windowBase(1) - window(1)) * fs / 1000) + 1:fix((windowBase(2) - window(1)) * fs / 1000);
+    tIdxBase = fix((windowBase(1) - window(1)) * fs / 1000) + 1:fix((windowBase(2) - window(1)) * fs / 1000);
     tIdx = fix((windowOnset(1) - window(1)) * fs / 1000) + 1:fix((windowOnset(2) - window(1)) * fs / 1000);
-    avgBase = cellfun(@(x) mean(x(:, tBaseIdx), 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
+    avgBase = cellfun(@(x) mean(x(:, tIdxBase), 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
     avgOnset = cellfun(@(x) mean(x(:, tIdx), 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
     [~, p] = cellfun(@(x, y) ttest(x, y), avgBase, avgOnset);
     save(fullfile(SAVEPATH, "FindChs.mat"), "p", "avgOnset", "avgBase");
