@@ -13,7 +13,10 @@ alpha = 0.05;
 temp = {data.p}';
 temp = cellfun(@(x) mafdr(x, 'BHFDR', true), temp, "UniformOutput", false);
 temp = cellfun(@(x) sum(x < alpha) / length(data), changeCellRowNum(temp));
-chs = find(temp > 0.6)
+chsAvg = find(temp > 0.6);
+chsAvg(ismember(chsAvg, [33, 43])) = [];
+save("chsAvg.mat", "chsAvg");
+
 figure;
 maximizeFig;
 mSubplot(1, 1, 1, "shape", "square-min");
@@ -28,4 +31,3 @@ avgDiff = cellfun(@(x, y) x - y, avgOnset, avgBase, "UniformOutput", false);
 temp = cellfun(@mean, avgDiff);
 topoplot(temp, 'chan64.loc');
 colorbar;
-scaleAxes("c", "cutoffRange", [-100, 100], "symOpt", "max", "uiOpt", "show");

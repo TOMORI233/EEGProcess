@@ -5,10 +5,9 @@ addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 MATROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
 FIGROOTPATH = "D:\Education\Lab\Projects\EEG\Figures\";
 
-params.dataOnlyOpt = true; % true - save temporal data only without plotting
+params.dataOnlyOpt = false; % true - save temporal data only without plotting
 
-% protocolsToProcess = ["passive1", "passive2", "passive3", "active1", "active2"];
-protocolsToProcess = ["passive3"];
+protocolsToProcess = ["passive1", "passive2", "passive3", "active1", "active2"];
 
 %% Load and save
 DATESTRs = dir(MATROOTPATH);
