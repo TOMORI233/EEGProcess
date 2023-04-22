@@ -121,7 +121,7 @@ xticklabels(num2str(ICIsREG'));
 xlim([0.8, length(ICIsREG) + 0.2]);
 xlabel('S2 ICI (ms)');
 ylabel('BRI (\muV)');
-title('REG');
+title('Behavior (Interval) REG');
 
 %% BRI - IRREG
 ICIsIRREG = [4, 4.06];
@@ -178,7 +178,7 @@ xticklabels(num2str(ICIsIRREG'));
 xlim([0.8, length(ICIsIRREG) + 0.2]);
 xlabel('S2 ICI (ms)');
 ylabel('BRI (\muV)');
-title('IRREG');
+title('Behavior (Interval) IRREG');
 
 scaleAxes(FigBRI, "y");
 

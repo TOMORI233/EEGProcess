@@ -1,5 +1,8 @@
 clear; clc; close all force;
 
+margins = [0.05, 0.05, 0.1, 0.1];
+colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
+
 %% Compare BRI
 dataA1 = load("D:\Education\Lab\Projects\EEG\Figure DATA\Res_BRI_A1.mat");
 dataP3 = load("D:\Education\Lab\Projects\EEG\Figure DATA\Res_BRI_P3.mat");
@@ -88,3 +91,50 @@ ylabel('\Delta BRI (\muV)');
 title('Behavior - Non-behavior');
 
 %% Compare Wave
+waveDataA1 = load("D:\Education\Lab\Projects\EEG\Figure DATA\Res_chMean_A1.mat");
+waveDataP3 = load("D:\Education\Lab\Projects\EEG\Figure DATA\Res_chMean_P3.mat");
+load("chsAvg.mat", "chsAvg");
+window = waveDataA1.window;
+t = linspace(window(1), window(2), size(waveDataA1.chMeanREG(index).chMean, 2));
+
+% REG
+figure;
+maximizeFig;
+for index = 1:length(waveDataA1.chMeanREG)
+    chMeanA1 = mean(waveDataA1.chMeanREG(index).chMean(chsAvg, :), 1);
+    chMeanP3 = mean(waveDataP3.chMeanREG(index).chMean(chsAvg, :), 1);
+    mSubplot(2, 3, index, "margins", margins);
+    plot(t - 1000, chMeanA1, 'r', 'LineWidth', 2, 'DisplayName', 'Behavior');
+    hold on;
+    plot(t - 1000, chMeanP3, 'k', 'LineWidth', 2, 'DisplayName', 'Non-behavior');
+    legend;
+    set(gca, 'FontSize', 12);
+    xlabel('Time from change point (ms)');
+    ylabel('ERP (\muV)');
+    title(['S2 ICI = ', num2str(waveDataA1.chMeanREG(index).ICI), ' ms']);
+end
+scaleAxes("x", [0, 500]);
+scaleAxes("y", "on", "symOpt", "max");
+
+figure;
+maximizeFig;
+mAxe1 = mSubplot(1, 2, 1, "margins", margins);
+hold(mAxe1, "on");
+set(mAxe1, 'FontSize', 12);
+mAxe2 = mSubplot(1, 2, 2, "margins", margins);
+hold(mAxe2, "on");
+set(mAxe2, 'FontSize', 12);
+for index = 1:length(waveDataA1.chMeanREG)
+    chMeanA1 = mean(waveDataA1.chMeanREG(index).chMean(chsAvg, :), 1);
+    chMeanP3 = mean(waveDataP3.chMeanREG(index).chMean(chsAvg, :), 1);
+    plot(mAxe1, t - 1000, chMeanA1, 'Color', colors{index}, 'LineWidth', 2, 'DisplayName', num2str(waveDataA1.chMeanREG(index).ICI));
+    plot(mAxe2, t - 1000, chMeanP3, 'Color', colors{index}, 'LineWidth', 2, 'DisplayName', num2str(waveDataP3.chMeanREG(index).ICI));
+end
+legend(mAxe1);
+legend(mAxe2);
+xlabel([mAxe1, mAxe2], 'Time from change point (ms)');
+ylabel([mAxe1, mAxe2], 'ERP (\muV)');
+title(mAxe1, 'Behavior REG');
+title(mAxe2, 'Non-behavior REG');
+scaleAxes("x", [0, 500]);
+scaleAxes("y", "on", "symOpt", "max");
