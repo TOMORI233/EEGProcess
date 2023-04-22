@@ -19,7 +19,7 @@ nREG = 0;
 nIRREG = 0;
 
 for index = 1:length(ICIs)
-    idx = [temp.ICI] == ICIs(index) & [temp.type] == "REG" & [temp.correct];
+    idx = [temp.ICI] == ICIs(index) & [temp.type] == "REG";
     if any(idx)
         nREG = nREG + 1;
         chMeanREG(nREG, 1).chMean = cell2mat(cellfun(@(x) mean(x, 1), changeCellRowNum({temp(idx).chMean}'), "UniformOutput", false));
@@ -46,14 +46,18 @@ FigIRREG = plotRawWaveMultiEEG(chMeanIRREG, window, 1000, "IRREG");
 scaleAxes(FigIRREG, "x", [0, 2000]);
 scaleAxes(FigIRREG, "y", "on", "symOpt", "max", "uiOpt", "show");
 
+save("D:\Education\Lab\Projects\EEG\Figure DATA\Res_chMean_A1.mat", ...
+     "chMeanREG", "chMeanIRREG", "window", "subjectIdx");
+
 %% BRI - REG
 ICIsREG = [4, 4.01, 4.02, 4.03, 4.06];
-meanBRI_REG = zeros(length(briData), length(ICIsREG));
-meanBRIbase_REG = zeros(length(briData), length(ICIsREG));
+meanBRI_REG      = zeros(length(briData), length(ICIsREG));
+meanBRIbase_REG  = zeros(length(briData), length(ICIsREG));
 meanBRIbase2_REG = zeros(length(briData), length(ICIsREG));
-seBRI_REG = zeros(length(briData), length(ICIsREG));
-seBRIbase_REG = zeros(length(briData), length(ICIsREG));
-seBRIbase2_REG = zeros(length(briData), length(ICIsREG));
+seBRI_REG        = zeros(length(briData), length(ICIsREG));
+seBRIbase_REG    = zeros(length(briData), length(ICIsREG));
+seBRIbase2_REG   = zeros(length(briData), length(ICIsREG));
+skipIdx          = false(length(briData), length(ICIsREG));
 
 for bIndex = 1:length(briData)
     trialAll = briData(bIndex).trialAll;
@@ -63,29 +67,43 @@ for bIndex = 1:length(briData)
 
     for index = 1:length(ICIsREG)
         idx = [trialAll.ICI] == ICIsREG(index) & [trialAll.type] == "REG" & [trialAll.correct];
-        meanBRI_REG(bIndex, index) = mean(BRI(idx));
-        seBRI_REG(bIndex, index) = SE(BRI(idx));
 
-        meanBRIbase_REG(bIndex, index) = mean(BRIbase(idx));
-        seBRIbase_REG(bIndex, index) = SE(BRIbase(idx));
+        if any(idx)
+            meanBRI_REG(bIndex, index) = mean(BRI(idx));
+            seBRI_REG(bIndex, index) = SE(BRI(idx));
+    
+            meanBRIbase_REG(bIndex, index) = mean(BRIbase(idx));
+            seBRIbase_REG(bIndex, index) = SE(BRIbase(idx));
+    
+            meanBRIbase2_REG(bIndex, index) = mean(BRIbase2(idx));
+            seBRIbase2_REG(bIndex, index) = SE(BRIbase2(idx));
+        else
+            skipIdx(bIndex, index) = true;
+        end
 
-        meanBRIbase2_REG(bIndex, index) = mean(BRIbase2(idx));
-        seBRIbase2_REG(bIndex, index) = SE(BRIbase2(idx));
     end
 
 end
 
-pREG = zeros(1, length(ICIsREG)); % vs baseline
-pREG2 = zeros(1, length(ICIsREG)); % vs before change
-pREG3 = zeros(1, length(ICIsREG) - 1); % vs control
+pREG     = zeros(1, length(ICIsREG)); % vs baseline
+pREG2    = zeros(1, length(ICIsREG)); % vs before change
+pREG3    = zeros(1, length(ICIsREG) - 1); % vs control
 pBaseREG = zeros(1, length(ICIsREG)); % baseline vs before change
 for index = 1:length(ICIsREG)
-    [~, pREG(index)] = ttest(meanBRI_REG(:, index), meanBRIbase_REG(:, index));
-    [~, pREG2(index)] = ttest(meanBRI_REG(:, index), meanBRIbase2_REG(:, index));
-    [~, pBaseREG(index)] = ttest(meanBRIbase_REG(:, index), meanBRIbase2_REG(:, index));
-
-    if index > 1
-        [~, pREG3(index - 1)] = ttest(meanBRI_REG(:, index), meanBRI_REG(:, 1));
+    if any(skipIdx(:, index))
+        [~, pREG(index)] = ttest2(meanBRI_REG(~skipIdx(:, index), index), meanBRIbase_REG(~skipIdx(:, index), index));
+        [~, pREG2(index)] = ttest2(meanBRI_REG(~skipIdx(:, index), index), meanBRIbase2_REG(~skipIdx(:, index), index));
+        [~, pBaseREG(index)] = ttest2(meanBRIbase_REG(~skipIdx(:, index), index), meanBRIbase2_REG(~skipIdx(:, index), index));
+        if index > 1
+            [~, pREG3(index - 1)] = ttest2(meanBRI_REG(~skipIdx(:, index), index), meanBRI_REG(:, 1));
+        end
+    else
+        [~, pREG(index)] = ttest(meanBRI_REG(:, index), meanBRIbase_REG(:, index));
+        [~, pREG2(index)] = ttest(meanBRI_REG(:, index), meanBRIbase2_REG(:, index));
+        [~, pBaseREG(index)] = ttest(meanBRIbase_REG(:, index), meanBRIbase2_REG(:, index));
+        if index > 1
+            [~, pREG3(index - 1)] = ttest(meanBRI_REG(:, index), meanBRI_REG(:, 1));
+        end
     end
 end
 
@@ -177,3 +195,29 @@ text(mAxe2, 1:length(ICIsIRREG), repmat(max(get(mAxe2, "YLim")) - 0.5, [1, lengt
 text(mAxe2, 1:length(ICIsIRREG), repmat(max(get(mAxe2, "YLim")) - 1, [1, length(ICIsIRREG)]), num2str(pIRREG2'), "HorizontalAlignment", "center", "FontSize", 12);
 text(mAxe2, 2, max(get(mAxe2, "YLim")) - 1.5, num2str(pIRREG3), "HorizontalAlignment", "center", "FontSize", 12);
 text(mAxe2, 1:length(ICIsIRREG), repmat(min(get(mAxe2, "YLim")) + 0.5, [1, length(ICIsIRREG)]), num2str(pBaseIRREG'), "HorizontalAlignment", "center", "FontSize", 12);
+
+%% save
+save("D:\Education\Lab\Projects\EEG\Figure DATA\Res_BRI_A1.mat", ...
+     "meanBRI_REG", ...
+     "meanBRI_IRREG", ...
+     "meanBRIbase_REG", ...
+     "meanBRIbase_IRREG", ...
+     "meanBRIbase2_REG", ...
+     "meanBRIbase2_IRREG", ...
+     "seBRI_REG", ...
+     "seBRI_IRREG", ...
+     "seBRIbase_REG", ...
+     "seBRIbase_IRREG", ...
+     "seBRIbase2_REG", ...
+     "seBRIbase2_IRREG", ...
+     "pREG", ...
+     "pREG2", ...
+     "pREG3", ...
+     "pIRREG", ...
+     "pIRREG2", ...
+     "pIRREG3", ...
+     "pBaseREG", ...
+     "pBaseIRREG", ...
+     "subjectIdx", ...
+     "ICIsREG", ...
+     "ICIsIRREG");
