@@ -3,6 +3,7 @@ clear; clc; close all force;
 
 chMeanData = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_A1_Population.mat").data;
 briData = load("D:\Education\Lab\Projects\EEG\MAT Population\BRI_A1_Population.mat").data;
+
 load("subjectIdx_A1.mat", "subjectIdx");
 chMeanData = chMeanData(subjectIdx);
 briData = briData(subjectIdx);
@@ -18,7 +19,7 @@ nREG = 0;
 nIRREG = 0;
 
 for index = 1:length(ICIs)
-    idx = [temp.ICI] == ICIs(index) & [temp.type] == "REG";
+    idx = [temp.ICI] == ICIs(index) & [temp.type] == "REG" & [temp.correct];
     if any(idx)
         nREG = nREG + 1;
         chMeanREG(nREG, 1).chMean = cell2mat(cellfun(@(x) mean(x, 1), changeCellRowNum({temp(idx).chMean}'), "UniformOutput", false));
@@ -46,116 +47,133 @@ scaleAxes(FigIRREG, "x", [0, 2000]);
 scaleAxes(FigIRREG, "y", "on", "symOpt", "max", "uiOpt", "show");
 
 %% BRI - REG
-ICIs = [4, 4.01, 4.02, 4.03, 4.06];
-meanBRI_REG = zeros(length(briData), 5);
-seBRI_REG = zeros(length(briData), 5);
+ICIsREG = [4, 4.01, 4.02, 4.03, 4.06];
+meanBRI_REG = zeros(length(briData), length(ICIsREG));
+meanBRIbase_REG = zeros(length(briData), length(ICIsREG));
+meanBRIbase2_REG = zeros(length(briData), length(ICIsREG));
+seBRI_REG = zeros(length(briData), length(ICIsREG));
+seBRIbase_REG = zeros(length(briData), length(ICIsREG));
+seBRIbase2_REG = zeros(length(briData), length(ICIsREG));
 
 for bIndex = 1:length(briData)
     trialAll = briData(bIndex).trialAll;
     BRI = briData(bIndex).BRI;
+    BRIbase = briData(bIndex).BRIbase;
+    BRIbase2 = briData(bIndex).BRIbase2;
 
-    for index = 1:length(ICIs)
-        temp = BRI([trialAll.ICI] == ICIs(index) & [trialAll.type] == "REG");
-        meanBRI_REG(bIndex, index) = mean(temp);
-        seBRI_REG(bIndex, index) = SE(temp);
+    for index = 1:length(ICIsREG)
+        idx = [trialAll.ICI] == ICIsREG(index) & [trialAll.type] == "REG" & [trialAll.correct];
+        meanBRI_REG(bIndex, index) = mean(BRI(idx));
+        seBRI_REG(bIndex, index) = SE(BRI(idx));
+
+        meanBRIbase_REG(bIndex, index) = mean(BRIbase(idx));
+        seBRIbase_REG(bIndex, index) = SE(BRIbase(idx));
+
+        meanBRIbase2_REG(bIndex, index) = mean(BRIbase2(idx));
+        seBRIbase2_REG(bIndex, index) = SE(BRIbase2(idx));
     end
 
 end
 
-trialAllPopu = [briData.trialAll]';
-BRIPopu = vertcat(briData.BRI);
-BRIbasePopu = vertcat(briData.BRIbase);
-BRIbase2Popu = vertcat(briData.BRIbase2);
-pREG = zeros(1, 5);
-pREG2 = zeros(1, 5);
-pREG3 = zeros(1, 4);
-[~, pBaseREG] = ttest(BRIbasePopu([trialAllPopu.type] == "REG"), BRIbase2Popu([trialAllPopu.type] == "REG"));
-for index = 1:length(ICIs)
-    idx = [trialAllPopu.ICI] == ICIs(index) & [trialAllPopu.type] == "REG";
-    [~, pREG(index)] = ttest(BRIPopu(idx), BRIbasePopu(idx));
-    [~, pREG2(index)] = ttest(BRIPopu(idx), BRIbase2Popu(idx));
+pREG = zeros(1, length(ICIsREG)); % vs baseline
+pREG2 = zeros(1, length(ICIsREG)); % vs before change
+pREG3 = zeros(1, length(ICIsREG) - 1); % vs control
+pBaseREG = zeros(1, length(ICIsREG)); % baseline vs before change
+for index = 1:length(ICIsREG)
+    [~, pREG(index)] = ttest(meanBRI_REG(:, index), meanBRIbase_REG(:, index));
+    [~, pREG2(index)] = ttest(meanBRI_REG(:, index), meanBRIbase2_REG(:, index));
+    [~, pBaseREG(index)] = ttest(meanBRIbase_REG(:, index), meanBRIbase2_REG(:, index));
 
     if index > 1
-        [~, pREG3(index - 1)] = ttest2(BRIPopu(idx), BRIPopu([trialAllPopu.ICI] == ICIs(1) & [trialAllPopu.type] == "REG"));
+        [~, pREG3(index - 1)] = ttest(meanBRI_REG(:, index), meanBRI_REG(:, 1));
     end
 end
 
 FigBRI = figure;
 maximizeFig(FigBRI);
-mAxe1 = mSubplot(FigBRI, 1, 2, 1, "shape", "square-min");
+mAxe1 = mSubplot(FigBRI, 1, 2, 1, "shape", "square-min", "padding_left", 0.05, "padding_right", 0.05);
 for bIndex = 1:length(briData)
-    errorbar(1:5, meanBRI_REG(bIndex, :), seBRI_REG(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
+    errorbar(1:length(ICIsREG), meanBRI_REG(bIndex, :), seBRI_REG(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
     hold on;
 end
-errorbar(1:5, mean(meanBRI_REG, 1), SE(meanBRI_REG, 1), 'Color', 'r', 'LineWidth', 2);
+errorbar(1:length(ICIsREG), mean(meanBRI_REG, 1), SE(meanBRI_REG, 1), 'Color', 'r', 'LineWidth', 2);
 set(gca, 'FontSize', 12);
-xticks(1:5);
-xticklabels(num2str(ICIs'));
-xlim([0.8, 5.2]);
-xlabel('S2 ICI(ms)');
-ylabel('BRI(\muV)');
-title(['REG | p_{Baseline [-300,0] vs Before change [900,1000]}=', num2str(pBaseREG)]);
+xticks(1:length(ICIsREG));
+xticklabels(num2str(ICIsREG'));
+xlim([0.8, length(ICIsREG) + 0.2]);
+xlabel('S2 ICI (ms)');
+ylabel('BRI (\muV)');
+title('REG');
 
 %% BRI - IRREG
-ICIs = [4, 4.06];
-meanBRI_IRREG = zeros(length(briData), 2);
-seBRI_IRREG = zeros(length(briData), 2);
+ICIsIRREG = [4, 4.06];
+meanBRI_IRREG = zeros(length(briData), length(ICIsIRREG));
+meanBRIbase_IRREG = zeros(length(briData), length(ICIsIRREG));
+meanBRIbase2_IRREG = zeros(length(briData), length(ICIsIRREG));
+seBRI_IRREG = zeros(length(briData), length(ICIsIRREG));
+seBRIbase_IRREG = zeros(length(briData), length(ICIsIRREG));
+seBRIbase2_IRREG = zeros(length(briData), length(ICIsIRREG));
 
 for bIndex = 1:length(briData)
     trialAll = briData(bIndex).trialAll;
     BRI = briData(bIndex).BRI;
+    BRIbase = briData(bIndex).BRIbase;
+    BRIbase2 = briData(bIndex).BRIbase2;
 
-    for index = 1:length(ICIs)
-        temp = BRI([trialAll.ICI] == ICIs(index) & [trialAll.type] == "IRREG");
-        meanBRI_IRREG(bIndex, index) = mean(temp);
-        seBRI_IRREG(bIndex, index) = SE(temp);
+    for index = 1:length(ICIsIRREG)
+        idx = [trialAll.ICI] == ICIsIRREG(index) & [trialAll.type] == "IRREG";
+        meanBRI_IRREG(bIndex, index) = mean(BRI(idx));
+        seBRI_IRREG(bIndex, index) = SE(BRI(idx));
+
+        meanBRIbase_IRREG(bIndex, index) = mean(BRIbase(idx));
+        seBRIbase_IRREG(bIndex, index) = SE(BRIbase(idx));
+
+        meanBRIbase2_IRREG(bIndex, index) = mean(BRIbase2(idx));
+        seBRIbase2_IRREG(bIndex, index) = SE(BRIbase2(idx));
     end
 
 end
 
-trialAllPopu = [briData.trialAll]';
-BRIPopu = vertcat(briData.BRI);
-BRIbasePopu = vertcat(briData.BRIbase);
-BRIbase2Popu = vertcat(briData.BRIbase2);
-pIRREG = zeros(1, 2);
-pIRREG2 = zeros(1, 2);
-[~, pBaseIRREG] = ttest(BRIbasePopu([trialAllPopu.type] == "IRREG"), BRIbase2Popu([trialAllPopu.type] == "IRREG"));
-for index = 1:length(ICIs)
-    idx = [trialAllPopu.ICI] == ICIs(index) & [trialAllPopu.type] == "IRREG";
-    [~, pIRREG(index)] = ttest(BRIPopu(idx), BRIbasePopu(idx));
-    [~, pIRREG2(index)] = ttest(BRIPopu(idx), BRIbase2Popu(idx));
+pIRREG = zeros(1, length(ICIsIRREG)); % vs baseline
+pIRREG2 = zeros(1, length(ICIsIRREG)); % vs before change
+pIRREG3 = zeros(1, length(ICIsIRREG) - 1); % vs control
+pBaseIRREG = zeros(1, length(ICIsIRREG)); % baseline vs before change
+for index = 1:length(ICIsIRREG)
+    [~, pIRREG(index)] = ttest(meanBRI_IRREG(:, index), meanBRIbase_IRREG(:, index));
+    [~, pIRREG2(index)] = ttest(meanBRI_IRREG(:, index), meanBRIbase2_IRREG(:, index));
+    [~, pBaseIRREG(index)] = ttest(meanBRIbase_IRREG(:, index), meanBRIbase2_IRREG(:, index));
 
     if index > 1
-        [~, pIRREG3] = ttest2(BRIPopu(idx), BRIPopu([trialAllPopu.ICI] == ICIs(1) & [trialAllPopu.type] == "IRREG"));
+        [~, pIRREG3(index - 1)] = ttest(meanBRI_IRREG(:, index), meanBRI_IRREG(:, 1));
     end
 end
 
-mAxe2 = mSubplot(FigBRI, 1, 2, 2, "shape", "square-min");
+mAxe2 = mSubplot(FigBRI, 1, 2, 2, "shape", "square-min", "padding_left", 0.05, "padding_right", 0.05);
 for bIndex = 1:length(briData)
-    errorbar(1:2, meanBRI_IRREG(bIndex, :), seBRI_IRREG(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
+    errorbar(1:length(ICIsIRREG), meanBRI_IRREG(bIndex, :), seBRI_IRREG(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
     hold on;
 end
-errorbar(1:2, mean(meanBRI_IRREG, 1), SE(meanBRI_IRREG, 1), 'Color', 'r', 'LineWidth', 2);
+errorbar(1:length(ICIsIRREG), mean(meanBRI_IRREG, 1), SE(meanBRI_IRREG, 1), 'Color', 'r', 'LineWidth', 2);
 set(gca, 'FontSize', 12);
-xticks(1:2);
-xticklabels(num2str(ICIs'));
-xlim([0.8, 2.2]);
-xlabel('S2 ICI(ms)');
-ylabel('BRI(\muV)');
-title(['IRREG | p_{Baseline [-300,0] vs Before change [900,1000]}=', num2str(pBaseIRREG)]);
+xticks(1:length(ICIsIRREG));
+xticklabels(num2str(ICIsIRREG'));
+xlim([0.8, length(ICIsIRREG) + 0.2]);
+xlabel('S2 ICI (ms)');
+ylabel('BRI (\muV)');
+title('IRREG');
 
 scaleAxes(FigBRI, "y");
 
-text(mAxe1, 0.8, max(get(mAxe1, "YLim")) - 0.5, 'vs \bf{[-300,0]}', "HorizontalAlignment", "right", "FontSize", 12);
-text(mAxe1, 1:5, repmat(max(get(mAxe1, "YLim")) - 0.5, [1, 5]), num2str(pREG'), "HorizontalAlignment", "center", "FontSize", 12);
-text(mAxe1, 0.8, max(get(mAxe1, "YLim")) - 1, 'vs \bf{[900,1000]}', "HorizontalAlignment", "right", "FontSize", 12);
-text(mAxe1, 1:5, repmat(max(get(mAxe1, "YLim")) - 1, [1, 5]), num2str(pREG2'), "HorizontalAlignment", "center", "FontSize", 12);
-text(mAxe1, 0.8, max(get(mAxe1, "YLim")) - 1.5, 'vs \bf{control}', "HorizontalAlignment", "right", "FontSize", 12);
-text(mAxe1, 2:5, repmat(max(get(mAxe1, "YLim")) - 1.5, [1, 4]), num2str(pREG3'), "HorizontalAlignment", "center", "FontSize", 12);
+text(mAxe1, 0.8, max(get(mAxe1, "YLim")) - 0.5, '\bf{vs [-300,0]}', "HorizontalAlignment", "right", "FontSize", 12);
+text(mAxe1, 1:length(ICIsREG), repmat(max(get(mAxe1, "YLim")) - 0.5, [1, length(ICIsREG)]), num2str(pREG'), "HorizontalAlignment", "center", "FontSize", 12);
+text(mAxe1, 0.8, max(get(mAxe1, "YLim")) - 1, '\bf{vs [900,1000]}', "HorizontalAlignment", "right", "FontSize", 12);
+text(mAxe1, 1:length(ICIsREG), repmat(max(get(mAxe1, "YLim")) - 1, [1, length(ICIsREG)]), num2str(pREG2'), "HorizontalAlignment", "center", "FontSize", 12);
+text(mAxe1, 0.8, max(get(mAxe1, "YLim")) - 1.5, '\bf{vs control}', "HorizontalAlignment", "right", "FontSize", 12);
+text(mAxe1, 2:length(ICIsREG), repmat(max(get(mAxe1, "YLim")) - 1.5, [1, length(ICIsREG) - 1]), num2str(pREG3'), "HorizontalAlignment", "center", "FontSize", 12);
+text(mAxe1, 0.8, min(get(mAxe1, "YLim")) + 0.5, '\bf{base1 vs base2}', "HorizontalAlignment", "right", "FontSize", 12);
+text(mAxe1, 1:length(ICIsREG), repmat(min(get(mAxe1, "YLim")) + 0.5, [1, length(ICIsREG)]), num2str(pBaseREG'), "HorizontalAlignment", "center", "FontSize", 12);
 
-text(mAxe2, 0.8, max(get(mAxe2, "YLim")) - 0.5, 'vs \bf{[-300,0]}', "HorizontalAlignment", "right", "FontSize", 12);
-text(mAxe2, 1:2, repmat(max(get(mAxe2, "YLim")) - 0.5, [1, 2]), num2str(pIRREG'), "HorizontalAlignment", "center", "FontSize", 12);
-text(mAxe2, 0.8, max(get(mAxe2, "YLim")) - 1, 'vs \bf{[900,1000]}', "HorizontalAlignment", "right", "FontSize", 12);
-text(mAxe2, 1:2, repmat(max(get(mAxe2, "YLim")) - 1, [1, 2]), num2str(pIRREG2'), "HorizontalAlignment", "center", "FontSize", 12);
-text(mAxe2, 0.8, max(get(mAxe2, "YLim")) - 1.5, 'vs \bf{control}', "HorizontalAlignment", "right", "FontSize", 12);
+text(mAxe2, 1:length(ICIsIRREG), repmat(max(get(mAxe2, "YLim")) - 0.5, [1, length(ICIsIRREG)]), num2str(pIRREG'), "HorizontalAlignment", "center", "FontSize", 12);
+text(mAxe2, 1:length(ICIsIRREG), repmat(max(get(mAxe2, "YLim")) - 1, [1, length(ICIsIRREG)]), num2str(pIRREG2'), "HorizontalAlignment", "center", "FontSize", 12);
 text(mAxe2, 2, max(get(mAxe2, "YLim")) - 1.5, num2str(pIRREG3), "HorizontalAlignment", "center", "FontSize", 12);
+text(mAxe2, 1:length(ICIsIRREG), repmat(min(get(mAxe2, "YLim")) + 0.5, [1, length(ICIsIRREG)]), num2str(pBaseIRREG'), "HorizontalAlignment", "center", "FontSize", 12);

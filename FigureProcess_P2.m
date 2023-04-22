@@ -23,50 +23,70 @@ scaleAxes(FigVar, "x", [1000, 1500]);
 scaleAxes(FigVar, "y", "on", "symOpt", "max", "uiOpt", "show");
 
 %% BRI
-meanBRI = zeros(length(briData), 3);
-seBRI = zeros(length(briData), 3);
+meanBRI = zeros(length(briData), length(vars));
+meanBRIbase = zeros(length(briData), length(vars));
+meanBRIbase2 = zeros(length(briData), length(vars));
+seBRI = zeros(length(briData), length(vars));
+seBRIbase = zeros(length(briData), length(vars));
+seBRIbase2 = zeros(length(briData), length(vars));
 
 for bIndex = 1:length(briData)
     trialAll = briData(bIndex).trialAll;
     BRI = briData(bIndex).BRI;
+    BRIbase = briData(bIndex).BRIbase;
+    BRIbase2 = briData(bIndex).BRIbase2;
 
     for index = 1:length(vars)
-        temp = BRI([trialAll.variance] == vars(index));
-        meanBRI(bIndex, index) = mean(temp);
-        seBRI(bIndex, index) = SE(temp);
+        idx = [trialAll.variance] == vars(index);
+        meanBRI(bIndex, index) = mean(BRI(idx));
+        seBRI(bIndex, index) = SE(BRI(idx));
+
+        meanBRIbase(bIndex, index) = mean(BRIbase(idx));
+        seBRIbase(bIndex, index) = SE(BRIbase(idx));
+
+        meanBRIbase2(bIndex, index) = mean(BRIbase2(idx));
+        seBRIbase2(bIndex, index) = SE(BRIbase2(idx));
     end
 
 end
 
-trialAllPopu = [briData.trialAll]';
-BRIPopu = vertcat(briData.BRI);
-BRIbasePopu = vertcat(briData.BRIbase);
-BRIbase2Popu = vertcat(briData.BRIbase2);
-pREG = zeros(1, 3);
-pREG2 = zeros(1, 3);
-[~, pBaseREG] = ttest(BRIbasePopu, BRIbase2Popu);
+p = zeros(1, length(vars)); % vs baseline
+p2 = zeros(1, length(vars)); % vs before change
+p3 = zeros(1, length(vars) - 1); % vs control
+pBase = zeros(1, length(vars)); % baseline vs before change
 for index = 1:length(vars)
-    idx = [trialAllPopu.variance] == vars(index);
-    [~, pREG(index)] = ttest(BRIPopu(idx), BRIbasePopu(idx));
-    [~, pREG2(index)] = ttest(BRIPopu(idx), BRIbase2Popu(idx));
+    [~, p(index)] = ttest(meanBRI(:, index), meanBRIbase(:, index));
+    [~, p2(index)] = ttest(meanBRI(:, index), meanBRIbase2(:, index));
+    [~, pBase(index)] = ttest(meanBRIbase(:, index), meanBRIbase2(:, index));
+
+    if index > 1
+        [~, p3(index - 1)] = ttest(meanBRI(:, index), meanBRI(:, 1));
+    end
 end
 
-figure;
-maximizeFig;
-mSubplot(1, 1, 1, "shape", "square-min");
+FigBRI = figure;
+maximizeFig(FigBRI);
+mAxe = mSubplot(FigBRI, 1, 1, 1, "shape", "square-min", "padding_left", 0.05, "padding_right", 0.05);
 for bIndex = 1:length(briData)
-    errorbar(1:3, meanBRI(bIndex, :), seBRI(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
+    errorbar(1:length(vars), meanBRI(bIndex, :), seBRI(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
     hold on;
 end
-errorbar(1:3, mean(meanBRI, 1), SE(meanBRI, 1), 'Color', 'r', 'LineWidth', 2);
+errorbar(1:length(vars), mean(meanBRI, 1), SE(meanBRI, 1), 'Color', 'r', 'LineWidth', 2);
 set(gca, 'FontSize', 12);
-text(0.8, max(get(gca, "YLim")) - 0.5, 'vs \bf{[-300,0]}', "HorizontalAlignment", "right", "FontSize", 12);
-text(1:3, repmat(max(get(gca, "YLim")) - 0.5, [1, 3]), num2str(pREG'), "HorizontalAlignment", "center", "FontSize", 12);
-text(0.8, max(get(gca, "YLim")) - 1, 'vs \bf{[900,1000]}', "HorizontalAlignment", "right", "FontSize", 12);
-text(1:3, repmat(max(get(gca, "YLim")) - 1, [1, 3]), num2str(pREG2'), "HorizontalAlignment", "center", "FontSize", 12);
-xticks(1:3);
+xticks(1:length(vars));
 xticklabels(num2str(vars'));
-xlim([0.8, 3.2]);
+xlim([0.8, length(vars) + 0.2]);
 xlabel('ICI Variance Factor X (\sigma=\mu/X)');
-ylabel('BRI(\muV)');
-title(['p_{Baseline [-300,0] vs Before change [900,1000]}=', num2str(pBaseREG)]);
+ylabel('BRI (\muV)');
+title('Variance');
+
+scaleAxes(FigBRI, "y");
+
+text(mAxe, 0.8, max(get(mAxe, "YLim")) - 0.5, '\bf{vs [-300,0]}', "HorizontalAlignment", "right", "FontSize", 12);
+text(mAxe, 1:length(vars), repmat(max(get(mAxe, "YLim")) - 0.5, [1, length(vars)]), num2str(p'), "HorizontalAlignment", "center", "FontSize", 12);
+text(mAxe, 0.8, max(get(mAxe, "YLim")) - 1, '\bf{vs [900,1000]}', "HorizontalAlignment", "right", "FontSize", 12);
+text(mAxe, 1:length(vars), repmat(max(get(mAxe, "YLim")) - 1, [1, length(vars)]), num2str(p2'), "HorizontalAlignment", "center", "FontSize", 12);
+text(mAxe, 0.8, max(get(mAxe, "YLim")) - 1.5, '\bf{vs control}', "HorizontalAlignment", "right", "FontSize", 12);
+text(mAxe, 2:length(vars), repmat(max(get(mAxe, "YLim")) - 1.5, [1, length(vars) - 1]), num2str(p3'), "HorizontalAlignment", "center", "FontSize", 12);
+text(mAxe, 0.8, min(get(mAxe, "YLim")) + 0.5, '\bf{base1 vs base2}', "HorizontalAlignment", "right", "FontSize", 12);
+text(mAxe, 1:length(vars), repmat(min(get(mAxe, "YLim")) + 0.5, [1, length(vars)]), num2str(pBase'), "HorizontalAlignment", "center", "FontSize", 12);
