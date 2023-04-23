@@ -13,6 +13,8 @@ alpha = 0.05;
 temp = {data.p}';
 temp = cellfun(@(x) mafdr(x, 'BHFDR', true), temp, "UniformOutput", false);
 temp = cellfun(@(x) sum(x < alpha) / length(data), changeCellRowNum(temp));
+
+% Export chs
 chsAvg = find(temp > 0.6);
 chsAvg(ismember(chsAvg, [33, 43])) = [];
 save("chsAvg.mat", "chsAvg");
