@@ -6,9 +6,9 @@ function active2ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
     interval = trialAll(1).interval;
 
-    if exist("chsAvg.mat", "file") && exist("windowBRI.mat", "file")
+    if exist("chsAvg.mat", "file") && exist("windowBRI4_A2.mat", "file")
         load("chsAvg.mat", "chsAvg");
-        load("windowBRI_A2.mat", "windowBRI");
+        load("windowBRI4_A2.mat", "windowBRI");
         windowBeforeChange = [1500, 1600];
         tIdxBase = fix((windowBase(1) - window(1)) * fs / 1000) + 1:fix((windowBase(2) - window(1)) * fs / 1000);
         tIdxBase2 = fix((windowBeforeChange(1) - window(1)) * fs / 1000) + 1:fix((windowBeforeChange(2) - window(1)) * fs / 1000);

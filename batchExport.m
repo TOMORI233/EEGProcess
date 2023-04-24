@@ -22,6 +22,7 @@ windows = struct("window",   {[-500, 2000];  ... % passive1
                               "passive3"; ...
                               "active1";  ...
                               "active2"});
+save("windows.mat", "windows", "windowBase");
 
 % exclude trials
 tTh = 0.2;

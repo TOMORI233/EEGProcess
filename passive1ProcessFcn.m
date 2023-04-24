@@ -4,16 +4,39 @@ function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
     parseStruct(params);
     mkdir(FIGPATH);
 
-    if exist("chsAvg.mat", "file") && exist("windowBRI.mat", "file")
+    if exist("chsAvg.mat", "file") && exist("windowBRI4.mat", "file") && exist("windowBRI8.mat", "file") && exist("windowBRI16.mat", "file") && exist("windowBRI32.mat", "file")
         load("chsAvg.mat", "chsAvg");
-        load("windowBRI.mat", "windowBRI");
-        windowBeforeChange = [900, 1000];
+        windowBeforeChange = [900, 1000]; % ms
         tIdxBase = fix((windowBase(1) - window(1)) * fs / 1000) + 1:fix((windowBase(2) - window(1)) * fs / 1000);
         tIdxBase2 = fix((windowBeforeChange(1) - window(1)) * fs / 1000) + 1:fix((windowBeforeChange(2) - window(1)) * fs / 1000);
-        tIdxBRI = fix((windowBRI(1) - window(1)) * fs / 1000) + 1:fix((windowBRI(2) - window(1)) * fs / 1000);
-        BRI = cellfun(@(x) mean(x(chsAvg, tIdxBRI), 'all'), trialsEEG);
         BRIbase = cellfun(@(x) mean(x(chsAvg, tIdxBase), 'all'), trialsEEG);
         BRIbase2 = cellfun(@(x) mean(x(chsAvg, tIdxBase2), 'all'), trialsEEG); % BRI of wave before change
+        BRI = zeros(length(trialAll), 1);
+
+        % Base ICI = 4
+        load("windowBRI4.mat", "windowBRI");
+        tIdxBRI = fix((windowBRI(1) - window(1)) * fs / 1000) + 1:fix((windowBRI(2) - window(1)) * fs / 1000);
+        idx = [trialAll.ICI] == 4.06;
+        BRI(idx) = cellfun(@(x) mean(x(chsAvg, tIdxBRI), 'all'), trialsEEG(idx));
+        
+        % Base ICI = 8
+        load("windowBRI8.mat", "windowBRI");
+        tIdxBRI = fix((windowBRI(1) - window(1)) * fs / 1000) + 1:fix((windowBRI(2) - window(1)) * fs / 1000);
+        idx = [trialAll.ICI] == 8.12;
+        BRI(idx) = cellfun(@(x) mean(x(chsAvg, tIdxBRI), 'all'), trialsEEG(idx));
+
+        % Base ICI = 16
+        load("windowBRI16.mat", "windowBRI");
+        tIdxBRI = fix((windowBRI(1) - window(1)) * fs / 1000) + 1:fix((windowBRI(2) - window(1)) * fs / 1000);
+        idx = [trialAll.ICI] == 16.24;
+        BRI(idx) = cellfun(@(x) mean(x(chsAvg, tIdxBRI), 'all'), trialsEEG(idx));
+
+        % Base ICI = 32
+        load("windowBRI32.mat", "windowBRI");
+        tIdxBRI = fix((windowBRI(1) - window(1)) * fs / 1000) + 1:fix((windowBRI(2) - window(1)) * fs / 1000);
+        idx = [trialAll.ICI] == 32.48;
+        BRI(idx) = cellfun(@(x) mean(x(chsAvg, tIdxBRI), 'all'), trialsEEG(idx));
+
         save(fullfile(SAVEPATH, "BRI_P1.mat"), "BRI", "BRIbase", "BRIbase2", "window", "windowBRI", "windowBase", "windowBeforeChange", "chsAvg", "trialAll", "fs");
         return;
     end

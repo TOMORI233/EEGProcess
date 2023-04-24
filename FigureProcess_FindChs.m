@@ -21,12 +21,13 @@ save("chsAvg.mat", "chsAvg");
 
 figure;
 maximizeFig;
-topoplot(temp, 'Neuroscan_chan64.loc');
+topoplot(temp, 'chan64.loc');
 cb = colorbar;
 cb.Label.String = 'Significant ratio';
 cb.Label.FontSize = 18;
 cb.Label.FontWeight = "bold";
 cb.Label.Rotation = -90;
+cb.Label.VerticalAlignment = "bottom";
 scaleAxes("c", [0, 1]);
 
 %% Onset - Base diff
@@ -34,10 +35,11 @@ figure;
 maximizeFig;
 avgDiff = cellfun(@(x, y) x - y, avgOnset, avgBase, "UniformOutput", false);
 temp = cellfun(@mean, avgDiff);
-topoplot(temp, 'Neuroscan_chan64.loc');
+topoplot(temp, 'chan64.loc');
 cb = colorbar;
 cb.Label.String = 'Difference between onset and baseline (\muV)';
 cb.Label.FontSize = 18;
 cb.Label.FontName = "Arial";
 cb.Label.FontWeight = "bold";
 cb.Label.Rotation = -90;
+cb.Label.VerticalAlignment = "bottom";

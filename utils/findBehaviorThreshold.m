@@ -4,7 +4,7 @@ function thICI = findBehaviorThreshold(fitRes, thBeh)
     idx = find(y >= thBeh, 1);
 
     if isempty(idx)
-        thICI = max(x);
+        thICI = x(end);
     else
         thICI = x(idx);
     end

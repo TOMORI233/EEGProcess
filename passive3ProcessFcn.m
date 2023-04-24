@@ -4,9 +4,9 @@ function passive3ProcessFcn(trialAll, trialsEEG, window, fs, params)
     parseStruct(params);
     mkdir(FIGPATH);
 
-    if exist("chsAvg.mat", "file") && exist("windowBRI.mat", "file")
+    if exist("chsAvg.mat", "file") && exist("windowBRI4.mat", "file")
         load("chsAvg.mat", "chsAvg");
-        load("windowBRI.mat", "windowBRI");
+        load("windowBRI4.mat", "windowBRI");
         windowBeforeChange = [900, 1000];
         tIdxBase = fix((windowBase(1) - window(1)) * fs / 1000) + 1:fix((windowBase(2) - window(1)) * fs / 1000);
         tIdxBase2 = fix((windowBeforeChange(1) - window(1)) * fs / 1000) + 1:fix((windowBeforeChange(2) - window(1)) * fs / 1000);
@@ -19,13 +19,15 @@ function passive3ProcessFcn(trialAll, trialsEEG, window, fs, params)
     end
 
     %% Find channels with significant auditory reaction | Use mean
-    windowOnset = [70, 120]; % auditory window, ms
-    tIdxBase = fix((windowBase(1) - window(1)) * fs / 1000) + 1:fix((windowBase(2) - window(1)) * fs / 1000);
-    tIdx = fix((windowOnset(1) - window(1)) * fs / 1000) + 1:fix((windowOnset(2) - window(1)) * fs / 1000);
-    avgBase = cellfun(@(x) mean(x(:, tIdxBase), 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
-    avgOnset = cellfun(@(x) mean(x(:, tIdx), 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
-    [~, p] = cellfun(@(x, y) ttest(x, y), avgBase, avgOnset);
-    save(fullfile(SAVEPATH, "FindChs.mat"), "p", "avgOnset", "avgBase");
+    if exist("windowOnset.mat", "file")
+        load("windowOnset.mat", "windowOnset"); % auditory window, ms
+        tIdxBase = fix((windowBase(1) - window(1)) * fs / 1000) + 1:fix((windowBase(2) - window(1)) * fs / 1000);
+        tIdx = fix((windowOnset(1) - window(1)) * fs / 1000) + 1:fix((windowOnset(2) - window(1)) * fs / 1000);
+        avgBase = cellfun(@(x) mean(x(:, tIdxBase), 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
+        avgOnset = cellfun(@(x) mean(x(:, tIdx), 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
+        [~, p] = cellfun(@(x, y) ttest(x, y), avgBase, avgOnset);
+        save(fullfile(SAVEPATH, "FindChs.mat"), "p", "avgOnset", "avgBase");
+    end
 
     %% REG
     n = 1;

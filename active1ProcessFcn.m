@@ -4,9 +4,9 @@ function active1ProcessFcn(trialAll, trialsEEG, window, fs, params)
     parseStruct(params);
     mkdir(FIGPATH);
 
-    if exist("chsAvg.mat", "file") && exist("windowBRI.mat", "file")
+    if exist("chsAvg.mat", "file") && exist("windowBRI4.mat", "file")
         load("chsAvg.mat", "chsAvg");
-        load("windowBRI.mat", "windowBRI");
+        load("windowBRI4.mat", "windowBRI");
         windowBeforeChange = [900, 1000];
         tIdxBase = fix((windowBase(1) - window(1)) * fs / 1000) + 1:fix((windowBase(2) - window(1)) * fs / 1000);
         tIdxBase2 = fix((windowBeforeChange(1) - window(1)) * fs / 1000) + 1:fix((windowBeforeChange(2) - window(1)) * fs / 1000);

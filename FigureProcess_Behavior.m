@@ -36,7 +36,7 @@ subjectIdx = subjectIdxA2;
 save("subjectIdx_A2.mat", "subjectIdx");
 resMeanREG_A2 = fitBehavior(mean(cell2mat(resREG_A2(subjectIdxA2))), ICIsREG);
 
-%% Behavior res
+%% Plot Behavior res
 figure;
 maximizeFig;
 mSubplot(2, 3, 1, 'shape', 'square-min', "margins", margins);
@@ -147,8 +147,8 @@ for index = 1:2
     title(['IRREG | ICI2 = ', num2str(ICIsIRREG(index)), ' ms | p=', num2str(p)]);
 end
 
-%% Behavior threshold
-thBeh = 0.6;
+%% Find Behavior threshold
+thBeh = 0.5;
 fitResREG_A1 = cellfun(@(x) fitBehavior(x, ICIsREG), resREG_A1(subjectIdx), "UniformOutput", false);
 fitResREG_A2 = cellfun(@(x) fitBehavior(x, ICIsREG), resREG_A2(subjectIdx), "UniformOutput", false);
 thREG_A1 = cellfun(@(x) findBehaviorThreshold(x, thBeh), fitResREG_A1);
@@ -156,6 +156,7 @@ thREG_A2 = cellfun(@(x) findBehaviorThreshold(x, thBeh), fitResREG_A2);
 
 idx = find(thREG_A1 > ICIsREG(1) & thREG_A1 < ICIsREG(end) & thREG_A2 > ICIsREG(1) & thREG_A2 < ICIsREG(end));
 
+%% Plot Behavior threshold res
 figure;
 maximizeFig;
 mSubplot(2, 2, 1);
@@ -170,10 +171,10 @@ xticks(ICIsREG);
 xticklabels(num2str(ICIsREG));
 ylabel('Press for difference ratio');
 
-mSubplot(2, 2, 3);
+mSubplot(2, 2, 3, "margin_top", 0.08);
 meanThREG_A1 = mean(thREG_A1(idx));
 meanThREG_A2 = mean(thREG_A2(idx));
-histogram(thREG_A1(idx), "BinWidth", mode(diff(ICIsREG)) / 4, "FaceColor", [1 0 0], "DisplayName", ['Interval (Mean at ', num2str(meanThREG_A1), ')']);
+histogram(thREG_A1(idx), "BinWidth", mode(diff(ICIsREG)) / 4, "FaceColor", [1 0 0], "DisplayName", ['Interval 600 ms (Mean at ', num2str(meanThREG_A1), ')']);
 hold on;
 histogram(thREG_A2(idx), "BinWidth", mode(diff(ICIsREG)) / 4, "FaceColor", [0 0 1], "DisplayName", ['No-interval (Mean at ', num2str(meanThREG_A2), ')']);
 addLines2Axes(gca, struct("X", meanThREG_A1, "color", "r"));
@@ -186,12 +187,12 @@ legend("Location", "best");
 [~, p] = ttest(thREG_A1(idx), thREG_A2(idx));
 title(['Pairwise t-test p=', num2str(p)])
 
-mSubplot(1, 2, 2, "shape", "square-min");
+mSubplot(1, 2, 2, "shape", "square-min", "margin_left", 0.08);
 scatter(thREG_A1(idx), thREG_A2(idx), 100, "k");
 set(gca, "FontSize", 12);
 [R, p] = corr(thREG_A1(idx), thREG_A2(idx), "type", "Pearson");
 hold on;
 plot([ICIsREG(1), ICIsREG(end)], [ICIsREG(1), ICIsREG(end)], "k--", "LineWidth", 2);
-xlabel('Behavior threhold ICI (Interval)');
+xlabel('Behavior threhold ICI (Interval 600 ms)');
 ylabel('Behavior threhold ICI (No-interval)');
 title(['Pearson Corr R=', num2str(R), ' | p=', num2str(p), ' | N=', num2str(length(idx))]);

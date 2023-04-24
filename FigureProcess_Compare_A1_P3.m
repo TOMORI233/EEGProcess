@@ -3,9 +3,15 @@ clear; clc; close all force;
 margins = [0.05, 0.05, 0.1, 0.1];
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
+fs = 1e3;
+
+load("windowBRI4.mat", "windowBRI");
+
 %% Compare BRI
 dataA1 = load("D:\Education\Lab\Projects\EEG\Figure DATA\Res_BRI_A1.mat");
 dataP3 = load("D:\Education\Lab\Projects\EEG\Figure DATA\Res_BRI_P3.mat");
+
+tBRI = windowBRI(1):1000/fs:windowBRI(2);
 
 subjectIdx = find(dataA1.subjectIdx);
 ICIsREG = dataA1.ICIsREG;
@@ -111,7 +117,7 @@ for index = 1:length(waveDataA1.chMeanREG)
     set(gca, 'FontSize', 12);
     xlabel('Time from change point (ms)');
     ylabel('ERP (\muV)');
-    title(['S2 ICI = ', num2str(waveDataA1.chMeanREG(index).ICI), ' ms']);
+    title(['REG S2 ICI = ', num2str(waveDataA1.chMeanREG(index).ICI), ' ms']);
 end
 scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", -1000, "width", 2));
@@ -137,5 +143,58 @@ xlabel([mAxe1, mAxe2], 'Time from change point (ms)');
 ylabel([mAxe1, mAxe2], 'ERP (\muV)');
 title(mAxe1, 'Behavior REG');
 title(mAxe2, 'Non-behavior REG');
-scaleAxes("x", [0, 500]);
+scaleAxes("x", [-100, 500]);
+yRange = scaleAxes("y", "on", "symOpt", "max");
+b(1) = bar(mAxe1, tBRI - 1000, repmat(yRange(1), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off', 'DisplayName', 'BRI window');
+b(2) = bar(mAxe1, tBRI - 1000, repmat(yRange(2), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off');
+b(3) = bar(mAxe2, tBRI - 1000, repmat(yRange(1), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off', 'DisplayName', 'BRI window');
+b(4) = bar(mAxe2, tBRI - 1000, repmat(yRange(2), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off');
+arrayfun(@(x) setLegendOff(x), b([2, 4]));
+
+% IRREG
+figure;
+maximizeFig;
+for index = 1:length(waveDataA1.chMeanIRREG)
+    chMeanA1 = mean(waveDataA1.chMeanIRREG(index).chMean(chsAvg, :), 1);
+    chMeanP3 = mean(waveDataP3.chMeanIRREG(index).chMean(chsAvg, :), 1);
+    mSubplot(1, 2, index, "margins", margins);
+    plot(t - 1000, chMeanA1, 'r', 'LineWidth', 2, 'DisplayName', 'Behavior');
+    hold on;
+    plot(t - 1000, chMeanP3, 'k', 'LineWidth', 2, 'DisplayName', 'Non-behavior');
+    legend;
+    set(gca, 'FontSize', 12);
+    xlabel('Time from change point (ms)');
+    ylabel('ERP (\muV)');
+    title(['IRREG S2 ICI = ', num2str(waveDataA1.chMeanIRREG(index).ICI), ' ms']);
+end
 scaleAxes("y", "on", "symOpt", "max");
+addLines2Axes(struct("X", -1000, "width", 2));
+addLines2Axes(struct("X", 0, "width", 2));
+
+figure;
+maximizeFig;
+mAxe1 = mSubplot(1, 2, 1, "margins", margins);
+hold(mAxe1, "on");
+set(mAxe1, 'FontSize', 12);
+mAxe2 = mSubplot(1, 2, 2, "margins", margins);
+hold(mAxe2, "on");
+set(mAxe2, 'FontSize', 12);
+for index = 1:length(waveDataA1.chMeanIRREG)
+    chMeanA1 = mean(waveDataA1.chMeanIRREG(index).chMean(chsAvg, :), 1);
+    chMeanP3 = mean(waveDataP3.chMeanIRREG(index).chMean(chsAvg, :), 1);
+    plot(mAxe1, t - 1000, chMeanA1, 'Color', colors{index}, 'LineWidth', 2, 'DisplayName', num2str(waveDataA1.chMeanIRREG(index).ICI));
+    plot(mAxe2, t - 1000, chMeanP3, 'Color', colors{index}, 'LineWidth', 2, 'DisplayName', num2str(waveDataP3.chMeanIRREG(index).ICI));
+end
+legend(mAxe1);
+legend(mAxe2);
+xlabel([mAxe1, mAxe2], 'Time from change point (ms)');
+ylabel([mAxe1, mAxe2], 'ERP (\muV)');
+title(mAxe1, 'Behavior IRREG');
+title(mAxe2, 'Non-behavior IRREG');
+scaleAxes("x", [-100, 500]);
+yRange = scaleAxes("y", "on", "symOpt", "max");
+b(1) = bar(mAxe1, tBRI - 1000, repmat(yRange(1), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off', 'DisplayName', 'BRI window');
+b(2) = bar(mAxe1, tBRI - 1000, repmat(yRange(2), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off');
+b(3) = bar(mAxe2, tBRI - 1000, repmat(yRange(1), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off', 'DisplayName', 'BRI window');
+b(4) = bar(mAxe2, tBRI - 1000, repmat(yRange(2), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off');
+arrayfun(@(x) setLegendOff(x), b([2, 4]));
