@@ -87,7 +87,7 @@ mSubplot(FigDiff, 1, 1, 1, "shape", "square-min", "padding_left", 0.05, "padding
 hold(gca, "on");
 errorbar([1, 5], mean(diffBRI_IRREG, 1), SE(diffBRI_IRREG, 1), 'Color', 'b', 'LineWidth', 2, 'DisplayName', 'IRREG Difference');
 errorbar(1:length(ICIsREG), mean(diffBRI_REG, 1), SE(diffBRI_REG, 1), 'Color', 'r', 'LineWidth', 2, 'DisplayName', 'REG Difference');
-legend("Location", "best");
+legend("Location", "northwest");
 set(gca, 'FontSize', 12);
 xticks(1:length(ICIsREG));
 xticklabels(num2str(ICIsREG'));
@@ -150,6 +150,7 @@ b(2) = bar(mAxe1, tBRI - 1000, repmat(yRange(2), [length(tBRI), 1]), 1, 'FaceCol
 b(3) = bar(mAxe2, tBRI - 1000, repmat(yRange(1), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off', 'DisplayName', 'BRI window');
 b(4) = bar(mAxe2, tBRI - 1000, repmat(yRange(2), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off');
 arrayfun(@(x) setLegendOff(x), b([2, 4]));
+addLines2Axes(struct("X", 0, "width", 2));
 
 % IRREG
 figure;
@@ -198,3 +199,4 @@ b(2) = bar(mAxe1, tBRI - 1000, repmat(yRange(2), [length(tBRI), 1]), 1, 'FaceCol
 b(3) = bar(mAxe2, tBRI - 1000, repmat(yRange(1), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off', 'DisplayName', 'BRI window');
 b(4) = bar(mAxe2, tBRI - 1000, repmat(yRange(2), [length(tBRI), 1]), 1, 'FaceColor', [0 0 0], 'EdgeColor', 'none', 'FaceAlpha', 0.1, 'ShowBaseLine', 'off');
 arrayfun(@(x) setLegendOff(x), b([2, 4]));
+addLines2Axes(struct("X", 0, "width", 2));

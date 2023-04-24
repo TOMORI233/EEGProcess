@@ -4,7 +4,7 @@ margins = [0.05, 0.05, 0.1, 0.1];
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
 load("windows.mat", "windows");
-window = windows([windows.protocol] == "passive1");
+window = windows([windows.protocol] == "passive1").window;
 dataP1 = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P1_Population.mat").data;
 dataP3 = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P3_Population.mat").data;
 
