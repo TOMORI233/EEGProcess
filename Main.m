@@ -15,6 +15,7 @@ run("FigureProcess_Behavior.m");
 run("FigureProcess_FindOnsetWin.m");
 
 %% Generate FindChs.mat for each subject
+clear; clc; close all force;
 batchSingle("passive3");
 
 %% Find channels with significant auditory reaction

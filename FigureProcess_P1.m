@@ -4,6 +4,8 @@ clear; clc; close all force;
 chMeanData = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P1_Population.mat").data;
 briData = load("D:\Education\Lab\Projects\EEG\MAT Population\BRI_P1_Population.mat").data;
 
+load("chsAvg.mat", "chsAvg");
+fs = briData(1).fs;
 window = briData(1).window;
 colors = flip(cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false));
 
@@ -22,6 +24,9 @@ for index = 1:length(ICIs)
         chMeanREG(nREG, 1).ICI = ICIs(index);
         chMeanREG(nREG, 1).type = "REG";
         chMeanREG(nREG, 1).color = colors{nREG};
+        chMeanAvgREG(nREG, 1).chMean = mean(chMeanREG(nREG, 1).chMean(chsAvg, :), 1);
+        chMeanAvgREG(nREG, 1).color = colors{nREG};
+        chMeanAvgREG(nREG, 1).ICI = ICIs(index);
     end
 
     idx = [temp.ICI] == ICIs(index) & [temp.type] == "IRREG";
@@ -31,6 +36,9 @@ for index = 1:length(ICIs)
         chMeanIRREG(nIRREG, 1).ICI = ICIs(index);
         chMeanIRREG(nIRREG, 1).type = "IRREG";
         chMeanIRREG(nIRREG, 1).color = colors{nIRREG};
+        chMeanAvgIRREG(nIRREG, 1).chMean = mean(chMeanIRREG(nIRREG, 1).chMean(chsAvg, :), 1);
+        chMeanAvgIRREG(nIRREG, 1).color = colors{nIRREG};
+        chMeanAvgIRREG(nIRREG, 1).ICI = ICIs(index);
     end
 end
 
@@ -41,6 +49,66 @@ scaleAxes(FigREG, "y", "on", "symOpt", "max", "uiOpt", "show");
 FigIRREG = plotRawWaveMultiEEG(chMeanIRREG, window, 1000, "IRREG");
 scaleAxes(FigIRREG, "x", [0, 1500]);
 scaleAxes(FigIRREG, "y", "on", "symOpt", "max", "uiOpt", "show");
+
+%% average in channels
+t = linspace(window(1), window(2), size(chMeanREG(1).chMean, 2));
+figure;
+maximizeFig;
+mSubplot(1, 2, 1);
+hold(gca, "on");
+for index = 1:length(chMeanAvgREG)
+    plot(t - 1000, chMeanAvgREG(index).chMean, "Color", chMeanAvgREG(index).color, "LineWidth", 2, "DisplayName", num2str(chMeanAvgREG(index).ICI));
+end
+set(gca, "FontSize", 15);
+legend;
+xlabel("Time from change point (ms)");
+ylabel("ERP (\muV)");
+title("REG");
+
+mSubplot(1, 2, 2);
+hold(gca, "on");
+for index = 1:length(chMeanAvgIRREG)
+    plot(t - 1000, chMeanAvgIRREG(index).chMean, "Color", chMeanAvgIRREG(index).color, "LineWidth", 2, "DisplayName", num2str(chMeanAvgIRREG(index).ICI));
+end
+set(gca, "FontSize", 15);
+legend;
+xlabel("Time from change point (ms)");
+ylabel("ERP (\muV)");
+title("IRREG");
+scaleAxes("x", [-1300, 1000]);
+scaleAxes("y", "on", "symOpt", "max");
+addLines2Axes(struct("X", -1000, "width", 2));
+addLines2Axes(struct("X", 0, "width", 2));
+
+%% FFT
+[fftResREG, f] = arrayfun(@(x) mfft(x.chMean, fs), chMeanAvgREG, "UniformOutput", false);
+fftResIRREG = arrayfun(@(x) mfft(x.chMean, fs), chMeanAvgIRREG, "UniformOutput", false);
+
+figure;
+maximizeFig;
+mSubplot(1, 2, 1);
+hold(gca, "on");
+for index = 1:length(fftResREG)
+    plot(f{1}, fftResREG{index}, "Color", chMeanAvgREG(index).color, "LineWidth", 2, "DisplayName", num2str(chMeanAvgREG(index).ICI));
+end
+set(gca, "FontSize", 15);
+legend;
+xlabel("Frequency (Hz)");
+ylabel("FFT spect");
+title("REG");
+
+mSubplot(1, 2, 2);
+hold(gca, "on");
+for index = 1:length(fftResIRREG)
+    plot(f{1}, fftResIRREG{index}, "Color", chMeanAvgIRREG(index).color, "LineWidth", 2, "DisplayName", num2str(chMeanAvgIRREG(index).ICI));
+end
+set(gca, "FontSize", 15);
+legend;
+xlabel("Frequency (Hz)");
+ylabel("FFT spect");
+title("IRREG");
+scaleAxes("x", [0, 50]);
+scaleAxes("y");
 
 %% BRI - REG
 meanBRI_REG = zeros(length(briData), length(ICIs));
