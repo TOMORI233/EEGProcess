@@ -18,6 +18,8 @@
 
 1. 将`MATLAB LTP Config`文件夹下的`inpoutx64.dll`和`inpoutx64.sys`文件复制或移动至`C:\Windows\System32\`目录下
 
+1. 运行`**\MATLAB LTP Config\InpOutBinaries_1501\Win32\InstallDriver.exe`
+
 2. 将`MATLAB LTP Config`下的`config_io.m`、`inp.m`、`outp.m`和`io64.mexw64`加入MATLAB的路径
 
 3. 在MATLAB中运行`config_io.m`成功则表示配置完成
@@ -42,6 +44,7 @@
 2. 将`Recorder-TxCSSupport_Base_4200-202101210-48cb850b\TriggerBox`下的`TriggerBox.m`加入MATLAB路径
 
 3. ```matlab
+   % 请保证TriggerBox已连接再进行测试
    %% Init triggerBox
    mTriggerBox = TriggerBox();
    

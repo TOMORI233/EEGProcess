@@ -32,6 +32,7 @@ function EEGDataset = EEGFilter(EEGDataset, fhp, flp)
     cfg.hpfilter = 'yes';
     cfg.hpfreq = fhp;
     cfg.hpfiltord = 3;
+    cfg.dftfilter = 'yes';
     cfg.dftfreq = [50 100 150]; % line noise frequencies in Hz for DFT filter (default = [50 100 150])
     data = ft_preprocessing(cfg, data);
 
