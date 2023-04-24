@@ -1,16 +1,20 @@
-function batchSingle(protocolsToProcess)
+function batchSingle(protocolsToProcess, dataOnlyOpt)
 % Process each protocol for each subject
-narginchk(0, 1);
+narginchk(0, 2);
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
 MATROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
 FIGROOTPATH = "D:\Education\Lab\Projects\EEG\Figures\";
 
-params.dataOnlyOpt = true; % true - save temporal data only without plotting
-
-if nargin < 1
+if nargin < 1 || isempty(protocolsToProcess)
     protocolsToProcess = ["passive1", "passive2", "passive3", "active1", "active2"];
+end
+
+if nargin < 2
+    params.dataOnlyOpt = false; % true - save temporal data only without plotting
+else
+    params.dataOnlyOpt = dataOnlyOpt;
 end
 
 %% Load and save

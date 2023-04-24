@@ -4,6 +4,7 @@ function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
     parseStruct(params);
     mkdir(FIGPATH);
 
+    %% BRI
     if exist("chsAvg.mat", "file") && exist("windowBRI4.mat", "file") && exist("windowBRI8.mat", "file") && exist("windowBRI16.mat", "file") && exist("windowBRI32.mat", "file")
         load("chsAvg.mat", "chsAvg");
         windowBeforeChange = [900, 1000]; % ms
@@ -38,7 +39,11 @@ function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
         BRI(idx) = cellfun(@(x) mean(x(chsAvg, tIdxBRI), 'all'), trialsEEG(idx));
 
         save(fullfile(SAVEPATH, "BRI_P1.mat"), "BRI", "BRIbase", "BRIbase2", "window", "windowBRI", "windowBase", "windowBeforeChange", "chsAvg", "trialAll", "fs");
-        return;
+        
+        if dataOnlyOpt
+            return;
+        end
+        
     end
 
     %% REG
@@ -96,5 +101,5 @@ function passive1ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
     end
 
-    mSave(fullfile(SAVEPATH, "chMean_P1.mat"), "chMeanData");
+    save(fullfile(SAVEPATH, "chMean_P1.mat"), "chMeanData");
 end

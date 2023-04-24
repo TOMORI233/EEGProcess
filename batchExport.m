@@ -1,5 +1,6 @@
+function batchExport(protocolsToExport)
 % Export baseline-correted EEG wave and trials
-clear; clc; close all force;
+narginchk(0, 1);
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
@@ -8,7 +9,12 @@ SAVEROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
 
 opts.fhp = 0.5;
 opts.flp = 40;
-opts.protocols = ["passive1", "passive2", "passive3", "active1", "active2"];
+
+if nargin < 1
+    opts.protocols = ["passive1", "passive2", "passive3", "active1", "active2"];
+else
+    opts.protocols = protocolsToExport;
+end
 
 % window setting, ms
 windowBase = [-300, 0];
@@ -47,18 +53,14 @@ for dIndex = 1:length(DAYPATHs)
     
     % For every subject in a single day
     for sIndex = 1:length(SUBJECTs)
+        disp(['Current: Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTs{sIndex})]);
         DATAPATH = fullfile(ROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
         SAVEPATH = fullfile(SAVEROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
 
-        if ~exist(SAVEPATH, "dir")
-            opts.DATEStr = DATESTRs{dIndex};
-            [EEGDatasets, trialDatasets] = EEGPreprocess(DATAPATH, opts);
-            fs = EEGDatasets(1).fs;
-            protocols = [trialDatasets.protocol]';
-        else
-            disp(['Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTs{sIndex}), ' already exported. Skip.']);
-            continue;
-        end
+        opts.DATEStr = DATESTRs{dIndex};
+        [EEGDatasets, trialDatasets] = EEGPreprocess(DATAPATH, opts);
+        fs = EEGDatasets(1).fs;
+        protocols = [trialDatasets.protocol]';
 
         mkdir(SAVEPATH);
 
@@ -68,25 +70,19 @@ for dIndex = 1:length(DAYPATHs)
         % For each protocol
         for pIndex = 1:length(protocols)
             MATNAME = fullfile(SAVEPATH, strcat(protocols(pIndex), ".mat"));
-            
-            if ~exist(MATNAME, "file")
-                window = windows([windows.protocol] == protocols{pIndex}).window;
-                trialAll = trialDatasets([trialDatasets.protocol] == protocols(pIndex)).trialAll';
-                trialsEEG = selectEEG(EEGDatasets([EEGDatasets.protocol] == protocols(pIndex)), ...
-                                                  trialAll, ...
-                                                  window);
+            window = windows([windows.protocol] == protocols{pIndex}).window;
+            trialAll = trialDatasets([trialDatasets.protocol] == protocols(pIndex)).trialAll';
+            trialsEEG = selectEEG(EEGDatasets([EEGDatasets.protocol] == protocols(pIndex)), ...
+                                              trialAll, ...
+                                              window);
 
-                % Baseline correction
-                trialsEEG = baselineCorrection(trialsEEG, fs, window, windowBase);
+            % Baseline correction
+            trialsEEG = baselineCorrection(trialsEEG, fs, window, windowBase);
 
-                tIdx = excludeTrials(trialsEEG, tTh, chTh, "userDefineOpt", "off");
-                trialsEEG(tIdx) = [];
-                trialAll(tIdx) = [];
-                mSave(MATNAME, "windowBase", "window", "trialsEEG", "trialAll", "fs");
-            else
-                disp(['Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTs{sIndex}), ' ', char(protocols(pIndex)), ' already exported. Skip.']);
-            end
-
+            tIdx = excludeTrials(trialsEEG, tTh, chTh, "userDefineOpt", "off");
+            trialsEEG(tIdx) = [];
+            trialAll(tIdx) = [];
+            save(MATNAME, "windowBase", "window", "trialsEEG", "trialAll", "fs");
         end
 
     end

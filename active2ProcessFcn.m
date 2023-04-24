@@ -6,6 +6,7 @@ function active2ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
     interval = trialAll(1).interval;
 
+    %% BRI
     if exist("chsAvg.mat", "file") && exist("windowBRI4_A2.mat", "file")
         load("chsAvg.mat", "chsAvg");
         load("windowBRI4_A2.mat", "windowBRI");
@@ -17,7 +18,11 @@ function active2ProcessFcn(trialAll, trialsEEG, window, fs, params)
         BRIbase = cellfun(@(x) mean(x(chsAvg, tIdxBase), 'all'), trialsEEG);
         BRIbase2 = cellfun(@(x) mean(x(chsAvg, tIdxBase2), 'all'), trialsEEG); % BRI of wave before change
         save(fullfile(SAVEPATH, "BRI_A2.mat"), "BRI", "BRIbase", "BRIbase2", "window", "windowBRI", "windowBase", "windowBeforeChange", "chsAvg", "trialAll", "fs");
-        return;
+        
+        if dataOnlyOpt
+            return;
+        end
+
     end
 
     %% Behavior
@@ -84,5 +89,5 @@ function active2ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
     end
 
-    mSave(fullfile(SAVEPATH, "chMean_A2.mat"), "chMeanData");
+    save(fullfile(SAVEPATH, "chMean_A2.mat"), "chMeanData");
 end

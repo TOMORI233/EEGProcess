@@ -4,6 +4,7 @@ function passive3ProcessFcn(trialAll, trialsEEG, window, fs, params)
     parseStruct(params);
     mkdir(FIGPATH);
 
+    %% BRI
     if exist("chsAvg.mat", "file") && exist("windowBRI4.mat", "file")
         load("chsAvg.mat", "chsAvg");
         load("windowBRI4.mat", "windowBRI");
@@ -27,6 +28,11 @@ function passive3ProcessFcn(trialAll, trialsEEG, window, fs, params)
         avgOnset = cellfun(@(x) mean(x(:, tIdx), 2), changeCellRowNum(trialsEEG), "UniformOutput", false);
         [~, p] = cellfun(@(x, y) ttest(x, y), avgBase, avgOnset);
         save(fullfile(SAVEPATH, "FindChs.mat"), "p", "avgOnset", "avgBase");
+
+        if dataOnlyOpt
+            return;
+        end
+
     end
 
     %% REG
@@ -114,5 +120,5 @@ function passive3ProcessFcn(trialAll, trialsEEG, window, fs, params)
 
     end
 
-    mSave(fullfile(SAVEPATH, "chMean_P3.mat"), "chMeanData");
+    save(fullfile(SAVEPATH, "chMean_P3.mat"), "chMeanData");
 end

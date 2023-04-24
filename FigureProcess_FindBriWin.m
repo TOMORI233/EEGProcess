@@ -1,13 +1,14 @@
 clear; clc; close all force;
 
 load("chsAvg.mat", "chsAvg");
+load("windows.mat", "windows");
 fs = 1e3; % Hz
 
 winWidth = [-35, 35]; % ms
 
 %% For A1, P2, P3
 load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P3_Population.mat");
-window = [-500, 2000]; % ms
+window = windows([windows.protocol] == "passive3").window;
 
 temp = vertcat(data.chMeanData);
 chMean = cell2mat(cellfun(@(x) mean(x, 1), changeCellRowNum({temp([temp.ICI] == 4.06 & [temp.type] == "REG").chMean}'), "UniformOutput", false));
@@ -30,7 +31,7 @@ save("windowBRI4.mat", "windowBRI");
 
 %% For A2
 load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_A2_Population.mat");
-window = [-500, 2600]; % ms
+window = windows([windows.protocol] == "active2").window;
 
 temp = vertcat(data.chMeanData);
 chMean = cell2mat(cellfun(@(x) mean(x, 1), changeCellRowNum({temp([temp.ICI] == 4.06 & [temp.type] == "REG").chMean}'), "UniformOutput", false));
@@ -53,7 +54,7 @@ save("windowBRI4_A2.mat", "windowBRI");
 
 %% For P1
 load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P1_Population.mat");
-window = [-500, 2000]; % ms
+window = windows([windows.protocol] == "passive1").window;
 
 temp = vertcat(data.chMeanData);
 

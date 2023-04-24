@@ -75,7 +75,7 @@ legend;
 xlabel("Time from change point (ms)");
 ylabel("ERP (\muV)");
 title("IRREG");
-scaleAxes("x", [-1300, 1000]);
+scaleAxes("x", [-1300, 1500]);
 scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", -1000, "width", 2));
 addLines2Axes(struct("X", 0, "width", 2));

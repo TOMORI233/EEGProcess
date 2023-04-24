@@ -1,12 +1,20 @@
 %% Export data
-run("batchExport.m");
+ccc;
+batchExport();
 
 %% Process individual data
-clear; clc;
-run("batchSingle.m");
+ccc;
+batchSingle([], false);
 
-%% Collect individual data
-run("batchCollect.m");
+%% Collect individual chMean and behavior data
+ccc;
+batchCollect(["Behavior_A1_Res", ...
+              "Behavior_A2_Res", ...
+              "chMean_A1", ...
+              "chMean_A2", ...
+              "chMean_P1", ...
+              "chMean_P2", ...
+              "chMean_P3"])
 
 %% Behavior and exclude subjects with bad behavior
 run("FigureProcess_Behavior.m");
@@ -15,19 +23,26 @@ run("FigureProcess_Behavior.m");
 run("FigureProcess_FindOnsetWin.m");
 
 %% Generate FindChs.mat for each subject
-clear; clc; close all force;
-batchSingle("passive3");
+ccc;
+batchSingle("passive3", true);
 
 %% Find channels with significant auditory reaction
-run("batchCollect.m");
+ccc;
+batchCollect("FindChs");
 run("FigureProcess_FindChs.m");
 
 %% Find window for BRI for each protocol
 run("FigureProcess_FindBriWin.m");
 
 %% Compute BRI for each protocol and for each subject
-run("batchSingle.m");
-run("batchCollect.m");
+ccc;
+batchSingle([], true);
+ccc;
+batchCollect(["BRI_P1", ...
+              "BRI_P2", ...
+              "BRI_P3", ...
+              "BRI_A1", ...
+              "BRI_A2"]);
 
 %% Analyze at population level
 run("FigureProcess_A1.m");
