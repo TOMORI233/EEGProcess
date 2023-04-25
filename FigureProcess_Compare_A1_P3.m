@@ -3,17 +3,15 @@ clear; clc; close all force;
 margins = [0.05, 0.05, 0.1, 0.1];
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
-fs = 1e3;
-
 load("windowBRI4.mat", "windowBRI");
 
 %% Compare BRI
 dataA1 = load("D:\Education\Lab\Projects\EEG\Figure DATA\Res_BRI_A1.mat");
 dataP3 = load("D:\Education\Lab\Projects\EEG\Figure DATA\Res_BRI_P3.mat");
+fs = dataA1.fs;
+tBRI = windowBRI(1):1000 / fs:windowBRI(2);
 
-tBRI = windowBRI(1):1000/fs:windowBRI(2);
-
-subjectIdx = find(dataA1.subjectIdx);
+subjectIdx = dataA1.subjectIdx;
 ICIsREG = dataA1.ICIsREG;
 ICIsIRREG = dataA1.ICIsIRREG;
 
@@ -22,15 +20,17 @@ FigBRI = figure;
 maximizeFig(FigBRI);
 mAxe1 = mSubplot(FigBRI, 1, 2, 1, "shape", "square-min", "padding_left", 0.05, "padding_right", 0.05);
 for bIndex = 1:length(subjectIdx)
-    eb = errorbar(1:length(ICIsREG), dataA1.meanBRI_REG(bIndex, :) - dataA1.meanBRIbase2_REG(bIndex, :), dataA1.seBRI_REG(bIndex, :), ...
-                  'Color', [255 192 203] / 255, 'LineWidth', 1);
-    setLegendOff(eb);
-    hold on;
-    eb = errorbar(1:length(ICIsREG), dataP3.meanBRI_REG(subjectIdx(bIndex), :) - dataP3.meanBRIbase2_REG(subjectIdx(bIndex), :), dataP3.seBRI_REG(subjectIdx(bIndex), :), ...
-                  'Color', [200 200 200] / 255, 'LineWidth', 1);
-    setLegendOff(eb);
+    if subjectIdx(bIndex)
+        eb = errorbar(1:length(ICIsREG), dataA1.meanBRI_REG(bIndex, :) - dataA1.meanBRIbase2_REG(bIndex, :), dataA1.seBRI_REG(bIndex, :), ...
+                      'Color', [255 192 203] / 255, 'LineWidth', 1);
+        setLegendOff(eb);
+        hold on;
+        eb = errorbar(1:length(ICIsREG), dataP3.meanBRI_REG(bIndex, :) - dataP3.meanBRIbase2_REG(bIndex, :), dataP3.seBRI_REG(bIndex, :), ...
+                      'Color', [200 200 200] / 255, 'LineWidth', 1);
+        setLegendOff(eb);
+    end
 end
-errorbar(1:length(ICIsREG), mean(dataA1.meanBRI_REG - dataA1.meanBRIbase2_REG, 1), SE(dataA1.meanBRI_REG - dataA1.meanBRIbase2_REG, 1), 'Color', 'r', 'LineWidth', 2, 'DisplayName', 'Behavior');
+errorbar(1:length(ICIsREG), mean(dataA1.meanBRI_REG(subjectIdx, :) - dataA1.meanBRIbase2_REG(subjectIdx, :), 1), SE(dataA1.meanBRI_REG(subjectIdx, :) - dataA1.meanBRIbase2_REG(subjectIdx, :), 1), 'Color', 'r', 'LineWidth', 2, 'DisplayName', 'Behavior');
 errorbar(1:length(ICIsREG), mean(dataP3.meanBRI_REG(subjectIdx, :) - dataP3.meanBRIbase2_REG(subjectIdx, :), 1), SE(dataP3.meanBRI_REG(subjectIdx, :) - dataP3.meanBRIbase2_REG(subjectIdx, :), 1), 'Color', 'k', 'LineWidth', 2, 'DisplayName', 'Non-behavior');
 legend;
 set(gca, 'FontSize', 12);
@@ -38,21 +38,23 @@ xticks(1:length(ICIsREG));
 xticklabels(num2str(ICIsREG'));
 xlim([0.8, length(ICIsREG) + 0.2]);
 xlabel('S2 ICI (ms)');
-ylabel('\Delta BRI_{Onset - Before change} (\muV)');
-title('REG');
+ylabel('\Delta BRI_{vs Before change} (\muV)');
+title(['REG (N=', num2str(sum(subjectIdx)), ')']);
 
 % BRI - IRREG
 mAxe2 = mSubplot(FigBRI, 1, 2, 2, "shape", "square-min", "padding_left", 0.05, "padding_right", 0.05);
 for bIndex = 1:length(subjectIdx)
-    eb = errorbar(1:length(ICIsIRREG), dataA1.meanBRI_IRREG(bIndex, :) - dataA1.meanBRIbase2_IRREG(bIndex, :), dataA1.seBRI_IRREG(bIndex, :), ...
-                  'Color', [255 192 203] / 255, 'LineWidth', 1);
-    setLegendOff(eb);
-    hold on;
-    eb = errorbar(1:length(ICIsIRREG), dataP3.meanBRI_IRREG(subjectIdx(bIndex), :) - dataP3.meanBRIbase2_IRREG(subjectIdx(bIndex), :), dataP3.seBRI_IRREG(subjectIdx(bIndex), :), ...
-                  'Color', [200 200 200] / 255, 'LineWidth', 1);
-    setLegendOff(eb);
+    if subjectIdx(bIndex)
+        eb = errorbar(1:length(ICIsIRREG), dataA1.meanBRI_IRREG(bIndex, :) - dataA1.meanBRIbase2_IRREG(bIndex, :), dataA1.seBRI_IRREG(bIndex, :), ...
+                      'Color', [255 192 203] / 255, 'LineWidth', 1);
+        setLegendOff(eb);
+        hold on;
+        eb = errorbar(1:length(ICIsIRREG), dataP3.meanBRI_IRREG(subjectIdx(bIndex), :) - dataP3.meanBRIbase2_IRREG(subjectIdx(bIndex), :), dataP3.seBRI_IRREG(subjectIdx(bIndex), :), ...
+                      'Color', [200 200 200] / 255, 'LineWidth', 1);
+        setLegendOff(eb);
+    end
 end
-errorbar(1:length(ICIsIRREG), mean(dataA1.meanBRI_IRREG - dataA1.meanBRIbase2_IRREG, 1), SE(dataA1.meanBRI_IRREG - dataA1.meanBRIbase2_IRREG, 1), 'Color', 'r', 'LineWidth', 2, 'DisplayName', 'Behavior');
+errorbar(1:length(ICIsIRREG), mean(dataA1.meanBRI_IRREG(subjectIdx, :) - dataA1.meanBRIbase2_IRREG(subjectIdx, :), 1), SE(dataA1.meanBRI_IRREG(subjectIdx, :) - dataA1.meanBRIbase2_IRREG(subjectIdx, :), 1), 'Color', 'r', 'LineWidth', 2, 'DisplayName', 'Behavior');
 errorbar(1:length(ICIsIRREG), mean(dataP3.meanBRI_IRREG(subjectIdx, :) - dataP3.meanBRIbase2_IRREG(subjectIdx, :), 1), SE(dataP3.meanBRI_IRREG(subjectIdx, :) - dataP3.meanBRIbase2_IRREG(subjectIdx, :), 1), 'Color', 'k', 'LineWidth', 2, 'DisplayName', 'Non-behavior');
 legend;
 set(gca, 'FontSize', 12);
@@ -60,17 +62,17 @@ xticks(1:length(ICIsIRREG));
 xticklabels(num2str(ICIsIRREG'));
 xlim([0.8, length(ICIsIRREG) + 0.2]);
 xlabel('S2 ICI (ms)');
-ylabel('\Delta BRI_{Onset - Before change} (\muV)');
+ylabel('\Delta BRI_{vs Before change} (\muV)');
 title('IRREG');
 
 pREG = zeros(1, length(ICIsREG));
 for index = 1:length(ICIsREG)
-    [~, pREG(index)] = ttest(dataA1.meanBRI_REG(:, index) - dataA1.meanBRIbase2_REG(:, index), dataP3.meanBRI_REG(subjectIdx, index) - dataP3.meanBRIbase2_REG(subjectIdx, index));
+    [~, pREG(index)] = ttest(dataA1.meanBRI_REG(subjectIdx, index) - dataA1.meanBRIbase2_REG(subjectIdx, index), dataP3.meanBRI_REG(subjectIdx, index) - dataP3.meanBRIbase2_REG(subjectIdx, index));
 end
 
 pIRREG = zeros(1, length(ICIsIRREG));
 for index = 1:length(ICIsIRREG)
-    [~, pIRREG(index)] = ttest(dataA1.meanBRI_IRREG(:, index) - dataA1.meanBRIbase2_IRREG(:, index), dataP3.meanBRI_IRREG(subjectIdx, index) - dataP3.meanBRIbase2_IRREG(subjectIdx, index));
+    [~, pIRREG(index)] = ttest(dataA1.meanBRI_IRREG(subjectIdx, index) - dataA1.meanBRIbase2_IRREG(subjectIdx, index), dataP3.meanBRI_IRREG(subjectIdx, index) - dataP3.meanBRIbase2_IRREG(subjectIdx, index));
 end
 
 scaleAxes(FigBRI, "y");
@@ -79,8 +81,8 @@ text(mAxe1, 1:length(ICIsREG), repmat(min(get(mAxe1, "YLim")) + 0.5, [1, length(
 text(mAxe2, 1:length(ICIsIRREG), repmat(min(get(mAxe2, "YLim")) + 0.5, [1, length(ICIsIRREG)]), num2str(pIRREG'), "HorizontalAlignment", "center", "FontSize", 12);
 
 % Diff BRI
-diffBRI_REG = (dataA1.meanBRI_REG - dataA1.meanBRIbase2_REG) - (dataP3.meanBRI_REG(subjectIdx, :) - dataP3.meanBRIbase2_REG(subjectIdx, :));
-diffBRI_IRREG = (dataA1.meanBRI_IRREG - dataA1.meanBRIbase2_IRREG) - (dataP3.meanBRI_IRREG(subjectIdx, :) - dataP3.meanBRIbase2_IRREG(subjectIdx, :));
+diffBRI_REG = (dataA1.meanBRI_REG(subjectIdx, :) - dataA1.meanBRIbase2_REG(subjectIdx, :)) - (dataP3.meanBRI_REG(subjectIdx, :) - dataP3.meanBRIbase2_REG(subjectIdx, :));
+diffBRI_IRREG = (dataA1.meanBRI_IRREG(subjectIdx, :) - dataA1.meanBRIbase2_IRREG(subjectIdx, :)) - (dataP3.meanBRI_IRREG(subjectIdx, :) - dataP3.meanBRIbase2_IRREG(subjectIdx, :));
 FigDiff = figure;
 maximizeFig(FigDiff);
 mSubplot(FigDiff, 1, 1, 1, "shape", "square-min", "padding_left", 0.05, "padding_right", 0.05);

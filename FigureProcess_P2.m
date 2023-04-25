@@ -22,6 +22,9 @@ FigVar = plotRawWaveMultiEEG(chMeanVar, window, 1000, "Variance");
 scaleAxes(FigVar, "x", [1000, 1500]);
 scaleAxes(FigVar, "y", "on", "symOpt", "max", "uiOpt", "show");
 
+save("D:\Education\Lab\Projects\EEG\Figure DATA\Res_chMean_P2.mat", ...
+     "chMeanVar", "window");
+
 %% BRI
 meanBRI = zeros(length(briData), length(vars));
 meanBRIbase = zeros(length(briData), length(vars));

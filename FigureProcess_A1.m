@@ -4,9 +4,10 @@ clear; clc; close all force;
 chMeanData = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_A1_Population.mat").data;
 briData = load("D:\Education\Lab\Projects\EEG\MAT Population\BRI_A1_Population.mat").data;
 
+fs = briData(1).fs;
+
 load("subjectIdx_A1.mat", "subjectIdx");
 chMeanData = chMeanData(subjectIdx);
-briData = briData(subjectIdx);
 
 window = briData(1).window;
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
@@ -90,19 +91,19 @@ pREG2    = zeros(1, length(ICIsREG)); % vs before change
 pREG3    = zeros(1, length(ICIsREG) - 1); % vs control
 pBaseREG = zeros(1, length(ICIsREG)); % baseline vs before change
 for index = 1:length(ICIsREG)
-    if any(skipIdx(:, index))
-        [~, pREG(index)] = ttest2(meanBRI_REG(~skipIdx(:, index), index), meanBRIbase_REG(~skipIdx(:, index), index));
-        [~, pREG2(index)] = ttest2(meanBRI_REG(~skipIdx(:, index), index), meanBRIbase2_REG(~skipIdx(:, index), index));
-        [~, pBaseREG(index)] = ttest2(meanBRIbase_REG(~skipIdx(:, index), index), meanBRIbase2_REG(~skipIdx(:, index), index));
+    if any(skipIdx(subjectIdx, index))
+        [~, pREG(index)] = ttest2(meanBRI_REG(~skipIdx(subjectIdx, index), index), meanBRIbase_REG(~skipIdx(subjectIdx, index), index));
+        [~, pREG2(index)] = ttest2(meanBRI_REG(~skipIdx(subjectIdx, index), index), meanBRIbase2_REG(~skipIdx(subjectIdx, index), index));
+        [~, pBaseREG(index)] = ttest2(meanBRIbase_REG(~skipIdx(subjectIdx, index), index), meanBRIbase2_REG(~skipIdx(subjectIdx, index), index));
         if index > 1
-            [~, pREG3(index - 1)] = ttest2(meanBRI_REG(~skipIdx(:, index), index), meanBRI_REG(:, 1));
+            [~, pREG3(index - 1)] = ttest2(meanBRI_REG(~skipIdx(subjectIdx, index), index), meanBRI_REG(subjectIdx, 1));
         end
     else
-        [~, pREG(index)] = ttest(meanBRI_REG(:, index), meanBRIbase_REG(:, index));
-        [~, pREG2(index)] = ttest(meanBRI_REG(:, index), meanBRIbase2_REG(:, index));
-        [~, pBaseREG(index)] = ttest(meanBRIbase_REG(:, index), meanBRIbase2_REG(:, index));
+        [~, pREG(index)] = ttest(meanBRI_REG(subjectIdx, index), meanBRIbase_REG(subjectIdx, index));
+        [~, pREG2(index)] = ttest(meanBRI_REG(subjectIdx, index), meanBRIbase2_REG(subjectIdx, index));
+        [~, pBaseREG(index)] = ttest(meanBRIbase_REG(subjectIdx, index), meanBRIbase2_REG(subjectIdx, index));
         if index > 1
-            [~, pREG3(index - 1)] = ttest(meanBRI_REG(:, index), meanBRI_REG(:, 1));
+            [~, pREG3(index - 1)] = ttest(meanBRI_REG(subjectIdx, index), meanBRI_REG(subjectIdx, 1));
         end
     end
 end
@@ -110,11 +111,13 @@ end
 FigBRI = figure;
 maximizeFig(FigBRI);
 mAxe1 = mSubplot(FigBRI, 1, 2, 1, "shape", "square-min", "padding_left", 0.05, "padding_right", 0.05);
+hold(mAxe1, "on");
 for bIndex = 1:length(briData)
-    errorbar(1:length(ICIsREG), meanBRI_REG(bIndex, :), seBRI_REG(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
-    hold on;
+    if subjectIdx(bIndex)
+        errorbar(1:length(ICIsREG), meanBRI_REG(bIndex, :), seBRI_REG(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
+    end
 end
-errorbar(1:length(ICIsREG), mean(meanBRI_REG, 1), SE(meanBRI_REG, 1), 'Color', 'r', 'LineWidth', 2);
+errorbar(1:length(ICIsREG), mean(meanBRI_REG(subjectIdx, :), 1), SE(meanBRI_REG(subjectIdx, :), 1), 'Color', 'r', 'LineWidth', 2);
 set(gca, 'FontSize', 12);
 xticks(1:length(ICIsREG));
 xticklabels(num2str(ICIsREG'));
@@ -125,12 +128,13 @@ title('Behavior (no-interval) REG');
 
 %% BRI - IRREG
 ICIsIRREG = [4, 4.06];
-meanBRI_IRREG = zeros(length(briData), length(ICIsIRREG));
-meanBRIbase_IRREG = zeros(length(briData), length(ICIsIRREG));
+meanBRI_IRREG      = zeros(length(briData), length(ICIsIRREG));
+meanBRIbase_IRREG  = zeros(length(briData), length(ICIsIRREG));
 meanBRIbase2_IRREG = zeros(length(briData), length(ICIsIRREG));
-seBRI_IRREG = zeros(length(briData), length(ICIsIRREG));
-seBRIbase_IRREG = zeros(length(briData), length(ICIsIRREG));
-seBRIbase2_IRREG = zeros(length(briData), length(ICIsIRREG));
+seBRI_IRREG        = zeros(length(briData), length(ICIsIRREG));
+seBRIbase_IRREG    = zeros(length(briData), length(ICIsIRREG));
+seBRIbase2_IRREG   = zeros(length(briData), length(ICIsIRREG));
+skipIdx            = false(length(briData), length(ICIsIRREG));
 
 for bIndex = 1:length(briData)
     trialAll = briData(bIndex).trialAll;
@@ -140,38 +144,54 @@ for bIndex = 1:length(briData)
 
     for index = 1:length(ICIsIRREG)
         idx = [trialAll.ICI] == ICIsIRREG(index) & [trialAll.type] == "IRREG";
-        meanBRI_IRREG(bIndex, index) = mean(BRI(idx));
-        seBRI_IRREG(bIndex, index) = SE(BRI(idx));
 
-        meanBRIbase_IRREG(bIndex, index) = mean(BRIbase(idx));
-        seBRIbase_IRREG(bIndex, index) = SE(BRIbase(idx));
+        if any(idx)
+            meanBRI_IRREG(bIndex, index) = mean(BRI(idx));
+            seBRI_IRREG(bIndex, index) = SE(BRI(idx));
+    
+            meanBRIbase_IRREG(bIndex, index) = mean(BRIbase(idx));
+            seBRIbase_IRREG(bIndex, index) = SE(BRIbase(idx));
+    
+            meanBRIbase2_IRREG(bIndex, index) = mean(BRIbase2(idx));
+            seBRIbase2_IRREG(bIndex, index) = SE(BRIbase2(idx));
+        else
+            skipIdx(bIndex, index) = true;
+        end
 
-        meanBRIbase2_IRREG(bIndex, index) = mean(BRIbase2(idx));
-        seBRIbase2_IRREG(bIndex, index) = SE(BRIbase2(idx));
     end
 
 end
 
-pIRREG = zeros(1, length(ICIsIRREG)); % vs baseline
-pIRREG2 = zeros(1, length(ICIsIRREG)); % vs before change
-pIRREG3 = zeros(1, length(ICIsIRREG) - 1); % vs control
+pIRREG     = zeros(1, length(ICIsIRREG)); % vs baseline
+pIRREG2    = zeros(1, length(ICIsIRREG)); % vs before change
+pIRREG3    = zeros(1, length(ICIsIRREG) - 1); % vs control
 pBaseIRREG = zeros(1, length(ICIsIRREG)); % baseline vs before change
 for index = 1:length(ICIsIRREG)
-    [~, pIRREG(index)] = ttest(meanBRI_IRREG(:, index), meanBRIbase_IRREG(:, index));
-    [~, pIRREG2(index)] = ttest(meanBRI_IRREG(:, index), meanBRIbase2_IRREG(:, index));
-    [~, pBaseIRREG(index)] = ttest(meanBRIbase_IRREG(:, index), meanBRIbase2_IRREG(:, index));
-
-    if index > 1
-        [~, pIRREG3(index - 1)] = ttest(meanBRI_IRREG(:, index), meanBRI_IRREG(:, 1));
+    if any(skipIdx(subjectIdx, index))
+        [~, pIRREG(index)] = ttest2(meanBRI_IRREG(~skipIdx(subjectIdx, index), index), meanBRIbase_IRREG(~skipIdx(subjectIdx, index), index));
+        [~, pIRREG2(index)] = ttest2(meanBRI_IRREG(~skipIdx(subjectIdx, index), index), meanBRIbase2_IRREG(~skipIdx(subjectIdx, index), index));
+        [~, pBaseIRREG(index)] = ttest2(meanBRIbase_IRREG(~skipIdx(subjectIdx, index), index), meanBRIbase2_IRREG(~skipIdx(subjectIdx, index), index));
+        if index > 1
+            [~, pIRREG3(index - 1)] = ttest2(meanBRI_IRREG(~skipIdx(subjectIdx, index), index), meanBRI_IRREG(subjectIdx, 1));
+        end
+    else
+        [~, pIRREG(index)] = ttest(meanBRI_IRREG(subjectIdx, index), meanBRIbase_IRREG(subjectIdx, index));
+        [~, pIRREG2(index)] = ttest(meanBRI_IRREG(subjectIdx, index), meanBRIbase2_IRREG(subjectIdx, index));
+        [~, pBaseIRREG(index)] = ttest(meanBRIbase_IRREG(subjectIdx, index), meanBRIbase2_IRREG(subjectIdx, index));
+        if index > 1
+            [~, pIRREG3(index - 1)] = ttest(meanBRI_IRREG(subjectIdx, index), meanBRI_IRREG(subjectIdx, 1));
+        end
     end
 end
 
 mAxe2 = mSubplot(FigBRI, 1, 2, 2, "shape", "square-min", "padding_left", 0.05, "padding_right", 0.05);
+hold(mAxe2, "on");
 for bIndex = 1:length(briData)
-    errorbar(1:length(ICIsIRREG), meanBRI_IRREG(bIndex, :), seBRI_IRREG(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
-    hold on;
+    if subjectIdx(bIndex)
+        errorbar(1:length(ICIsIRREG), meanBRI_IRREG(bIndex, :), seBRI_IRREG(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
+    end
 end
-errorbar(1:length(ICIsIRREG), mean(meanBRI_IRREG, 1), SE(meanBRI_IRREG, 1), 'Color', 'r', 'LineWidth', 2);
+errorbar(1:length(ICIsIRREG), mean(meanBRI_IRREG(subjectIdx, :), 1), SE(meanBRI_IRREG(subjectIdx, :), 1), 'Color', 'r', 'LineWidth', 2);
 set(gca, 'FontSize', 12);
 xticks(1:length(ICIsIRREG));
 xticklabels(num2str(ICIsIRREG'));
@@ -198,6 +218,7 @@ text(mAxe2, 1:length(ICIsIRREG), repmat(min(get(mAxe2, "YLim")) + 0.5, [1, lengt
 
 %% save
 save("D:\Education\Lab\Projects\EEG\Figure DATA\Res_BRI_A1.mat", ...
+     "fs", ...
      "meanBRI_REG", ...
      "meanBRI_IRREG", ...
      "meanBRIbase_REG", ...

@@ -44,6 +44,7 @@ batchCollect(["BRI_P1", ...
               "BRI_A1", ...
               "BRI_A2"]);
 
+%-----------------Final results-----------------------
 %% Analyze at population level
 run("FigureProcess_A1.m");
 run("FigureProcess_A2.m");
