@@ -3,11 +3,12 @@ clear; clc; close all force;
 fs = 1e3; % Hz
 
 chMeanDataP3 = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P3_Population.mat").data;
-window = [-500, 2000]; % ms
+load("windows.mat", "windows");
+windowP3 = windows([windows.protocol] == "passive3").window;
 
 temp = vertcat(chMeanDataP3.chMeanData);
 chMean = cell2mat(cellfun(@(x) mean(x, 1), changeCellRowNum({temp([temp.type] == "REG").chMean}'), "UniformOutput", false));
-t = linspace(window(1), window(2), length(chMean));
+t = linspace(windowP3(1), windowP3(2), length(chMean));
 [PKS, LOCS] = rowFcn(@(x) findpeaks(x, t), chMean, "UniformOutput", false);
 
 figure;

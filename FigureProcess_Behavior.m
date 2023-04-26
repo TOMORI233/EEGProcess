@@ -193,6 +193,6 @@ set(gca, "FontSize", 12);
 [R, p] = corr(thREG_A1(idx), thREG_A2(idx), "type", "Pearson");
 hold on;
 plot([ICIsREG(1), ICIsREG(end)], [ICIsREG(1), ICIsREG(end)], "k--", "LineWidth", 2);
-xlabel('Behavior threhold ICI (Interval 600 ms)');
-ylabel('Behavior threhold ICI (No-interval)');
+xlabel('Behavior threshold ICI (Interval 600 ms)');
+ylabel('Behavior threshold ICI (No-interval)');
 title(['Pearson Corr R=', num2str(R), ' | p=', num2str(p), ' | N=', num2str(length(idx))]);
