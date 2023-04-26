@@ -174,16 +174,19 @@ ylabel('Press for difference ratio');
 mSubplot(2, 2, 3, "margin_top", 0.08);
 meanThREG_A1 = mean(thREG_A1(idx));
 meanThREG_A2 = mean(thREG_A2(idx));
-histogram(thREG_A1(idx), "BinWidth", mode(diff(ICIsREG)) / 4, "FaceColor", [1 0 0], "DisplayName", ['Interval 600 ms (Mean at ', num2str(meanThREG_A1), ')']);
-hold on;
-histogram(thREG_A2(idx), "BinWidth", mode(diff(ICIsREG)) / 4, "FaceColor", [0 0 1], "DisplayName", ['No-interval (Mean at ', num2str(meanThREG_A2), ')']);
+mHistogram([thREG_A1(idx), thREG_A2(idx)]', ...
+           "BinWidth", mode(diff(ICIsREG)) / 2, ...
+           "Color", {[1 0 0], ...
+                     [0 0 1]}, ...
+           "DisplayName", {['Interval 600 ms (Mean at ', num2str(meanThREG_A1), ')'], ...
+                           ['No-interval (Mean at ', num2str(meanThREG_A2), ')']});
 addLines2Axes(gca, struct("X", meanThREG_A1, "color", "r"));
 addLines2Axes(gca, struct("X", meanThREG_A2, "color", "b"));
 xlim([ICIsREG(1), ICIsREG(end)]);
 set(gca, "FontSize", 12);
 xlabel('Behavior threshold ICI (ms)');
 ylabel('Subject count');
-legend("Location", "best");
+legend;
 [~, p] = ttest(thREG_A1(idx), thREG_A2(idx));
 title(['Pairwise t-test p=', num2str(p)])
 
