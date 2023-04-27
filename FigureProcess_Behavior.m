@@ -178,8 +178,8 @@ mHistogram([thREG_A1(idx), thREG_A2(idx)]', ...
            "BinWidth", mode(diff(ICIsREG)) / 2, ...
            "Color", {[1 0 0], ...
                      [0 0 1]}, ...
-           "DisplayName", {['Interval 600 ms (Mean at ', num2str(meanThREG_A1), ')'], ...
-                           ['No-interval (Mean at ', num2str(meanThREG_A2), ')']});
+           "DisplayName", {['No-interval (Mean at ', num2str(meanThREG_A1), ')'], ...
+                           ['Interval 600 ms (Mean at ', num2str(meanThREG_A2), ')']});
 addLines2Axes(gca, struct("X", meanThREG_A1, "color", "r"));
 addLines2Axes(gca, struct("X", meanThREG_A2, "color", "b"));
 xlim([ICIsREG(1), ICIsREG(end)]);
@@ -196,6 +196,6 @@ set(gca, "FontSize", 12);
 [R, p] = corr(thREG_A1(idx), thREG_A2(idx), "type", "Pearson");
 hold on;
 plot([ICIsREG(1), ICIsREG(end)], [ICIsREG(1), ICIsREG(end)], "k--", "LineWidth", 2);
-xlabel('Behavior threshold ICI (Interval 600 ms)');
-ylabel('Behavior threshold ICI (No-interval)');
+xlabel('Behavior threshold ICI (No-interval)');
+ylabel('Behavior threshold ICI (Interval 600 ms)');
 title(['Pearson Corr R=', num2str(R), ' | p=', num2str(p), ' | N=', num2str(length(idx))]);
