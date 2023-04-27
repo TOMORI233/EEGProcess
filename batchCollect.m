@@ -4,8 +4,8 @@ narginchk(0, 1);
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
-MATROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
-POPUPATH = "D:\Education\Lab\Projects\EEG\MAT Population\";
+MATROOTPATH = "..\MAT DATA\";
+POPUPATH = "..\MAT Population\";
 
 mkdir(POPUPATH);
 

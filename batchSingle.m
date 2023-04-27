@@ -4,8 +4,8 @@ narginchk(0, 2);
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
-MATROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
-FIGROOTPATH = "D:\Education\Lab\Projects\EEG\Figures\";
+MATROOTPATH = "..\MAT DATA\";
+FIGROOTPATH = "..\Figures\";
 
 if nargin < 1 || isempty(protocolsToProcess)
     protocolsToProcess = ["passive1", "passive2", "passive3", "active1", "active2"];

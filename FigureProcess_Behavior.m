@@ -4,7 +4,7 @@ margins = [0.05, 0.05, 0.1, 0.1];
 
 %% Load
 % Active 1
-load("D:\Education\Lab\Projects\EEG\MAT Population\Behavior_A1_Res_Population.mat");
+load("..\MAT Population\Behavior_A1_Res_Population.mat");
 bData = [data.behaviorRes]';
 
 temp = [bData([bData.type] == "REG").data]';
@@ -25,7 +25,7 @@ save("subjectIdx_A1.mat", "subjectIdx");
 resMeanREG_A1 = fitBehavior(mean(cell2mat(resREG_A1(subjectIdxA1))), ICIsREG);
 
 % Active 2
-load("D:\Education\Lab\Projects\EEG\MAT Population\Behavior_A2_Res_Population.mat");
+load("..\MAT Population\Behavior_A2_Res_Population.mat");
 bData = [data.behaviorRes]';
 
 resREG_A2 = arrayfun(@(x) x.nDiff ./ x.nTotal, [bData([bData.type] == "REG").data]', "UniformOutput", false);
