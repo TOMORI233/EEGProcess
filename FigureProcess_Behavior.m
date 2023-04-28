@@ -180,8 +180,8 @@ mHistogram([thREG_A1(idx), thREG_A2(idx)]', ...
                      [0 0 1]}, ...
            "DisplayName", {['Interval 600 ms (Mean at ', num2str(meanThREG_A1), ')'], ...
                            ['No-interval (Mean at ', num2str(meanThREG_A2), ')']});
-addLines2Axes(gca, struct("X", meanThREG_A1, "color", "r"));
-addLines2Axes(gca, struct("X", meanThREG_A2, "color", "b"));
+addLines2Axes(gca, struct("X", meanThREG_A1, "color", "r", "width", 1.5));
+addLines2Axes(gca, struct("X", meanThREG_A2, "color", "b", "width", 1.5));
 xlim([ICIsREG(1), ICIsREG(end)]);
 set(gca, "FontSize", 12);
 xlabel('Behavior threshold ICI (ms)');
