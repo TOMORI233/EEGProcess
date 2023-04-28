@@ -1,8 +1,8 @@
 %% 离散度
 clear; clc; close all force;
 
-chMeanData = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P2_Population.mat").data;
-briData = load("D:\Education\Lab\Projects\EEG\MAT Population\BRI_P2_Population.mat").data;
+chMeanData = load("..\MAT Population\chMean_P2_Population.mat").data;
+briData = load("..\MAT Population\BRI_P2_Population.mat").data;
 
 window = briData(1).window;
 colors = flip(cellfun(@(x) x / 255, {[0 0 0], [0 0 255], [255 0 0]}, "UniformOutput", false));
@@ -22,7 +22,7 @@ FigVar = plotRawWaveMultiEEG(chMeanVar, window, 1000, "Variance");
 scaleAxes(FigVar, "x", [1000, 1500]);
 scaleAxes(FigVar, "y", "on", "symOpt", "max", "uiOpt", "show");
 
-save("D:\Education\Lab\Projects\EEG\Figure DATA\Res_chMean_P2.mat", ...
+save("..\Figure DATA\Res_chMean_P2.mat", ...
      "chMeanVar", "window");
 
 %% BRI

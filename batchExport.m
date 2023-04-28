@@ -5,7 +5,7 @@ narginchk(0, 1);
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
 ROOTPATH = "F:\EEG\DATA\";
-SAVEROOTPATH = "D:\Education\Lab\Projects\EEG\MAT DATA\";
+SAVEROOTPATH = "..\MAT DATA\";
 
 opts.fhp = 0.5;
 opts.flp = 40;

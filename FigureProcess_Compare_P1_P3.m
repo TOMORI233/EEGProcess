@@ -6,10 +6,10 @@ colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], 
 load("windows.mat", "windows");
 windowP1 = windows([windows.protocol] == "passive1").window;
 windowP3 = windows([windows.protocol] == "passive3").window;
-chMeanDataP1 = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P1_Population.mat").data;
-chMeanDataP3 = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P3_Population.mat").data;
-briDataP1 = load("D:\Education\Lab\Projects\EEG\Figure DATA\Res_BRI_P1.mat");
-briDataP3 = load("D:\Education\Lab\Projects\EEG\Figure DATA\Res_BRI_P3.mat");
+chMeanDataP1 = load("..\MAT Population\chMean_P1_Population.mat").data;
+chMeanDataP3 = load("..\MAT Population\chMean_P3_Population.mat").data;
+briDataP1 = load("..\Figure DATA\Res_BRI_P1.mat");
+briDataP3 = load("..\Figure DATA\Res_BRI_P3.mat");
 fs = briDataP1.fs;
 
 %% chMean plot
@@ -28,12 +28,13 @@ FigIRREG = plotRawWaveMultiEEG(chMeanIRREG, window, 1000, "IRREG");
 scaleAxes(FigIRREG, "y", "on", "symOpt", "max", "uiOpt", "show");
 
 %% BRI scatter
+% diff
 figure;
 maximizeFig;
 mSubplot(1, 1, 1, "shape", "square-min");
-scatter(briDataP3.meanBRI_IRREG(:, 2), briDataP1.meanBRI_IRREG(:, 1), 100, 'k');
+scatter(briDataP3.meanBRI_IRREG(:, 2) - briDataP3.meanBRIbase2_IRREG(:, 2), briDataP1.meanBRI_IRREG(:, 1) - briDataP1.meanBRIbase2_IRREG(:, 2), 100, 'k');
 set(gca, "FontSize", 15);
-[~, p] = ttest(briDataP3.meanBRI_IRREG(:, 2), briDataP1.meanBRI_IRREG(:, 1));
+[~, p] = ttest(briDataP3.meanBRI_IRREG(:, 2) - briDataP3.meanBRIbase2_IRREG(:, 2), briDataP1.meanBRI_IRREG(:, 1) - briDataP1.meanBRIbase2_IRREG(:, 2));
 hold on;
 xRange = get(gca, "XLim");
 yRange = get(gca, "YLim");
@@ -42,6 +43,41 @@ xyMax = max([xRange, yRange]);
 xlim([xyMin, xyMax]);
 ylim([xyMin, xyMax]);
 addLines2Axes;
-xlabel('Ratio BRI_{IRREG 4-4.06} (\muV)');
-ylabel('Length BRI_{IRREG 4-4.06} (\muV)');
+xlabel('Ratio \DeltaBRI_{IRREG 4-4.06} (\muV)');
+ylabel('Length \DeltaBRI_{IRREG 4-4.06} (\muV)');
+title(['Pairwise t-test p=', num2str(p)]);
+
+% Baseline
+figure;
+maximizeFig;
+mSubplot(1, 2, 1, "shape", "square-min");
+scatter(briDataP3.meanBRIbase_IRREG(:, 2), briDataP1.meanBRIbase_IRREG(:, 1), 100, 'k');
+set(gca, "FontSize", 15);
+[~, p] = ttest(briDataP3.meanBRIbase_IRREG(:, 2), briDataP1.meanBRIbase_IRREG(:, 1));
+hold on;
+xRange = get(gca, "XLim");
+yRange = get(gca, "YLim");
+xyMin = min([xRange, yRange]);
+xyMax = max([xRange, yRange]);
+xlim([xyMin, xyMax]);
+ylim([xyMin, xyMax]);
+addLines2Axes;
+xlabel('Ratio baseline BRI_{IRREG 4-4.06} (\muV)');
+ylabel('Length baseline BRI_{IRREG 4-4.06} (\muV)');
+title(['Pairwise t-test p=', num2str(p)]);
+
+mSubplot(1, 2, 2, "shape", "square-min");
+scatter(briDataP3.meanBRIbase2_IRREG(:, 2), briDataP1.meanBRIbase2_IRREG(:, 1), 100, 'k');
+set(gca, "FontSize", 15);
+[~, p] = ttest(briDataP3.meanBRIbase2_IRREG(:, 2), briDataP1.meanBRIbase2_IRREG(:, 1));
+hold on;
+xRange = get(gca, "XLim");
+yRange = get(gca, "YLim");
+xyMin = min([xRange, yRange]);
+xyMax = max([xRange, yRange]);
+xlim([xyMin, xyMax]);
+ylim([xyMin, xyMax]);
+addLines2Axes;
+xlabel('Ratio before change BRI_{IRREG 4-4.06} (\muV)');
+ylabel('Length before change BRI_{IRREG 4-4.06} (\muV)');
 title(['Pairwise t-test p=', num2str(p)]);

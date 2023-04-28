@@ -1,6 +1,6 @@
 clear; clc; close all force;
 
-load("D:\Education\Lab\Projects\EEG\MAT Population\FindChs_Population.mat");
+load("..\MAT Population\FindChs_Population.mat");
 
 temp = cellfun(@changeCellRowNum, {data.avgBase}', "UniformOutput", false);
 avgBase = changeCellRowNum(vertcat(temp{:}));

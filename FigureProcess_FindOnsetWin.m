@@ -2,7 +2,7 @@ clear; clc; close all force;
 
 fs = 1e3; % Hz
 
-chMeanDataP3 = load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P3_Population.mat").data;
+chMeanDataP3 = load("..\MAT Population\chMean_P3_Population.mat").data;
 load("windows.mat", "windows");
 windowP3 = windows([windows.protocol] == "passive3").window;
 

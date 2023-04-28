@@ -7,7 +7,7 @@ fs = 1e3; % Hz
 winWidth = [-35, 35]; % ms
 
 %% For A1, P2, P3
-load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P3_Population.mat");
+load("..\MAT Population\chMean_P3_Population.mat");
 window = windows([windows.protocol] == "passive3").window;
 
 temp = vertcat(data.chMeanData);
@@ -30,7 +30,7 @@ res(1, :) = windowBRI;
 save("windowBRI4.mat", "windowBRI");
 
 %% For A2
-load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_A2_Population.mat");
+load("..\MAT Population\chMean_A2_Population.mat");
 window = windows([windows.protocol] == "active2").window;
 
 temp = vertcat(data.chMeanData);
@@ -53,7 +53,7 @@ windowBRI = winWidth + peakTime; % ms
 save("windowBRI4_A2.mat", "windowBRI");
 
 %% For P1
-load("D:\Education\Lab\Projects\EEG\MAT Population\chMean_P1_Population.mat");
+load("..\MAT Population\chMean_P1_Population.mat");
 window = windows([windows.protocol] == "passive1").window;
 
 temp = vertcat(data.chMeanData);

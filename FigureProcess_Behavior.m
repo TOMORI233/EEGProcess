@@ -4,7 +4,7 @@ margins = [0.05, 0.05, 0.1, 0.1];
 
 %% Load
 % Active 1
-load("D:\Education\Lab\Projects\EEG\MAT Population\Behavior_A1_Res_Population.mat");
+load("..\MAT Population\Behavior_A1_Res_Population.mat");
 bData = [data.behaviorRes]';
 
 temp = [bData([bData.type] == "REG").data]';
@@ -25,7 +25,7 @@ save("subjectIdx_A1.mat", "subjectIdx");
 resMeanREG_A1 = fitBehavior(mean(cell2mat(resREG_A1(subjectIdxA1))), ICIsREG);
 
 % Active 2
-load("D:\Education\Lab\Projects\EEG\MAT Population\Behavior_A2_Res_Population.mat");
+load("..\MAT Population\Behavior_A2_Res_Population.mat");
 bData = [data.behaviorRes]';
 
 resREG_A2 = arrayfun(@(x) x.nDiff ./ x.nTotal, [bData([bData.type] == "REG").data]', "UniformOutput", false);
@@ -196,6 +196,6 @@ set(gca, "FontSize", 12);
 [R, p] = corr(thREG_A1(idx), thREG_A2(idx), "type", "Pearson");
 hold on;
 plot([ICIsREG(1), ICIsREG(end)], [ICIsREG(1), ICIsREG(end)], "k--", "LineWidth", 2);
-xlabel('Behavior threshold ICI (Interval 600 ms)');
-ylabel('Behavior threshold ICI (No-interval)');
+xlabel('Behavior threshold ICI (No-interval)');
+ylabel('Behavior threshold ICI (Interval 600 ms)');
 title(['Pearson Corr R=', num2str(R), ' | p=', num2str(p), ' | N=', num2str(length(idx))]);
