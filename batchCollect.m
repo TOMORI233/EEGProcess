@@ -4,8 +4,9 @@ narginchk(0, 1);
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
-MATROOTPATH = "..\MAT DATA\";
-POPUPATH = "..\MAT Population\";
+currentPath = getRootDirPath(fileparts(mfilename("fullpath")), 1);
+MATROOTPATH = fullfile(currentPath, 'MAT DATA');
+POPUPATH = fullfile(currentPath, 'MAT Population');
 
 mkdir(POPUPATH);
 

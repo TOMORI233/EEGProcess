@@ -8,30 +8,34 @@ fs = briData(1).fs;
 window = briData(1).window;
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
+ICIsREG = [4, 4.01, 4.02, 4.03, 4.06];
+ICIsIRREG = [4, 4.06];
+
 %% chMean plot
 temp = vertcat(chMeanData.chMeanData);
-ICIs = [4, 4.01, 4.02, 4.03, 4.06];
 
 nREG = 0;
 nIRREG = 0;
 
-for index = 1:length(ICIs)
-    idx = [temp.ICI] == ICIs(index) & [temp.type] == "REG";
+for index = 1:length(ICIsREG)
+    idx = [temp.ICI] == ICIsREG(index) & [temp.type] == "REG";
     if any(idx)
         nREG = nREG + 1;
         chMeanREG(nREG, 1).chMean = cell2mat(cellfun(@(x) mean(x, 1), changeCellRowNum({temp(idx).chMean}'), "UniformOutput", false));
-        chMeanREG(nREG, 1).ICI = ICIs(index);
+        chMeanREG(nREG, 1).ICI = ICIsREG(index);
         chMeanREG(nREG, 1).type = "REG";
-        chMeanREG(nREG, 1).color = colors{index};
+        chMeanREG(nREG, 1).color = colors{nREG};
     end
+end
 
-    idx = [temp.ICI] == ICIs(index) & [temp.type] == "IRREG";
+for index = 1:length(ICIsIRREG)
+    idx = [temp.ICI] == ICIsIRREG(index) & [temp.type] == "IRREG";
     if any(idx)
         nIRREG = nIRREG + 1;
         chMeanIRREG(nIRREG, 1).chMean = cell2mat(cellfun(@(x) mean(x, 1), changeCellRowNum({temp(idx).chMean}'), "UniformOutput", false));
-        chMeanIRREG(nIRREG, 1).ICI = ICIs(index);
+        chMeanIRREG(nIRREG, 1).ICI = ICIsIRREG(index);
         chMeanIRREG(nIRREG, 1).type = "IRREG";
-        chMeanIRREG(nIRREG, 1).color = colors{index};
+        chMeanIRREG(nIRREG, 1).color = colors{nIRREG + 2};
     end
 end
 
@@ -103,7 +107,7 @@ xticklabels(num2str(ICIsREG'));
 xlim([0.8, length(ICIsREG) + 0.2]);
 xlabel('S2 ICI (ms)');
 ylabel('BRI (\muV)');
-title('Non-behavior REG');
+title(['Non-behavior REG | N=', num2str(length(chMeanData))]);
 
 %% BRI - IRREG
 ICIsIRREG = [4, 4.06];

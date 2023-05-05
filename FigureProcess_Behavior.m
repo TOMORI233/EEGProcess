@@ -6,14 +6,14 @@ margins = [0.05, 0.05, 0.1, 0.1];
 % Active 1
 load("..\MAT Population\Behavior_A1_Res_Population.mat");
 bData = [data.behaviorRes]';
+ICIsREG = [4, 4.01, 4.02, 4.03, 4.06]';
+ICIsIRREG = [4, 4.06, 8]';
 
 temp = [bData([bData.type] == "REG").data]';
-ICIsREG = unique([temp.ICI])';
-resREG_A1 = arrayfun(@(x) x.nDiff ./ x.nTotal, temp, "UniformOutput", false);
+resREG_A1 = arrayfun(@(x) x.nDiff(ismember(x.ICI, ICIsREG)) ./ x.nTotal(ismember(x.ICI, ICIsREG)), temp, "UniformOutput", false);
 
 temp = [bData([bData.type] == "IRREG").data]';
-ICIsIRREG = unique([temp.ICI])';
-resIRREG_A1 = arrayfun(@(x) x.nDiff ./ x.nTotal, temp, "UniformOutput", false);
+resIRREG_A1 = arrayfun(@(x) x.nDiff(ismember(x.ICI, ICIsIRREG)) ./ x.nTotal(ismember(x.ICI, ICIsIRREG)), temp, "UniformOutput", false);
 
 temp = [bData([bData.type] == "PT").data]';
 freqs = unique([temp.freq])';

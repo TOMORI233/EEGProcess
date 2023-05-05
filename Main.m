@@ -1,6 +1,6 @@
 %% Export data
 ccc;
-batchExport();
+batchExport("F:\EEG\DATA\");
 
 %% Process individual data
 ccc;

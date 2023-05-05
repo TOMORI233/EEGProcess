@@ -1,16 +1,16 @@
-function batchExport(protocolsToExport)
+function batchExport(CDTROOTPATH, protocolsToExport, DATESTRs, SUBJECTs)
 % Export baseline-correted EEG wave and trials
-narginchk(0, 1);
+narginchk(1, 4);
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
-ROOTPATH = "F:\EEG\DATA\";
-SAVEROOTPATH = "..\MAT DATA\";
+currentPath = getRootDirPath(fileparts(mfilename("fullpath")), 1);
+SAVEROOTPATH = fullfile(currentPath, 'MAT DATA');
 
 opts.fhp = 0.5;
 opts.flp = 40;
 
-if nargin < 1
+if nargin < 2 || isempty(protocolsToExport)
     opts.protocols = ["passive1", "passive2", "passive3", "active1", "active2"];
 else
     opts.protocols = protocolsToExport;
@@ -35,27 +35,39 @@ tTh = 0.2;
 chTh = 20;
 
 %% Load and save
-DATESTRs = dir(ROOTPATH);
-DATESTRs = DATESTRs([DATESTRs.isdir]);
-DATESTRs = {DATESTRs(3:end).name}';
-DAYPATHs = cellfun(@(x) fullfile(ROOTPATH, x), DATESTRs, "UniformOutput", false);
+if nargin < 2
+    DATESTRs = dir(CDTROOTPATH);
+    DATESTRs = DATESTRs([DATESTRs.isdir]);
+    DATESTRs = {DATESTRs(3:end).name}';
+end
+
+DAYPATHs = cellfun(@(x) fullfile(CDTROOTPATH, x), DATESTRs, "UniformOutput", false);
 
 % For each day
 for dIndex = 1:length(DAYPATHs)
-    SUBJECTs = dir(DAYPATHs{dIndex});
-
-    if length(SUBJECTs) < 3
+    SUBJECTsTemp = dir(DAYPATHs{dIndex});
+        
+    if length(SUBJECTsTemp) < 3
         warning(['No DATA found in ', num2str(DATESTRs{dIndex})]);
         continue;
     else
-        SUBJECTs = {SUBJECTs(3:end).name}';
+        SUBJECTsTemp = {SUBJECTsTemp(3:end).name}';
+    end
+
+    if nargin >= 4
+        SUBJECTsTemp = SUBJECTsTemp(contains(SUBJECTsTemp, SUBJECTs));
+
+        if ~all(contains(SUBJECTsTemp, SUBJECTs))
+            continue;
+        end
+
     end
     
     % For every subject in a single day
-    for sIndex = 1:length(SUBJECTs)
-        disp(['Current: Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTs{sIndex})]);
-        DATAPATH = fullfile(ROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
-        SAVEPATH = fullfile(SAVEROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
+    for sIndex = 1:length(SUBJECTsTemp)
+        disp(['Current: Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTsTemp{sIndex})]);
+        DATAPATH = fullfile(CDTROOTPATH, DATESTRs{dIndex}, SUBJECTsTemp{sIndex});
+        SAVEPATH = fullfile(SAVEROOTPATH, DATESTRs{dIndex}, SUBJECTsTemp{sIndex});
 
         opts.DATEStr = DATESTRs{dIndex};
         [EEGDatasets, trialDatasets] = EEGPreprocess(DATAPATH, opts);

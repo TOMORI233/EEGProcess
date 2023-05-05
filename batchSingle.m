@@ -1,11 +1,12 @@
-function batchSingle(protocolsToProcess, dataOnlyOpt)
+function batchSingle(protocolsToProcess, dataOnlyOpt, DATESTRs, SUBJECTs)
 % Process each protocol for each subject
-narginchk(0, 2);
+narginchk(0, 4);
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
-MATROOTPATH = "..\MAT DATA\";
-FIGROOTPATH = "..\Figures\";
+currentPath = getRootDirPath(fileparts(mfilename("fullpath")), 1);
+MATROOTPATH = fullfile(currentPath, 'MAT DATA');
+FIGROOTPATH = fullfile(currentPath, 'Figures');
 
 if nargin < 1 || isempty(protocolsToProcess)
     protocolsToProcess = ["passive1", "passive2", "passive3", "active1", "active2"];
@@ -18,33 +19,45 @@ else
 end
 
 %% Load and save
-DATESTRs = dir(MATROOTPATH);
-DATESTRs = DATESTRs([DATESTRs.isdir]);
-DATESTRs = {DATESTRs(3:end).name}';
+if nargin < 3
+    DATESTRs = dir(MATROOTPATH);
+    DATESTRs = DATESTRs([DATESTRs.isdir]);
+    DATESTRs = {DATESTRs(3:end).name}';
+end
+
 DAYPATHs = cellfun(@(x) fullfile(MATROOTPATH, x), DATESTRs, "UniformOutput", false);
 
 % For each day
 for dIndex = 1:length(DAYPATHs)
-    SUBJECTs = dir(DAYPATHs{dIndex});
+    SUBJECTsTemp = dir(DAYPATHs{dIndex});
 
-    if length(SUBJECTs) < 3
+    if length(SUBJECTsTemp) < 3
         warning(['No DATA found in ', num2str(DATESTRs{dIndex})]);
         continue;
     else
-        SUBJECTs = {SUBJECTs(3:end).name}';
+        SUBJECTsTemp = {SUBJECTsTemp(3:end).name}';
     end
-    
-    % For every subject in a single day
-    for sIndex = 1:length(SUBJECTs)
-        MATDirPATH = fullfile(MATROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
-        FIGPATH = fullfile(FIGROOTPATH, DATESTRs{dIndex}, SUBJECTs{sIndex});
 
-        if exist(FIGPATH, "dir") && ~params.dataOnlyOpt
-            disp(['Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTs{sIndex}), ' already processed. Skip.']);
+    if nargin >= 4
+        SUBJECTsTemp = SUBJECTsTemp(contains(SUBJECTsTemp, SUBJECTs));
+
+        if ~all(contains(SUBJECTsTemp, SUBJECTs))
             continue;
         end
 
-        disp(['Current: Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTs{sIndex})]);
+    end
+    
+    % For every subject in a single day
+    for sIndex = 1:length(SUBJECTsTemp)
+        MATDirPATH = fullfile(MATROOTPATH, DATESTRs{dIndex}, SUBJECTsTemp{sIndex});
+        FIGPATH = fullfile(FIGROOTPATH, DATESTRs{dIndex}, SUBJECTsTemp{sIndex});
+
+        if exist(FIGPATH, "dir") && ~params.dataOnlyOpt
+            disp(['Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTsTemp{sIndex}), ' already processed. Skip.']);
+            continue;
+        end
+
+        disp(['Current: Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTsTemp{sIndex})]);
         matfiles = what(MATDirPATH).mat;
         protocols = cellfun(@(x) obtainArgoutN(@fileparts, 2, x), matfiles, "UniformOutput", false);
         idx = contains(protocols, protocolsToProcess);

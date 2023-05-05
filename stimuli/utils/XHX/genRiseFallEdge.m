@@ -17,7 +17,7 @@ function y = genRiseFallEdge(y, fs, rfTime, rfOpt)
         case "fall"
             y(end - nRF + 1:end) = y(end - nRF + 1:end) .* (sin(pi * (0:1 / (nRF - 1):1) + pi / 2) + 1) / 2;
         case "both"
-            y(1:nRF) = y(1:nRF) .* (sin(pi * (0:1 / (nRF - 1):1) - pi / 2) + 1)' / 2;
+            y(1:nRF) = y(1:nRF) .* (sin(pi * (0:1 / (nRF - 1):1) - pi / 2) + 1) / 2;
             y(end - nRF + 1:end) = y(end - nRF + 1:end) .* (sin(pi * (0:1 / (nRF - 1):1) + pi / 2) + 1) / 2;
         otherwise
             error("Invalid rfOpt");
