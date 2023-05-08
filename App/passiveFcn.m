@@ -26,9 +26,9 @@ function passiveFcn(app)
     startTime = cell(length(orders), 1);
     estStopTime = cell(length(orders), 1);
     soundName = cell(length(orders), 1);
-    codes = 20 * pID + orders;
+    codes = 3 + orders;
 
-    mTrigger(triggerType, ioObj, 20 * pID, address);
+    mTrigger(triggerType, ioObj, 1, address);
     WaitSecs(2);
     
     for index = 1:length(orders)

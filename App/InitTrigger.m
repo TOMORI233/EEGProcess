@@ -6,6 +6,8 @@ function ioObj = InitTrigger(triggerType)
     elseif strcmpi(triggerType, 'triggerBox')
         % % For neuracle
         ioObj = TriggerBox();
+    elseif strcmpi(triggerType, 'None')
+        ioObj = [];
     else
         error('Invalid trigger type.');
     end

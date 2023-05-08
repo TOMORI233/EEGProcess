@@ -3,13 +3,12 @@ function res = fitBehavior(ratioData, ICIs)
     n = 0;
 
     while n < 20
-        ft = fittype('a/(1+exp(-b*(x-c)))', 'independent', 'x', 'dependent', 'y');
+        ft = fittype('1/(1+exp(-b*(x-c)))', 'independent', 'x', 'dependent', 'y');
         fitresult = fit(xData, yData, ft);
         x = linspace(ICIs(1), ICIs(end), 1000);
-        a = fitresult.a;
         b = fitresult.b;
         c = fitresult.c;
-        y = a ./ (1 + exp(-b * (x - c)));
+        y = 1 ./ (1 + exp(-b * (x - c)));
         res = [x; y];
         n = n + 1;
 
