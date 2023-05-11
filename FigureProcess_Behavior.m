@@ -148,7 +148,7 @@ for index = 1:2
 end
 
 %% Find Behavior threshold
-thBeh = 0.5;
+thBeh = 0.6;
 fitResREG_A1 = cellfun(@(x) fitBehavior(x, ICIsREG), resREG_A1(subjectIdx), "UniformOutput", false);
 fitResREG_A2 = cellfun(@(x) fitBehavior(x, ICIsREG), resREG_A2(subjectIdx), "UniformOutput", false);
 thREG_A1 = cellfun(@(x) findBehaviorThreshold(x, thBeh), fitResREG_A1);

@@ -89,25 +89,17 @@ for bIndex = 1:length(briData)
 
 end
 
+subjectIdx = rowFcn(@(x, y) (~any(x)) && y, skipIdx, subjectIdx);
 pREG     = zeros(1, length(ICIsREG)); % vs baseline
 pREG2    = zeros(1, length(ICIsREG)); % vs before change
 pREG3    = zeros(1, length(ICIsREG) - 1); % vs control
 pBaseREG = zeros(1, length(ICIsREG)); % baseline vs before change
 for index = 1:length(ICIsREG)
-    if any(skipIdx(subjectIdx, index))
-        [~, pREG(index)] = ttest2(meanBRI_REG(~skipIdx(subjectIdx, index), index), meanBRIbase_REG(~skipIdx(subjectIdx, index), index));
-        [~, pREG2(index)] = ttest2(meanBRI_REG(~skipIdx(subjectIdx, index), index), meanBRIbase2_REG(~skipIdx(subjectIdx, index), index));
-        [~, pBaseREG(index)] = ttest2(meanBRIbase_REG(~skipIdx(subjectIdx, index), index), meanBRIbase2_REG(~skipIdx(subjectIdx, index), index));
-        if index > 1
-            [~, pREG3(index - 1)] = ttest2(meanBRI_REG(~skipIdx(subjectIdx, index), index), meanBRI_REG(subjectIdx, 1));
-        end
-    else
-        [~, pREG(index)] = ttest(meanBRI_REG(subjectIdx, index), meanBRIbase_REG(subjectIdx, index));
-        [~, pREG2(index)] = ttest(meanBRI_REG(subjectIdx, index), meanBRIbase2_REG(subjectIdx, index));
-        [~, pBaseREG(index)] = ttest(meanBRIbase_REG(subjectIdx, index), meanBRIbase2_REG(subjectIdx, index));
-        if index > 1
-            [~, pREG3(index - 1)] = ttest(meanBRI_REG(subjectIdx, index), meanBRI_REG(subjectIdx, 1));
-        end
+    [~, pREG(index)] = ttest(meanBRI_REG(subjectIdx, index), meanBRIbase_REG(subjectIdx, index));
+    [~, pREG2(index)] = ttest(meanBRI_REG(subjectIdx, index), meanBRIbase2_REG(subjectIdx, index));
+    [~, pBaseREG(index)] = ttest(meanBRIbase_REG(subjectIdx, index), meanBRIbase2_REG(subjectIdx, index));
+    if index > 1
+        [~, pREG3(index - 1)] = ttest(meanBRI_REG(subjectIdx, index), meanBRI_REG(subjectIdx, 1));
     end
 end
 
