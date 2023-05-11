@@ -9,6 +9,8 @@ function mTrigger(triggerType, ioObj, code, address)
     elseif strcmpi(triggerType, 'triggerBox')
         % For neuracle
         ioObj.OutputEventData(code);
+    elseif strcmpi(triggerType, 'None')
+        % For behavior only
     else
         error('Invalid trigger type.');
     end
