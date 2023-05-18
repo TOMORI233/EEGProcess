@@ -35,7 +35,7 @@ tTh = 0.2;
 chTh = 20;
 
 %% Load and save
-if nargin < 2
+if nargin < 3
     DATESTRs = dir(CDTROOTPATH);
     DATESTRs = DATESTRs([DATESTRs.isdir]);
     DATESTRs = {DATESTRs(3:end).name}';
