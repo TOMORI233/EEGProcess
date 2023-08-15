@@ -1,11 +1,12 @@
 function batchExport(CDTROOTPATH, protocolsToExport, DATESTRs, SUBJECTs)
 % Export baseline-correted EEG wave and trials
+% SAVEROOTPATH = ROOTPATH\project\MAT DATA\pre\subject\protocol\date\
 narginchk(1, 4);
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
 currentPath = getRootDirPath(fileparts(mfilename("fullpath")), 1);
-SAVEROOTPATH = fullfile(currentPath, 'MAT DATA');
+SAVEROOTPATH = fullfile(currentPath, "DATA", "MAT DATA", "pre");
 
 opts.fhp = 0.5;
 opts.flp = 40;
@@ -67,21 +68,20 @@ for dIndex = 1:length(DAYPATHs)
     for sIndex = 1:length(SUBJECTsTemp)
         disp(['Current: Day ', char(DATESTRs{dIndex}), ' ', char(SUBJECTsTemp{sIndex})]);
         DATAPATH = fullfile(CDTROOTPATH, DATESTRs{dIndex}, SUBJECTsTemp{sIndex});
-        SAVEPATH = fullfile(SAVEROOTPATH, DATESTRs{dIndex}, SUBJECTsTemp{sIndex});
+        SAVEPATH = fullfile(SAVEROOTPATH, SUBJECTsTemp{sIndex});
 
         opts.DATEStr = DATESTRs{dIndex};
         [EEGDatasets, trialDatasets] = EEGPreprocess(DATAPATH, opts);
         fs = EEGDatasets(1).fs;
         protocols = [trialDatasets.protocol]';
 
-        mkdir(SAVEPATH);
-
         % Protocols
         protocols = protocols(contains(protocols, opts.protocols));
 
         % For each protocol
         for pIndex = 1:length(protocols)
-            MATNAME = fullfile(SAVEPATH, strcat(protocols(pIndex), ".mat"));
+            mkdir(fullfile(SAVEPATH, protocols{pIndex}, DATESTRs{dIndex}));
+            MATNAME = fullfile(SAVEPATH, protocols{pIndex}, DATESTRs{dIndex}, strcat(protocols(pIndex), ".mat"));
             window = windows([windows.protocol] == protocols{pIndex}).window;
             trialAll = trialDatasets([trialDatasets.protocol] == protocols(pIndex)).trialAll';
             trialsEEG = selectEEG(EEGDatasets([EEGDatasets.protocol] == protocols(pIndex)), ...

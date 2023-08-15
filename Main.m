@@ -1,10 +1,11 @@
 %% Export data
 ccc;
-batchExport("F:\EEG\DATA\");
+batchExport("F:\EEG\Neuroscan\DATA\");
 
 %% Process individual data
 ccc;
-batchSingle([], false);
+% batchSingle([], false);
+batchSingle([], true);
 
 %% Collect individual chMean and behavior data
 ccc;

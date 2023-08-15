@@ -6,8 +6,8 @@ colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], 
 load("windowBRI4.mat", "windowBRI");
 
 %% Compare BRI
-dataA1 = load("..\Figure DATA\Res_BRI_A1.mat");
-dataP3 = load("..\Figure DATA\Res_BRI_P3.mat");
+dataA1 = load("..\DATA\MAT DATA\figure\Res_BRI_A1.mat");
+dataP3 = load("..\DATA\MAT DATA\figure\Res_BRI_P3.mat");
 fs = dataA1.fs;
 tBRI = windowBRI(1):1000 / fs:windowBRI(2);
 
@@ -99,8 +99,8 @@ ylabel('\Delta BRI (\muV)');
 title('Behavior - Non-behavior');
 
 %% Compare Wave
-waveDataA1 = load("..\Figure DATA\Res_chMean_A1.mat");
-waveDataP3 = load("..\Figure DATA\Res_chMean_P3.mat");
+waveDataA1 = load("..\DATA\MAT DATA\figure\Res_chMean_A1.mat");
+waveDataP3 = load("..\DATA\MAT DATA\figure\Res_chMean_P3.mat");
 load("chsAvg.mat", "chsAvg");
 window = waveDataA1.window;
 t = linspace(window(1), window(2), size(waveDataA1.chMeanREG(index).chMean, 2));

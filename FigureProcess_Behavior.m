@@ -4,7 +4,7 @@ margins = [0.05, 0.05, 0.1, 0.1];
 
 %% Load
 % Active 1
-load("..\MAT Population\Behavior_A1_Res_Population.mat");
+load("..\DATA\MAT DATA\population\Behavior_A1_Res_Population.mat");
 bData = [data.behaviorRes]';
 ICIsREG = [4, 4.01, 4.02, 4.03, 4.06]';
 ICIsIRREG = [4, 4.06, 8]';
@@ -25,7 +25,7 @@ save("subjectIdx_A1.mat", "subjectIdx");
 resMeanREG_A1 = fitBehavior(mean(cell2mat(resREG_A1(subjectIdxA1))), ICIsREG);
 
 % Active 2
-load("..\MAT Population\Behavior_A2_Res_Population.mat");
+load("..\DATA\MAT DATA\population\Behavior_A2_Res_Population.mat");
 bData = [data.behaviorRes]';
 
 resREG_A2 = arrayfun(@(x) x.nDiff ./ x.nTotal, [bData([bData.type] == "REG").data]', "UniformOutput", false);
@@ -100,9 +100,10 @@ for index = 1:length(temp)
     hold on;
 end
 set(gca, "FontSize", 12);
-% idx=3 subject A2 ICI2=8 data missing
+
+% exclude ICI=8 missing
 temp1 = cell2mat(cellfun(@(x) x(1:2), temp, "UniformOutput", false));
-temp2 = cell2mat(cellfun(@(x) x(3), temp([1:2, 4:end]), "UniformOutput", false));
+temp2 = cell2mat(cellfun(@(x) x(3), temp(cellfun(@length, temp) > 2), "UniformOutput", false));
 errorbar(1:length(ICIsIRREG), [mean(temp1, 1), mean(temp2, 1)], [SE(temp1, 1), SE(temp2, 1)], 'Color', 'b', 'LineWidth', 2);
 xticks(1:length(ICIsIRREG));
 xticklabels(num2str(ICIsIRREG));

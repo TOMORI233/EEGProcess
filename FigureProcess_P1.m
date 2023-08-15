@@ -1,8 +1,8 @@
 %% 长度
 clear; clc; close all force;
 
-chMeanData = load("..\MAT Population\chMean_P1_Population.mat").data;
-briData = load("..\MAT Population\BRI_P1_Population.mat").data;
+chMeanData = load("..\DATA\MAT DATA\population\chMean_P1_Population.mat").data;
+briData = load("..\DATA\MAT DATA\population\BRI_P1_Population.mat").data;
 
 load("chsAvg.mat", "chsAvg");
 fs = briData(1).fs;
@@ -50,7 +50,7 @@ FigIRREG = plotRawWaveMultiEEG(chMeanIRREG, window, 1000, "IRREG");
 scaleAxes(FigIRREG, "x", [0, 1500]);
 scaleAxes(FigIRREG, "y", "on", "symOpt", "max", "uiOpt", "show");
 
-save("..\Figure DATA\Res_chMean_P1.mat", ...
+save("..\DATA\MAT DATA\figure\Res_chMean_P1.mat", ...
      "chMeanREG", "chMeanIRREG", "window");
 
 %% average in channels
@@ -246,7 +246,7 @@ text(mAxe2, 1:length(ICIs), repmat(min(get(mAxe2, "YLim")) + 0.5, [1, length(ICI
 %% save
 ICIsREG = ICIs;
 ICIsIRREG = ICIs;
-save("..\Figure DATA\Res_BRI_P1.mat", ...
+save("..\DATA\MAT DATA\figure\Res_BRI_P1.mat", ...
      "fs", ...
      "meanBRI_REG", ...
      "meanBRI_IRREG", ...

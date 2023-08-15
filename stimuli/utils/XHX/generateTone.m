@@ -18,6 +18,6 @@ function [y, t] = generateTone(f, duration, fs, tShift, edgeOpt)
             error("Invalid edge option input");
     end
 
-    y = sin(2 * pi * f * (t + tShift));
+    y = sin(2 * pi * f * (t + tShift))';
     return;
 end

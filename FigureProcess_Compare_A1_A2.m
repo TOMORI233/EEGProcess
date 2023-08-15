@@ -7,8 +7,8 @@ windowBRI_A1 = load("windowBRI4.mat").windowBRI;
 windowBRI_A2 = load("windowBRI4_A2.mat").windowBRI;
 
 %% Compare BRI
-dataA1 = load("..\Figure DATA\Res_BRI_A1.mat");
-dataA2 = load("..\Figure DATA\Res_BRI_A2.mat");
+dataA1 = load("..\DATA\MAT DATA\figure\Res_BRI_A1.mat");
+dataA2 = load("..\DATA\MAT DATA\figure\Res_BRI_A2.mat");
 fs = dataA1.fs;
 
 subjectIdx = dataA1.subjectIdx & dataA2.subjectIdx;
@@ -81,8 +81,8 @@ text(mAxe1, 1:length(ICIsREG), repmat(min(get(mAxe1, "YLim")) + 0.5, [1, length(
 text(mAxe2, 1:length(ICIsIRREG), repmat(min(get(mAxe2, "YLim")) + 0.5, [1, length(ICIsIRREG)]), num2str(pIRREG'), "HorizontalAlignment", "center", "FontSize", 12);
 
 %% Compare Wave
-waveDataA1 = load("..\Figure DATA\Res_chMean_A1.mat");
-waveDataA2 = load("..\Figure DATA\Res_chMean_A2.mat");
+waveDataA1 = load("..\DATA\MAT DATA\figure\Res_chMean_A1.mat");
+waveDataA2 = load("..\DATA\MAT DATA\figure\Res_chMean_A2.mat");
 load("chsAvg.mat", "chsAvg");
 windowA1 = waveDataA1.window;
 windowA2 = waveDataA2.window;

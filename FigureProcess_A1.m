@@ -1,8 +1,8 @@
 %% 精度
 clear; clc; close all force;
 
-chMeanData = load("..\MAT Population\chMean_A1_Population.mat").data;
-briData = load("..\MAT Population\BRI_A1_Population.mat").data;
+chMeanData = load("..\DATA\MAT DATA\population\chMean_A1_Population.mat").data;
+briData = load("..\DATA\MAT DATA\population\BRI_A1_Population.mat").data;
 
 fs = briData(1).fs;
 
@@ -51,7 +51,7 @@ FigIRREG = plotRawWaveMultiEEG(chMeanIRREG, window, 1000, "IRREG");
 scaleAxes(FigIRREG, "x", [0, 2000]);
 scaleAxes(FigIRREG, "y", "on", "symOpt", "max", "uiOpt", "show");
 
-save("..\Figure DATA\Res_chMean_A1.mat", ...
+save("..\DATA\MAT DATA\figure\Res_chMean_A1.mat", ...
      "chMeanREG", "chMeanIRREG", "window", "subjectIdx");
 
 %% BRI - REG
@@ -211,7 +211,7 @@ text(mAxe2, 2, max(get(mAxe2, "YLim")) - 1.5, num2str(pIRREG3), "HorizontalAlign
 text(mAxe2, 1:length(ICIsIRREG), repmat(min(get(mAxe2, "YLim")) + 0.5, [1, length(ICIsIRREG)]), num2str(pBaseIRREG'), "HorizontalAlignment", "center", "FontSize", 12);
 
 %% save
-save("..\Figure DATA\Res_BRI_A1.mat", ...
+save("..\DATA\MAT DATA\figure\Res_BRI_A1.mat", ...
      "fs", ...
      "meanBRI_REG", ...
      "meanBRI_IRREG", ...

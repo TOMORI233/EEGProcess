@@ -3,6 +3,7 @@ function active2ProcessFcn(trialAll, trialsEEG, window, fs, params)
     close all;
     parseStruct(params);
     mkdir(FIGPATH);
+    mkdir(SAVEPATH);
 
     interval = trialAll(1).interval;
 

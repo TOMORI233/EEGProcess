@@ -6,10 +6,10 @@ colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], 
 load("windows.mat", "windows");
 windowP1 = windows([windows.protocol] == "passive1").window;
 windowP3 = windows([windows.protocol] == "passive3").window;
-chMeanDataP1 = load("..\MAT Population\chMean_P1_Population.mat").data;
-chMeanDataP3 = load("..\MAT Population\chMean_P3_Population.mat").data;
-briDataP1 = load("..\Figure DATA\Res_BRI_P1.mat");
-briDataP3 = load("..\Figure DATA\Res_BRI_P3.mat");
+chMeanDataP1 = load("..\DATA\MAT DATA\population\chMean_P1_Population.mat").data;
+chMeanDataP3 = load("..\DATA\MAT DATA\population\chMean_P3_Population.mat").data;
+briDataP1 = load("..\DATA\MAT DATA\figure\Res_BRI_P1.mat");
+briDataP3 = load("..\DATA\MAT DATA\figure\Res_BRI_P3.mat");
 fs = briDataP1.fs;
 
 %% chMean plot

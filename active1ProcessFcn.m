@@ -3,6 +3,7 @@ function active1ProcessFcn(trialAll, trialsEEG, window, fs, params)
     close all;
     parseStruct(params);
     mkdir(FIGPATH);
+    mkdir(SAVEPATH);
 
     %% BRI
     if exist("chsAvg.mat", "file") && exist("windowBRI4.mat", "file")
