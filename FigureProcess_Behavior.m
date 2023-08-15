@@ -31,6 +31,10 @@ bData = [data.behaviorRes]';
 resREG_A2 = arrayfun(@(x) x.nDiff ./ x.nTotal, [bData([bData.type] == "REG").data]', "UniformOutput", false);
 resIRREG_A2 = arrayfun(@(x) x.nDiff ./ x.nTotal, [bData([bData.type] == "IRREG").data]', "UniformOutput", false);
 
+% Irreg decision threshold
+dThs = cellfun(@(x) x(1), resIRREG_A1);
+save("decision.mat", "dThs");
+
 subjectIdxA2 = cellfun(@(x) x(1) < 0.3 && x(end) > 0.3, resREG_A2);
 subjectIdx = subjectIdxA2;
 save("subjectIdx_A2.mat", "subjectIdx");

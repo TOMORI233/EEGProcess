@@ -4,7 +4,6 @@ batchExport("F:\EEG\Neuroscan\DATA\");
 
 %% Process individual data
 ccc;
-% batchSingle([], false);
 batchSingle([], true);
 
 %% Collect individual chMean and behavior data
@@ -15,7 +14,7 @@ batchCollect(["Behavior_A1_Res", ...
               "chMean_A2", ...
               "chMean_P1", ...
               "chMean_P2", ...
-              "chMean_P3"])
+              "chMean_P3"]);
 
 %% Behavior and exclude subjects with bad behavior
 run("FigureProcess_Behavior.m");
