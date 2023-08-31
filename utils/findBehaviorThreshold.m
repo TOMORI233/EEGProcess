@@ -1,4 +1,6 @@
 function thICI = findBehaviorThreshold(fitRes, thBeh)
+    % fitRes = [x; y]
+
     x = fitRes(1, :);
     y = fitRes(2, :);
     idx = find(y >= thBeh, 1);

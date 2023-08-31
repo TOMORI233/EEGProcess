@@ -153,7 +153,7 @@ for index = 1:2
 end
 
 %% Find Behavior threshold
-thBeh = 0.6;
+thBeh = 0.5;
 fitResREG_A1 = cellfun(@(x) fitBehavior(x, ICIsREG), resREG_A1(subjectIdx), "UniformOutput", false);
 fitResREG_A2 = cellfun(@(x) fitBehavior(x, ICIsREG), resREG_A2(subjectIdx), "UniformOutput", false);
 thREG_A1 = cellfun(@(x) findBehaviorThreshold(x, thBeh), fitResREG_A1);
@@ -183,8 +183,8 @@ mHistogram([thREG_A1(idx), thREG_A2(idx)]', ...
            "BinWidth", mode(diff(ICIsREG)) / 2, ...
            "Color", {[1 0 0], ...
                      [0 0 1]}, ...
-           "DisplayName", {['No-interval (Mean at ', num2str(meanThREG_A1), ')'], ...
-                           ['Interval 600 ms (Mean at ', num2str(meanThREG_A2), ')']});
+           "DisplayName", {['Seamless transition (Mean at ', num2str(meanThREG_A1), ')'], ...
+                           ['DMS delay = 600 ms (Mean at ', num2str(meanThREG_A2), ')']});
 addLines2Axes(gca, struct("X", meanThREG_A1, "color", "r", "width", 1.5));
 addLines2Axes(gca, struct("X", meanThREG_A2, "color", "b", "width", 1.5));
 xlim([ICIsREG(1), ICIsREG(end)]);
@@ -201,6 +201,6 @@ set(gca, "FontSize", 12);
 [R, p] = corr(thREG_A1(idx), thREG_A2(idx), "type", "Pearson");
 hold on;
 plot([ICIsREG(1), ICIsREG(end)], [ICIsREG(1), ICIsREG(end)], "k--", "LineWidth", 2);
-xlabel('Behavior threshold ICI (No-interval)');
-ylabel('Behavior threshold ICI (Interval 600 ms)');
+xlabel('Behavior threshold ICI (Seamless transition)');
+ylabel('Behavior threshold ICI (DMS delay = 600 ms)');
 title(['Pearson Corr R=', num2str(R), ' | p=', num2str(p), ' | N=', num2str(length(idx))]);
