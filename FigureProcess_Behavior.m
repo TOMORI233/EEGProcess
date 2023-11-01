@@ -19,7 +19,7 @@ temp = [bData([bData.type] == "PT").data]';
 freqs = unique([temp.freq])';
 resPT_A1 = arrayfun(@(x) x.nDiff ./ x.nTotal, temp, "UniformOutput", false);
 
-subjectIdxA1 = cellfun(@(x) x(1) < 0.3 && x(end) > 0.3, resREG_A1);
+subjectIdxA1 = cellfun(@(x) x(1) < 0.3 && x(end) > 0.5, resREG_A1);
 subjectIdx = subjectIdxA1;
 save("subjectIdx_A1.mat", "subjectIdx");
 resMeanREG_A1 = fitBehavior(mean(cell2mat(resREG_A1(subjectIdxA1))), ICIsREG);
@@ -33,9 +33,10 @@ resIRREG_A2 = arrayfun(@(x) x.nDiff ./ x.nTotal, [bData([bData.type] == "IRREG")
 
 % Irreg decision threshold
 dThs = cellfun(@(x) x(1), resIRREG_A1);
-save("decision.mat", "dThs");
+dThsDiff = cellfun(@(x) x(2), resIRREG_A1);
+save("decision.mat", "dThs", "dThsDiff");
 
-subjectIdxA2 = cellfun(@(x) x(1) < 0.3 && x(end) > 0.3, resREG_A2);
+subjectIdxA2 = cellfun(@(x) x(1) < 0.3 && x(end) > 0.5, resREG_A2);
 subjectIdx = subjectIdxA2;
 save("subjectIdx_A2.mat", "subjectIdx");
 resMeanREG_A2 = fitBehavior(mean(cell2mat(resREG_A2(subjectIdxA2))), ICIsREG);

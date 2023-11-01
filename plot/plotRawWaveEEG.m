@@ -1,17 +1,13 @@
-function Fig = plotRawWaveEEG(chMean, chStd, window, transTime, titleStr, EEGPos)
-    narginchk(3, 6);
+function Fig = plotRawWaveEEG(chMean, chStd, window, titleStr, EEGPos)
+    narginchk(3, 5);
 
     if nargin < 4
-        transTime = 1000; % ms
-    end
-
-    if nargin < 5
         titleStr = '';
     else
         titleStr = [' | ', char(titleStr)];
     end
 
-    if nargin < 6
+    if nargin < 5
         EEGPos = EEGPosConfig();
     end
 
@@ -45,27 +41,11 @@ function Fig = plotRawWaveEEG(chMean, chStd, window, transTime, titleStr, EEGPos
 
             xlim(window);
             title(['CH ', num2str(chNum), titleStr]);
-
-            if ~any([1, 4, 6, 15, 24, 34, 44, 53, 60, 61] == chNum)
-                yticks([]);
-                yticklabels('');
-            end
-
-            if chNum < (plotSize(1) - 1) * plotSize(2) + 1
-                xticklabels('');
-            end
-
         end
 
     end
 
-    yRange = scaleAxes(Fig);
-    allAxes = findobj(Fig, "Type", "axes");
-
-    for aIndex = 1:length(allAxes)
-        plot(allAxes(aIndex), [0, 0], yRange, "k--", "LineWidth", 1);
-        plot(allAxes(aIndex), transTime * ones(1, 2), yRange, "k--", "LineWidth", 1);
-    end
+    scaleAxes(Fig);
 
     return;
 end
