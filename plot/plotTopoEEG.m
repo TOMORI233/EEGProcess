@@ -1,15 +1,13 @@
-function Fig = plotTopoEEG(topo, LOCPATH, plotSize, ICs)
-    narginchk(1, 4);
+function Fig = plotTopoEEG(topo, LOCPATH, ICs)
+    narginchk(1, 3);
 
     if nargin < 2
         LOCPATH = 'chan64.loc';
     end
 
-    if nargin < 3
-        plotSize = [8, 8];
-    end
+    plotSize = autoPlotSize(size(topo, 2));
 
-    if nargin < 4
+    if nargin < 3
         ICs = reshape(1:(plotSize(1) * plotSize(2)), plotSize(2), plotSize(1))';
     end
 
