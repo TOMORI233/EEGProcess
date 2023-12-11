@@ -34,6 +34,7 @@ function Fig = plotTopoEEG(topo, LOCPATH, plotSize, ICs)
             ICNum = ICs(rIndex, cIndex);
             mSubplot(Fig, plotSize(1), plotSize(2), (rIndex - 1) * plotSize(2) + cIndex, [1, 1], margins, paddings);
             topoplot(topo(:, ICNum), LOCPATH);
+            title(['IC ', num2str(ICNum)]);
             colorbar;
         end
     

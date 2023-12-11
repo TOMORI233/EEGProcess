@@ -1,17 +1,13 @@
-function Fig = plotRawWaveMultiEEG(chData, window, transTime, titleStr, EEGPos)
-    narginchk(2, 5);
+function Fig = plotRawWaveMultiEEG(chData, window, titleStr, EEGPos)
+    narginchk(2, 4);
 
     if nargin < 3
-        transTime = 1000; % ms
-    end
-
-    if nargin < 4
         titleStr = '';
     else
         titleStr = [' | ', char(titleStr)];
     end
 
-    if nargin < 5
+    if nargin < 4
         EEGPos = EEGPosConfig();
     end
 
@@ -55,17 +51,7 @@ function Fig = plotRawWaveMultiEEG(chData, window, transTime, titleStr, EEGPos)
 
     end
 
-    yRange = scaleAxes(Fig);
-    allAxes = findobj(Fig, "Type", "axes");
-
-    for aIndex = 1:length(allAxes)
-        plot(allAxes(aIndex), [0, 0], yRange, "k--", "LineWidth", 1);
-
-        if ~isempty(transTime)
-            plot(allAxes(aIndex), transTime * ones(1, 2), yRange, "k--", "LineWidth", 1);
-        end
-        
-    end
+    scaleAxes(Fig);
 
     return;
 end

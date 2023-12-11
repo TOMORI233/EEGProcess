@@ -27,7 +27,7 @@ function [comp, ICs, FigTopoICA, FigWave, FigIC] = ICA_PopulationEEG(trialsEEG, 
     ICMean = cell2mat(cellfun(@mean, changeCellRowNum(comp.trial), "UniformOutput", false));
     ICStd = cell2mat(cellfun(@(x) std(x, [], 1), changeCellRowNum(comp.trial), "UniformOutput", false));
     FigIC = plotRawWave(ICMean, ICStd, windowICA, "ICA");
-    scaleAxes(FigIC, "y", "symOpts", "max", "uiOpt", "show");
+    scaleAxes(FigIC, "y", "symOpts", "max");
 
     % IC topo
     channels = 1:size(trialsEEG{1}, 1);
@@ -39,7 +39,7 @@ function [comp, ICs, FigTopoICA, FigWave, FigIC] = ICA_PopulationEEG(trialsEEG, 
     chMean = cell2mat(cellfun(@mean, temp, "UniformOutput", false));
     chStd = cell2mat(cellfun(@std, temp, "UniformOutput", false));
     FigWave(1) = plotRawWaveEEG(chMean, chStd, windowICA, "origin", EEGPos);
-    scaleAxes(FigWave(1), "y", "symOpts", "max", "uiOpt", "show");
+    scaleAxes(FigWave(1), "y", "symOpts", "max");
     
     % Remove bad channels in trialsEEG
     trialsEEG = cellfun(@(x) x(chs2doICA, :), trialsEEG, "UniformOutput", false);
@@ -63,7 +63,7 @@ function [comp, ICs, FigTopoICA, FigWave, FigIC] = ICA_PopulationEEG(trialsEEG, 
         chMean = cell2mat(cellfun(@mean, changeCellRowNum(temp), "UniformOutput", false));
         chStd = cell2mat(cellfun(@std, changeCellRowNum(temp), "UniformOutput", false));
         FigWave(2) = plotRawWaveEEG(chMean, chStd, windowICA, "reconstruct", EEGPos);
-        scaleAxes(FigWave(2), "y", "on", "symOpts", "max", "uiOpt", "show");
+        scaleAxes(FigWave(2), "y", "on", "symOpts", "max");
 
         k = validateInput('Press Y or Enter to continue or N to reselect ICs: ', @(x) isempty(x) || any(validatestring(x, {'y', 'n', 'N', 'Y', ''})), 's');
     end
