@@ -8,26 +8,27 @@ function Fig = plotRawWaveEEG(chMean, chStd, window, titleStr, EEGPos)
     end
 
     if nargin < 5
-        EEGPos = EEGPosConfig();
+        EEGPos = EEGPos_Neuroscan64();
     end
+
+    gridSize = EEGPos.grid;
 
     Fig = figure;
     margins = [0.05, 0.05, 0.1, 0.1];
     paddings = [0.1, 0.1, 0.03, 0.06];
     maximizeFig(Fig);
-    plotSize = [10, 9];
 
-    for rIndex = 1:plotSize(1)
+    for rIndex = 1:gridSize(1)
 
-        for cIndex = 1:plotSize(2)
-            chNum = (rIndex - 1) * plotSize(2) + cIndex;
+        for cIndex = 1:gridSize(2)
+            chNum = (rIndex - 1) * gridSize(2) + cIndex;
 
-            if chNum > size(chMean, 1) || ismember(chNum, [33, 43])
+            if chNum > size(chMean, 1)
                 continue;
             end
             
             t = linspace(window(1), window(2), size(chMean, 2));
-            mSubplot(Fig, plotSize(1), plotSize(2), EEGPos(chNum), [1, 1], margins, paddings);
+            mSubplot(Fig, gridSize(1), gridSize(2), EEGPos.map(chNum), [1, 1], margins, paddings);
             
             if ~isempty(chStd)
                 y1 = chMean(chNum, :) + chStd(chNum, :);

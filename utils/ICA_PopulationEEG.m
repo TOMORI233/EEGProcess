@@ -1,27 +1,43 @@
-function [comp, ICs, FigTopoICA, FigWave, FigIC] = ICA_PopulationEEG(trialsEEG, fs, windowICA, chs2doICA)
+function [comp, ICs] = ICA_PopulationEEG(trialsEEG, fs, windowICA, varargin)
     % Description: perform ICA on data and loop reconstructing data with input ICs until you are satisfied
     % Input:
     %     trialsEEG: nTrial*1 cell array of trial data (nCh*nSample matrix)
     %     fs: raw sample rate for [trialsEEG], in Hz
     %     windowICA: time window for [trialsEEG], in ms
+    %     chs2doICA: channel numbers
+    %     LOCPATH: full file path of *.loc
     % Output:
     %     comp: result of ICA (FieldTrip) without field [trial]
     %     ICs: the input IC number array for data reconstruction
-    %     FigTopoICA: figure of topo of all ICs
-    %     FigWave: (1) is raw wave. (2) is reconstructed wave.
-    %     FigIC: IC wave
 
-    narginchk(3, 4);
+    mIp = inputParser;
+    mIp.addRequired("trialsEEG", @iscell);
+    mIp.addRequired("fs", @(x) validateattributes(x, {'numeric'}, {'scalar', 'positive'}));
+    mIp.addRequired("windowICA", @(x) validateattributes(x, {'numeric'}, {'numel', 2, 'increasing'}));
+    mIp.addParameter("chs2doICA", [], @(x) validateattributes(x, {'numeric'}, {'integer', 'vector'}));
+    mIp.addParameter("LOCPATH", [], @(x) ischar(x) || isStringScalar(x));
+    mIp.addParameter("EEGPos", [], @isstruct);
+    mIp.parse(trialsEEG, fs, windowICA, varargin{:});
 
-    if nargin < 4
+    chs2doICA = mIp.Results.chs2doICA;
+    LOCPATH = mIp.Results.LOCPATH;
+    EEGPos = mIp.Results.EEGPos;
+
+    if isempty(chs2doICA)
         chs2doICA = 1:size(trialsEEG{1}, 1);
     end
 
+    if isempty(LOCPATH)
+        LOCPATH = 'Neuracle_chan64.loc';
+    end
+
+    if isempty(EEGPos)
+        EEGPos = EEGPos_Neuracle64;
+    end
+
+    %% Impl
     comp0 = mICA(trialsEEG, windowICA, fs, "chs2doICA", chs2doICA);
     comp = realignIC(comp0, windowICA);
-
-    EEGPos = EEGPosConfigNeuracle;
-    LOCPATH = 'Neuracle_chan64.loc';
 
     % IC Wave
     ICMean = cell2mat(cellfun(@mean, changeCellRowNum(comp.trial), "UniformOutput", false));
@@ -32,7 +48,7 @@ function [comp, ICs, FigTopoICA, FigWave, FigIC] = ICA_PopulationEEG(trialsEEG, 
     % IC topo
     channels = 1:size(trialsEEG{1}, 1);
     badCHs = channels(~ismember(channels, chs2doICA));
-    FigTopoICA = plotTopoEEG(insertRows(comp.topo, badCHs), LOCPATH);
+    plotTopoEEG(insertRows(comp.topo, badCHs), LOCPATH);
     
     % Origin raw wave
     temp = changeCellRowNum(interpolateBadChs(trialsEEG, badCHs));
