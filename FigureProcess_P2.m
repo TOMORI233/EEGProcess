@@ -18,7 +18,7 @@ for index = 1:length(vars)
     chMeanVar(index, 1).color = colors{index};
 end
 
-FigVar = plotRawWaveMultiEEG(chMeanVar, window, 1000, "Variance");
+FigVar = plotRawWaveMultiEEG(chMeanVar, window, "Variance");
 scaleAxes(FigVar, "x", [1000, 1500]);
 scaleAxes(FigVar, "y", "on", "symOpt", "max", "uiOpt", "show");
 

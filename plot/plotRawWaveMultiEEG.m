@@ -12,6 +12,7 @@ function Fig = plotRawWaveMultiEEG(chData, window, titleStr, EEGPos)
     end
 
     gridSize = EEGPos.grid;
+    chsIgnore = getOr(EEGPos, "ignore");
 
     Fig = figure;
     margins = [0.05, 0.05, 0.1, 0.1];
@@ -23,17 +24,23 @@ function Fig = plotRawWaveMultiEEG(chData, window, titleStr, EEGPos)
         for cIndex = 1:gridSize(2)
             chNum = (rIndex - 1) * gridSize(2) + cIndex;
 
-            if chNum > size(chData(1).chMean, 1)
+            if chNum > size(chData(1).chMean, 1) || ismember(chNum, chsIgnore)
                 continue;
             end
             
             mSubplot(Fig, gridSize(1), gridSize(2), EEGPos.map(chNum), [1, 1], margins, paddings);
-            
+            hold(gca, "on");
+
             for dIndex = 1:length(chData)
                 chMean = chData(dIndex).chMean;
                 t = linspace(window(1), window(2), size(chMean, 2));
-                plot(t, chMean(chNum, :), "LineWidth", 1.5, "Color", chData(dIndex).color, "DisplayName", chData(dIndex).legend);
-                hold on;
+                legendStr = getOr(chData(dIndex), "legend", '');
+                h = plot(t, chMean(chNum, :), "LineWidth", 1.5, "Color", chData(dIndex).color, "DisplayName", legendStr);
+                
+                if isempty(legendStr) || chNum > 1
+                    setLegendOff(h);
+                end
+                
             end
 
             xlim(window);

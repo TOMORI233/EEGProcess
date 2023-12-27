@@ -14,3 +14,6 @@ EEGPos.map(53 : 59) = 65:71;
 EEGPos.map(60) = 85;
 EEGPos.map(61 : 63) = 76:78;
 EEGPos.map(64) = 87;
+
+% channels not to plot
+EEGPos.ignore = [33, 43];

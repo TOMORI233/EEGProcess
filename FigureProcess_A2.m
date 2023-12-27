@@ -39,11 +39,11 @@ for index = 1:length(ICIs)
     end
 end
 
-FigREG = plotRawWaveMultiEEG(chMeanREG, window, 1600, "REG");
+FigREG = plotRawWaveMultiEEG(chMeanREG, window, "REG");
 scaleAxes(FigREG, "x", [1500, 2100]);
 scaleAxes(FigREG, "y", "on", "symOpt", "max", "uiOpt", "show");
 
-FigIRREG = plotRawWaveMultiEEG(chMeanIRREG, window, 1600, "IRREG");
+FigIRREG = plotRawWaveMultiEEG(chMeanIRREG, window, "IRREG");
 scaleAxes(FigIRREG, "x", [0, 2600]);
 scaleAxes(FigIRREG, "y", "on", "symOpt", "max", "uiOpt", "show");
 
