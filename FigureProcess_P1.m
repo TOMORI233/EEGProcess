@@ -1,272 +1,195 @@
-%% 长度
-clear; clc; close all force;
+ccc;
+cd(fileparts(mfilename("fullpath")));
 
-chMeanData = load("..\DATA\MAT DATA\population\chMean_P1_Population.mat").data;
-briData = load("..\DATA\MAT DATA\population\BRI_P1_Population.mat").data;
+ROOTPATH = '..\DATA\MAT DATA\temp';
+DATAPATHs = dir(fullfile(ROOTPATH, '**\passive1\chMean.mat'));
+DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput", false);
 
-load("chsAvg.mat", "chsAvg");
-fs = briData(1).fs;
-window = briData(1).window;
-colors = flip(cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false));
+SUBJECTs = strrep(DATAPATHs, ROOTPATH, '');
+SUBJECTs = strrep(SUBJECTs, 'passive1\chMean.mat', '');
+SUBJECTs = strrep(SUBJECTs, '\', '');
 
-%% chMean plot
-temp = vertcat(chMeanData.chMeanData);
-ICIs = unique([temp.ICI]);
+window = load(DATAPATHs{1}).window;
+fs = load(DATAPATHs{1}).fs;
+data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
 
-nREG = 0;
-nIRREG = 0;
+colors = cellfun(@(x) x / 255, {[0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
-for index = 1:length(ICIs)
-    idx = [temp.ICI] == ICIs(index) & [temp.type] == "REG";
-    if any(idx)
-        nREG = nREG + 1;
-        chMeanREG(nREG, 1).chMean = cell2mat(cellfun(@(x) mean(x, 1), changeCellRowNum({temp(idx).chMean}'), "UniformOutput", false));
-        chMeanREG(nREG, 1).ICI = ICIs(index);
-        chMeanREG(nREG, 1).type = "REG";
-        chMeanREG(nREG, 1).color = colors{nREG};
-        chMeanAvgREG(nREG, 1).chMean = mean(chMeanREG(nREG, 1).chMean(chsAvg, :), 1);
-        chMeanAvgREG(nREG, 1).color = colors{nREG};
-        chMeanAvgREG(nREG, 1).ICI = ICIs(index);
-    end
+interval = 0;
+run("config\windowConfig.m");
+windowNew = [-500, 1000];
 
-    idx = [temp.ICI] == ICIs(index) & [temp.type] == "IRREG";
-    if any(idx)
-        nIRREG = nIRREG + 1;
-        chMeanIRREG(nIRREG, 1).chMean = cell2mat(cellfun(@(x) mean(x, 1), changeCellRowNum({temp(idx).chMean}'), "UniformOutput", false));
-        chMeanIRREG(nIRREG, 1).ICI = ICIs(index);
-        chMeanIRREG(nIRREG, 1).type = "IRREG";
-        chMeanIRREG(nIRREG, 1).color = colors{nIRREG};
-        chMeanAvgIRREG(nIRREG, 1).chMean = mean(chMeanIRREG(nIRREG, 1).chMean(chsAvg, :), 1);
-        chMeanAvgIRREG(nIRREG, 1).color = colors{nIRREG};
-        chMeanAvgIRREG(nIRREG, 1).ICI = ICIs(index);
-    end
+set(0, "DefaultAxesFontSize", 12);
+set(0, "DefaultAxesTitleFontWeight", "bold");
+
+% For rms
+addpath(genpath(fullfile(matlabroot, 'toolbox\signal\signal')), '-begin');
+
+rmfcn = @rms;
+% rmfcn = @mean;
+
+run("config\avgConfig_Neuroscan64.m");
+
+%%
+% REG
+ICIsREG = unique([data{1}([data{1}.type] == "REG").ICI])';
+RM_baseREG  = cell(length(ICIsREG), 1);
+RM_changeREG = cell(length(ICIsREG), 1);
+for dIndex = 1:length(ICIsREG)
+    temp = cellfun(@(x) getOr(x([x.ICI] == ICIsREG(dIndex) & [x.type] == "REG"), "chMean"), data, "UniformOutput", false);
+    
+    % segment and align to change point
+    timeShift = 1000 + roundn(ICIsREG(dIndex), 0);
+    temp = cutData(temp, window, windowNew + timeShift);
+
+    chDataREG_All(dIndex, 1).chMean = calchMean(temp);
+    chDataREG_All(dIndex, 1).color = colors{dIndex};
+    chDataREG_All(dIndex, 1).legend = ['REG ', num2str(roundn(ICIsREG(dIndex), 0)), '-', num2str(ICIsREG(dIndex))];
+
+    temp = cellfun(@(x) x(chs2Avg, :), temp, "UniformOutput", false);
+    temp1 = cutData(temp, windowNew, windowBase - timeShift);
+    RM_baseREG{dIndex} = cellfun(@(x) rmfcn(mean(x, 1)), temp1);
+    temp2 = cutData(temp, windowNew, windowChange - timeShift);
+    RM_changeREG{dIndex} = cellfun(@(x) rmfcn(mean(x, 1)), temp2);
 end
 
-FigREG = plotRawWaveMultiEEG(chMeanREG, window, "REG");
-scaleAxes(FigREG, "x", [0, 1500]);
-scaleAxes(FigREG, "y", "on", "symOpt", "max", "uiOpt", "show");
-
-FigIRREG = plotRawWaveMultiEEG(chMeanIRREG, window, "IRREG");
-scaleAxes(FigIRREG, "x", [0, 1500]);
-scaleAxes(FigIRREG, "y", "on", "symOpt", "max", "uiOpt", "show");
-
-save("..\DATA\MAT DATA\figure\Res_chMean_P1.mat", ...
-     "chMeanREG", "chMeanIRREG", "window");
-
-%% average in channels
-t = linspace(window(1), window(2), size(chMeanREG(1).chMean, 2));
-figure;
-maximizeFig;
-mSubplot(1, 2, 1);
-hold(gca, "on");
-for index = 1:length(chMeanAvgREG)
-    plot(t - 1000, chMeanAvgREG(index).chMean, "Color", chMeanAvgREG(index).color, "LineWidth", 2, "DisplayName", num2str(chMeanAvgREG(index).ICI));
-end
-set(gca, "FontSize", 15);
-legend;
-xlabel("Time from change point (ms)");
-ylabel("ERP (\muV)");
-title("REG");
-
-mSubplot(1, 2, 2);
-hold(gca, "on");
-for index = 1:length(chMeanAvgIRREG)
-    plot(t - 1000, chMeanAvgIRREG(index).chMean, "Color", chMeanAvgIRREG(index).color, "LineWidth", 2, "DisplayName", num2str(chMeanAvgIRREG(index).ICI));
-end
-set(gca, "FontSize", 15);
-legend;
-xlabel("Time from change point (ms)");
-ylabel("ERP (\muV)");
-title("IRREG");
-scaleAxes("x", [-1300, 1500]);
+plotRawWaveMultiEEG(chDataREG_All, windowNew, [], EEGPos_Neuroscan64);
+scaleAxes("x", [-100, 500]);
 scaleAxes("y", "on", "symOpt", "max");
-addLines2Axes(struct("X", -1000, "width", 2));
-addLines2Axes(struct("X", 0, "width", 2));
+addLines2Axes(struct("X", 0));
 
-%% FFT
-[fftResREG, f] = arrayfun(@(x) mfft(x.chMean, fs), chMeanAvgREG, "UniformOutput", false);
-fftResIRREG = arrayfun(@(x) mfft(x.chMean, fs), chMeanAvgIRREG, "UniformOutput", false);
+chMean = arrayfun(@(x) mean(x.chMean(chs2Avg, :), 1), chDataREG_All, "UniformOutput", false);
+chErr = arrayfun(@(x) SE(x.chMean(chs2Avg, :), 1), chDataREG_All, "UniformOutput", false);
+chDataREG = addfield(chDataREG_All, "chMean", chMean);
+chDataREG = addfield(chDataREG, "chErr", chErr);
+FigGrandAvg = plotRawWaveMulti(chDataREG, windowNew, ['Grand-averaged wave in ', char(area)]);
+xlabel('Time (ms)');
+ylabel('Response (\muV)');
+scaleAxes("x", [-100, 500]);
+scaleAxes("y", "on", "symOpt", "max");
+addLines2Axes(struct("X", 0));
+print(FigGrandAvg, ['..\Docs\Figures\Figure 4\wave-', char(area), '.png'], "-dpng", "-r300");
 
-figure;
+% IRREG
+ICIsIRREG = unique([data{1}([data{1}.type] == "IRREG").ICI])';
+RM_baseIRREG  = cell(length(ICIsIRREG), 1);
+RM_changeIRREG = cell(length(ICIsIRREG), 1);
+for dIndex = 1:length(ICIsIRREG)
+    temp = cellfun(@(x) x([x.ICI] == ICIsIRREG(dIndex) & [x.type] == "IRREG").chMean, data, "UniformOutput", false);
+    
+    % segment and align to change point
+    timeShift = 1000 + roundn(ICIsIRREG(dIndex), 0);
+    temp = cutData(temp, window, windowNew + timeShift);
+
+    chDataIRREG_All(dIndex, 1).chMean = calchMean(temp);
+    chDataIRREG_All(dIndex, 1).color = colors{dIndex};
+    chDataIRREG_All(dIndex, 1).legend = ['IRREG ', num2str(roundn(ICIsIRREG(dIndex), 0)), '-', num2str(ICIsIRREG(dIndex))];
+
+    temp = cellfun(@(x) x(chs2Avg, :), temp, "UniformOutput", false);
+    temp1 = cutData(temp, windowNew, windowBase - timeShift);
+    RM_baseIRREG{dIndex} = cellfun(@(x) rmfcn(mean(x, 1)), temp1);
+    temp2 = cutData(temp, windowNew, windowChange - timeShift);
+    RM_changeIRREG{dIndex} = cellfun(@(x) rmfcn(mean(x, 1)), temp2);
+end
+
+plotRawWaveMultiEEG(chDataIRREG_All, windowNew, [], EEGPos_Neuroscan64);
+scaleAxes("x", [-100, 500]);
+scaleAxes("y", "on", "symOpt", "max");
+addLines2Axes(struct("X", 0));
+
+chMean = arrayfun(@(x) mean(x.chMean(chs2Avg, :), 1), chDataIRREG_All, "UniformOutput", false);
+chErr = arrayfun(@(x) SE(x.chMean(chs2Avg, :), 1), chDataIRREG_All, "UniformOutput", false);
+chDataIRREG = addfield(chDataIRREG_All, "chMean", chMean);
+chDataIRREG = addfield(chDataIRREG, "chErr", chErr);
+plotRawWaveMulti(chDataIRREG, windowNew, ['Grand-averaged wave in ', char(area)]);
+xlabel('Time (ms)');
+ylabel('Response (\muV)');
+scaleAxes("x", [-100, 500]);
+scaleAxes("y", "on", "symOpt", "max");
+addLines2Axes(struct("X", 0));
+
+%% scatter plot
+FigScatter = figure;
 maximizeFig;
-mSubplot(1, 2, 1);
-hold(gca, "on");
-for index = 1:length(fftResREG)
-    plot(f{1}, fftResREG{index}, "Color", chMeanAvgREG(index).color, "LineWidth", 2, "DisplayName", num2str(chMeanAvgREG(index).ICI));
+p_REG = zeros(length(ICIsREG), 1);
+for dIndex = 1:length(ICIsREG)
+    mSubplot(2, length(ICIsREG), dIndex, "shape", "square-min", "margin_left", 0.15, "margin_bottom", 0.25);
+    scatter(RM_baseREG{dIndex}, RM_changeREG{dIndex}, 50, "black");
+    [~, p_REG(dIndex)] = ttest(RM_baseREG{dIndex}, RM_changeREG{dIndex});
+    xRange = get(gca, "XLim");
+    yRange = get(gca, "YLim");
+    xyRange = [min([xRange, yRange]), max([xRange, yRange])];
+    xlim(xyRange);
+    ylim(xyRange);
+    xlabel("RM_{before change} (\muV)");
+    ylabel("RM_{change} (\muV)");
+    title(['REG S2 ICI=', num2str(ICIsREG(dIndex)), ' | p=', num2str(roundn(p_REG(dIndex), -4))]);
+    addLines2Axes(gca);
 end
-set(gca, "FontSize", 15);
+
+p_IRREG = zeros(length(ICIsIRREG), 1);
+for dIndex = 1:length(ICIsIRREG)
+    mSubplot(2, length(ICIsIRREG), length(ICIsIRREG) + dIndex, "shape", "square-min", "margin_left", 0.15, "margin_bottom", 0.25);
+    scatter(RM_baseIRREG{dIndex}, RM_changeIRREG{dIndex}, 50, "black");
+    [~, p_IRREG(dIndex)] = ttest(RM_baseIRREG{dIndex}, RM_changeIRREG{dIndex});
+    xRange = get(gca, "XLim");
+    yRange = get(gca, "YLim");
+    xyRange = [min([xRange, yRange]), max([xRange, yRange])];
+    xlim(xyRange);
+    ylim(xyRange);
+    xlabel("RM_{before change} (\muV)");
+    ylabel("RM_{change} (\muV)");
+    title(['IRREG S2 ICI=', num2str(ICIsIRREG(dIndex)), ' | p=', num2str(roundn(p_IRREG(dIndex), -4))]);
+    addLines2Axes(gca);
+end
+
+print(FigScatter, ['..\Docs\Figures\Figure 4\scatter-', char(area), '.png'], "-dpng", "-r300");
+
+%% tunning
+RM_deltaREG = cellfun(@(x, y) x - y, RM_changeREG, RM_baseREG, "UniformOutput", false);
+RM_deltaIRREG = cellfun(@(x, y) x - y, RM_changeIRREG, RM_baseIRREG, "UniformOutput", false);
+
+FigTuning = figure;
+maximizeFig;
+mSubplot(1, 1, 1, "shape", "square-min");
+errorbar(1:length(ICIsREG), cellfun(@mean, RM_deltaREG), cellfun(@SE, RM_deltaREG), "Color", "r", "LineWidth", 2, "DisplayName", "REG");
+hold on;
+errorbar(1:length(ICIsIRREG), cellfun(@mean, RM_deltaIRREG), cellfun(@SE, RM_deltaIRREG), "Color", "b", "LineWidth", 2, "DisplayName", "IRREG");
 legend;
-xlabel("Frequency (Hz)");
-ylabel("FFT spect");
-title("REG");
+xticks(1:length(ICIsREG));
+xlim([0, length(ICIsREG)] + 0.5);
+xticklabels(num2str(ICIsREG));
+xlabel("S2 ICI (ms)");
+ylabel("\DeltaRM_{change - before change} (\muV)");
+title("Tuning of RM");
 
-mSubplot(1, 2, 2);
-hold(gca, "on");
-for index = 1:length(fftResIRREG)
-    plot(f{1}, fftResIRREG{index}, "Color", chMeanAvgIRREG(index).color, "LineWidth", 2, "DisplayName", num2str(chMeanAvgIRREG(index).ICI));
-end
-set(gca, "FontSize", 15);
-legend;
-xlabel("Frequency (Hz)");
-ylabel("FFT spect");
-title("IRREG");
-scaleAxes("x", [0, 50]);
-scaleAxes("y");
-
-%% BRI - REG
-meanBRI_REG = zeros(length(briData), length(ICIs));
-meanBRIbase_REG = zeros(length(briData), length(ICIs));
-meanBRIbase2_REG = zeros(length(briData), length(ICIs));
-seBRI_REG = zeros(length(briData), length(ICIs));
-seBRIbase_REG = zeros(length(briData), length(ICIs));
-seBRIbase2_REG = zeros(length(briData), length(ICIs));
-
-for bIndex = 1:length(briData)
-    trialAll = briData(bIndex).trialAll;
-    BRI = briData(bIndex).BRI;
-    BRIbase = briData(bIndex).BRIbase;
-    BRIbase2 = briData(bIndex).BRIbase2;
-
-    for index = 1:length(ICIs)
-        idx = [trialAll.ICI] == ICIs(index) & [trialAll.type] == "REG";
-        meanBRI_REG(bIndex, index) = mean(BRI(idx));
-        seBRI_REG(bIndex, index) = SE(BRI(idx));
-
-        meanBRIbase_REG(bIndex, index) = mean(BRIbase(idx));
-        seBRIbase_REG(bIndex, index) = SE(BRIbase(idx));
-
-        meanBRIbase2_REG(bIndex, index) = mean(BRIbase2(idx));
-        seBRIbase2_REG(bIndex, index) = SE(BRIbase2(idx));
-    end
-
-end
-
-pREG = zeros(1, length(ICIs)); % vs baseline
-pREG2 = zeros(1, length(ICIs)); % vs before change
-pREG3 = zeros(1, length(ICIs) - 1); % vs control
-pBaseREG = zeros(1, length(ICIs)); % baseline vs before change
-for index = 1:length(ICIs)
-    [~, pREG(index)] = ttest(meanBRI_REG(:, index), meanBRIbase_REG(:, index));
-    [~, pREG2(index)] = ttest(meanBRI_REG(:, index), meanBRIbase2_REG(:, index));
-    [~, pBaseREG(index)] = ttest(meanBRIbase_REG(:, index), meanBRIbase2_REG(:, index));
-
-    if index > 1
-        [~, pREG3(index - 1)] = ttest(meanBRI_REG(:, index), meanBRI_REG(:, 1));
-    end
-end
-
-FigBRI = figure;
-maximizeFig(FigBRI);
-mAxe1 = mSubplot(FigBRI, 1, 2, 1, "shape", "square-min", "padding_left", 0.05, "padding_right", 0.05);
-for bIndex = 1:length(briData)
-    errorbar(1:length(ICIs), meanBRI_REG(bIndex, :), seBRI_REG(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
-    hold on;
-end
-errorbar(1:length(ICIs), mean(meanBRI_REG, 1), SE(meanBRI_REG, 1), 'Color', 'r', 'LineWidth', 2);
-set(gca, 'FontSize', 12);
-xticks(1:length(ICIs));
-xticklabels(num2str(ICIs'));
-xlim([0.8, length(ICIs) + 0.2]);
-xlabel('S2 ICI (ms)');
-ylabel('BRI (\muV)');
-title('REG');
-
-%% BRI - IRREG
-meanBRI_IRREG = zeros(length(briData), length(ICIs));
-meanBRIbase_IRREG = zeros(length(briData), length(ICIs));
-meanBRIbase2_IRREG = zeros(length(briData), length(ICIs));
-seBRI_IRREG = zeros(length(briData), length(ICIs));
-seBRIbase_IRREG = zeros(length(briData), length(ICIs));
-seBRIbase2_IRREG = zeros(length(briData), length(ICIs));
-
-for bIndex = 1:length(briData)
-    trialAll = briData(bIndex).trialAll;
-    BRI = briData(bIndex).BRI;
-    BRIbase = briData(bIndex).BRIbase;
-    BRIbase2 = briData(bIndex).BRIbase2;
-
-    for index = 1:length(ICIs)
-        idx = [trialAll.ICI] == ICIs(index) & [trialAll.type] == "IRREG";
-        meanBRI_IRREG(bIndex, index) = mean(BRI(idx));
-        seBRI_IRREG(bIndex, index) = SE(BRI(idx));
-
-        meanBRIbase_IRREG(bIndex, index) = mean(BRIbase(idx));
-        seBRIbase_IRREG(bIndex, index) = SE(BRIbase(idx));
-
-        meanBRIbase2_IRREG(bIndex, index) = mean(BRIbase2(idx));
-        seBRIbase2_IRREG(bIndex, index) = SE(BRIbase2(idx));
-    end
-
-end
-
-pIRREG = zeros(1, length(ICIs)); % vs baseline
-pIRREG2 = zeros(1, length(ICIs)); % vs before change
-pIRREG3 = zeros(1, length(ICIs) - 1); % vs control
-pBaseIRREG = zeros(1, length(ICIs)); % baseline vs before change
-for index = 1:length(ICIs)
-    [~, pIRREG(index)] = ttest(meanBRI_IRREG(:, index), meanBRIbase_IRREG(:, index));
-    [~, pIRREG2(index)] = ttest(meanBRI_IRREG(:, index), meanBRIbase2_IRREG(:, index));
-    [~, pBaseIRREG(index)] = ttest(meanBRIbase_IRREG(:, index), meanBRIbase2_IRREG(:, index));
-
-    if index > 1
-        [~, pIRREG3(index - 1)] = ttest(meanBRI_IRREG(:, index), meanBRI_IRREG(:, 1));
-    end
-end
-
-mAxe2 = mSubplot(FigBRI, 1, 2, 2, "shape", "square-min", "padding_left", 0.05, "padding_right", 0.05);
-for bIndex = 1:length(briData)
-    errorbar(1:length(ICIs), meanBRI_IRREG(bIndex, :), seBRI_IRREG(bIndex, :), 'Color', [200 200 200] / 255, 'LineWidth', 1);
-    hold on;
-end
-errorbar(1:length(ICIs), mean(meanBRI_IRREG, 1), SE(meanBRI_IRREG, 1), 'Color', 'r', 'LineWidth', 2);
-set(gca, 'FontSize', 12);
-xticks(1:length(ICIs));
-xticklabels(num2str(ICIs'));
-xlim([0.8, length(ICIs) + 0.2]);
-xlabel('S2 ICI (ms)');
-ylabel('BRI (\muV)');
-title('IRREG');
-
-scaleAxes(FigBRI, "y");
-
-text(mAxe1, 0.8, max(get(mAxe1, "YLim")) - 0.5, '\bf{vs [-300,0]}', "HorizontalAlignment", "right", "FontSize", 12);
-text(mAxe1, 1:length(ICIs), repmat(max(get(mAxe1, "YLim")) - 0.5, [1, length(ICIs)]), num2str(pREG'), "HorizontalAlignment", "center", "FontSize", 12);
-text(mAxe1, 0.8, max(get(mAxe1, "YLim")) - 1, '\bf{vs [900,1000]}', "HorizontalAlignment", "right", "FontSize", 12);
-text(mAxe1, 1:length(ICIs), repmat(max(get(mAxe1, "YLim")) - 1, [1, length(ICIs)]), num2str(pREG2'), "HorizontalAlignment", "center", "FontSize", 12);
-text(mAxe1, 0.8, max(get(mAxe1, "YLim")) - 1.5, '\bf{vs control}', "HorizontalAlignment", "right", "FontSize", 12);
-text(mAxe1, 2:length(ICIs), repmat(max(get(mAxe1, "YLim")) - 1.5, [1, length(ICIs) - 1]), num2str(pREG3'), "HorizontalAlignment", "center", "FontSize", 12);
-text(mAxe1, 0.8, min(get(mAxe1, "YLim")) + 0.5, '\bf{base1 vs base2}', "HorizontalAlignment", "right", "FontSize", 12);
-text(mAxe1, 1:length(ICIs), repmat(min(get(mAxe1, "YLim")) + 0.5, [1, length(ICIs)]), num2str(pBaseREG'), "HorizontalAlignment", "center", "FontSize", 12);
-
-text(mAxe2, 1:length(ICIs), repmat(max(get(mAxe2, "YLim")) - 0.5, [1, length(ICIs)]), num2str(pIRREG'), "HorizontalAlignment", "center", "FontSize", 12);
-text(mAxe2, 1:length(ICIs), repmat(max(get(mAxe2, "YLim")) - 1, [1, length(ICIs)]), num2str(pIRREG2'), "HorizontalAlignment", "center", "FontSize", 12);
-text(mAxe2, 2:length(ICIs), repmat(max(get(mAxe2, "YLim")) - 1.5, [1, length(ICIs) - 1]), num2str(pIRREG3'), "HorizontalAlignment", "center", "FontSize", 12);
-text(mAxe2, 1:length(ICIs), repmat(min(get(mAxe2, "YLim")) + 0.5, [1, length(ICIs)]), num2str(pBaseIRREG'), "HorizontalAlignment", "center", "FontSize", 12);
+print(FigTuning, ['..\Docs\Figures\Figure 4\tuning-', char(area), '.png'], "-dpng", "-r300");
 
 %% save
-ICIsREG = ICIs;
-ICIsIRREG = ICIs;
-save("..\DATA\MAT DATA\figure\Res_BRI_P1.mat", ...
+params = [fieldnames(getVarsFromWorkspace('RM_\W*')); ...
+          fieldnames(getVarsFromWorkspace('p_\W*'))];
+save(strcat("..\DATA\MAT DATA\figure\Res_RM_P1-", area, ".mat"), ...
      "fs", ...
-     "meanBRI_REG", ...
-     "meanBRI_IRREG", ...
-     "meanBRIbase_REG", ...
-     "meanBRIbase_IRREG", ...
-     "meanBRIbase2_REG", ...
-     "meanBRIbase2_IRREG", ...
-     "seBRI_REG", ...
-     "seBRI_IRREG", ...
-     "seBRIbase_REG", ...
-     "seBRIbase_IRREG", ...
-     "seBRIbase2_REG", ...
-     "seBRIbase2_IRREG", ...
-     "pREG", ...
-     "pREG2", ...
-     "pREG3", ...
-     "pIRREG", ...
-     "pIRREG2", ...
-     "pIRREG3", ...
-     "pBaseREG", ...
-     "pBaseIRREG", ...
      "ICIsREG", ...
-     "ICIsIRREG");
+     "ICIsIRREG", ...
+     "chs2Avg", ...
+     "windowNew", ...
+     params{:});
+
+%% Figure result
+% wave
+res_t = linspace(windowNew(1), windowNew(2), length(chDataREG(1).chMean))';
+res_chMean0 = addfield(chDataREG, "chMean", arrayfun(@(x) x.chMean', chDataREG, "UniformOutput", false));
+temp = {res_chMean0.chMean};
+res_chMean  = cat(2, temp{:});
+res_chErr0 = addfield(chDataREG, "chErr", arrayfun(@(x) x.chErr', chDataREG, "UniformOutput", false));
+temp = {res_chErr0.chErr};
+res_chErr  = cat(2, temp{:});
+
+% tuning
+res_tuningREG_mean = cellfun(@mean, RM_deltaREG);
+res_tuningREG_se = cellfun(@SE, RM_deltaREG);
+res_p_change_vs_base_REG = p_REG;
+
+params = fieldnames(getVarsFromWorkspace('res_\W*'));
+save(['..\Docs\Figures\Figure 4\data-', char(area), '.mat'], params{:});

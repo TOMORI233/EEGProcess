@@ -1,7 +1,7 @@
-function Fig = plotRawWaveEEG(chMean, chStd, window, titleStr, EEGPos)
+function Fig = plotRawWaveEEG(chMean, chErr, window, titleStr, EEGPos)
     narginchk(3, 5);
 
-    if nargin < 4
+    if nargin < 4 || isempty(titleStr)
         titleStr = '';
     else
         titleStr = [' | ', char(titleStr)];
@@ -12,6 +12,8 @@ function Fig = plotRawWaveEEG(chMean, chStd, window, titleStr, EEGPos)
     end
 
     gridSize = EEGPos.grid;
+    chsIgnore = getOr(EEGPos, "ignore");
+    channelNames = getOr(EEGPos, "channelNames");
 
     Fig = figure;
     margins = [0.05, 0.05, 0.1, 0.1];
@@ -23,16 +25,16 @@ function Fig = plotRawWaveEEG(chMean, chStd, window, titleStr, EEGPos)
         for cIndex = 1:gridSize(2)
             chNum = (rIndex - 1) * gridSize(2) + cIndex;
 
-            if chNum > size(chMean, 1)
+            if chNum > size(chMean, 1) || ismember(chNum, chsIgnore)
                 continue;
             end
             
             t = linspace(window(1), window(2), size(chMean, 2));
             mSubplot(Fig, gridSize(1), gridSize(2), EEGPos.map(chNum), [1, 1], margins, paddings);
             
-            if ~isempty(chStd)
-                y1 = chMean(chNum, :) + chStd(chNum, :);
-                y2 = chMean(chNum, :) - chStd(chNum, :);
+            if ~isempty(chErr)
+                y1 = chMean(chNum, :) + chErr(chNum, :);
+                y2 = chMean(chNum, :) - chErr(chNum, :);
                 fill([t fliplr(t)], [y1 fliplr(y2)], [0, 0, 0], 'edgealpha', '0', 'facealpha', '0.3', 'DisplayName', 'Error bar');
                 hold on;
             end
@@ -41,7 +43,11 @@ function Fig = plotRawWaveEEG(chMean, chStd, window, titleStr, EEGPos)
             hold on;
 
             xlim(window);
-            title(['CH ', num2str(chNum), titleStr]);
+            if ~isempty(channelNames)
+                title(['CH ', num2str(chNum), ' | ', channelNames{chNum}, titleStr]);
+            else
+                title(['CH ', num2str(chNum), titleStr]);
+            end
         end
 
     end

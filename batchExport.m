@@ -80,8 +80,8 @@ for dIndex = 1:length(DAYPATHs)
 
         % For each protocol
         for pIndex = 1:length(protocols)
-            mkdir(fullfile(SAVEPATH, protocols{pIndex}, DATESTRs{dIndex}));
-            MATNAME = fullfile(SAVEPATH, protocols{pIndex}, DATESTRs{dIndex}, strcat(protocols(pIndex), ".mat"));
+            mkdir(fullfile(SAVEPATH, protocols{pIndex}));
+            MATNAME = fullfile(SAVEPATH, protocols{pIndex}, strcat(protocols(pIndex), ".mat"));
             window = windows([windows.protocol] == protocols{pIndex}).window;
             trialAll = trialDatasets([trialDatasets.protocol] == protocols(pIndex)).trialAll';
             trialsEEG = selectEEG(EEGDatasets([EEGDatasets.protocol] == protocols(pIndex)), ...

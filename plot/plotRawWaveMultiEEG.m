@@ -13,6 +13,7 @@ function Fig = plotRawWaveMultiEEG(chData, window, titleStr, EEGPos)
 
     gridSize = EEGPos.grid;
     chsIgnore = getOr(EEGPos, "ignore");
+    channelNames = getOr(EEGPos, "channelNames");
 
     Fig = figure;
     margins = [0.05, 0.05, 0.1, 0.1];
@@ -44,7 +45,11 @@ function Fig = plotRawWaveMultiEEG(chData, window, titleStr, EEGPos)
             end
 
             xlim(window);
-            title(['CH ', num2str(chNum), titleStr]);
+            if ~isempty(channelNames)
+                title(['CH ', num2str(chNum), ' | ', channelNames{chNum}, titleStr]);
+            else
+                title(['CH ', num2str(chNum), titleStr]);
+            end
             yticks([]);
             yticklabels('');
 
