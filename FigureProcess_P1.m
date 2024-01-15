@@ -1,7 +1,7 @@
 ccc;
 cd(fileparts(mfilename("fullpath")));
 
-ROOTPATH = '..\DATA\MAT DATA\temp';
+ROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
 DATAPATHs = dir(fullfile(ROOTPATH, '**\passive1\chMean.mat'));
 DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput", false);
 

@@ -1,7 +1,7 @@
 ccc;
 cd(fileparts(mfilename("fullpath")));
 
-ROOTPATH = '..\DATA\MAT DATA\temp';
+ROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
 DATAPATHs = dir(fullfile(ROOTPATH, '**\active1\chMean.mat'));
 DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput", false);
 
@@ -174,61 +174,61 @@ title("Tuning of RM");
 print(FigTuning, ['..\Docs\Figures\Figure 9\tuning-', char(area), '.png'], "-dpng", "-r300");
 
 %% REG vs PT
-% % PT
-% freqs = unique([data{1}([data{1}.type] == "PT").freq])';
-% RM_basePT  = cell(length(freqs), 1);
-% RM_changePT = cell(length(freqs), 1);
-% skipIdxPT = false(length(data), length(freqs));
-% for fIndex = 1:length(freqs)
-%     temp = cellfun(@(x) getOr(x([x.freq] == freqs(fIndex) & [x.type] == "PT"), "chMean"), data, "UniformOutput", false);
-%     skipIdxPT(:, fIndex) = cellfun(@isempty, temp);
-%     chDataPT(fIndex, 1).chMean = calchMean(temp);
-%     chDataPT(fIndex, 1).color = colors{end - fIndex + 1};
-%     chDataPT(fIndex, 1).legend = ['PT ', num2str(freqs(fIndex))];
-% 
-%     temp(~skipIdxPT(:, fIndex)) = cellfun(@(x) x(chs2Avg, :), temp(~skipIdxPT(:, fIndex)), "UniformOutput", false);
-%     temp1 = cutData(temp, window, windowBase);
-%     RM_basePT{fIndex} = cellfun(@(x) rmfcn(mean(x, 1)), temp1);
-%     temp2 = cutData(temp, window, windowChange);
-%     RM_changePT{fIndex} = cellfun(@(x) rmfcn(mean(x, 1)), temp2);
-% end
-% 
-% plotRawWaveMultiEEG(chDataPT, window, [], EEGPos_Neuroscan64);
-% scaleAxes("y", "on", "symOpt", "max");
-% addLines2Axes(struct("X", {0; 1000; 2000}));
-% 
-% chMean = arrayfun(@(x) mean(x.chMean(chs2Avg, :), 1), chDataPT, "UniformOutput", false);
-% chDataPT = addfield(chDataPT, "chMean", chMean);
-% plotRawWaveMulti(chDataPT, window, ['Grand-averaged wave in ', char(area)]);
-% scaleAxes("y", "on", "symOpt", "max");
-% addLines2Axes(struct("X", {0; 1000; 2000}));
-% 
-% figure;
-% maximizeFig;
-% mSubplot(1, 1, 1, "shape", "square-min", "margin_left", 0.15);
-% X = RM_changePT{1} - RM_basePT{1};
-% Y = RM_changeREG{end} - RM_baseREG{end};
-% X(skipIdxREG(:, end) | skipIdxPT(:, 1)) = [];
-% Y(skipIdxREG(:, end) | skipIdxPT(:, 1)) = [];
-% scatter(X, Y, 50, "black");
-% [~, p_PT] = ttest(X, Y);
-% xRange = get(gca, "XLim");
-% yRange = get(gca, "YLim");
-% xyRange = [min([xRange, yRange]), max([xRange, yRange])];
-% xlim(xyRange);
-% ylim(xyRange);
-% xlabel("\DeltaRM_{PT} (\muV)");
-% ylabel("\DeltaRM_{REG} (\muV)");
-% title(['PT vs REG | p=', num2str(p_PT)]);
-% addLines2Axes(gca);
-% addLines2Axes(gca, struct("X", 0));
-% addLines2Axes(gca, struct("Y", 0));
-% 
-% chDataTemp = [chDataREG(end); chDataPT(1)];
-% chDataTemp(2).color = [0, 0, 1];
-% plotRawWaveMulti(chDataTemp, window, ['Grand-averaged wave in ', char(area)]);
-% scaleAxes("y", "on", "symOpt", "max");
-% addLines2Axes(struct("X", {0; 1000; 2000}));
+% PT
+freqs = unique([data{1}([data{1}.type] == "PT").freq])';
+RM_basePT  = cell(length(freqs), 1);
+RM_changePT = cell(length(freqs), 1);
+skipIdxPT = false(length(data), length(freqs));
+for fIndex = 1:length(freqs)
+    temp = cellfun(@(x) getOr(x([x.freq] == freqs(fIndex) & [x.type] == "PT" & [x.nTrial] >= 10), "chMean"), data, "UniformOutput", false);
+    skipIdxPT(:, fIndex) = cellfun(@isempty, temp);
+    chDataPT(fIndex, 1).chMean = calchMean(temp);
+    chDataPT(fIndex, 1).color = colors{end - fIndex + 1};
+    chDataPT(fIndex, 1).legend = ['PT ', num2str(freqs(fIndex))];
+
+    temp(~skipIdxPT(:, fIndex)) = cellfun(@(x) x(chs2Avg, :), temp(~skipIdxPT(:, fIndex)), "UniformOutput", false);
+    temp1 = cutData(temp, window, windowBase);
+    RM_basePT{fIndex} = cellfun(@(x) rmfcn(mean(x, 1)), temp1);
+    temp2 = cutData(temp, window, windowChange);
+    RM_changePT{fIndex} = cellfun(@(x) rmfcn(mean(x, 1)), temp2);
+end
+
+RM_deltaPT = cellfun(@(x, y) x - y, RM_changePT, RM_basePT, "UniformOutput", false);
+
+plotRawWaveMultiEEG(chDataPT, window, [], EEGPos_Neuroscan64);
+scaleAxes("y", "on", "symOpt", "max");
+addLines2Axes(struct("X", {0; 1000; 2000}));
+
+chMean = arrayfun(@(x) mean(x.chMean(chs2Avg, :), 1), chDataPT, "UniformOutput", false);
+chErr = arrayfun(@(x) SE(x.chMean(chs2Avg, :), 1), chDataPT, "UniformOutput", false);
+chDataPT = addfield(chDataPT, "chMean", chMean);
+chDataPT = addfield(chDataPT, "chErr", chErr);
+chDataTemp = [chDataREG(end); chDataPT(1)];
+chDataTemp(2).color = [0, 0, 1];
+plotRawWaveMulti(chDataTemp, window, ['Grand-averaged wave in ', char(area)]);
+scaleAxes("y", "on", "symOpt", "max");
+addLines2Axes(struct("X", {0; 1000; 2000}));
+
+figure;
+maximizeFig;
+mSubplot(1, 1, 1, "shape", "square-min", "margin_left", 0.15);
+X = RM_deltaPT{1};
+Y = RM_deltaREG{end};
+X(skipIdxREG(:, end) | skipIdxPT(:, 1)) = [];
+Y(skipIdxREG(:, end) | skipIdxPT(:, 1)) = [];
+scatter(X, Y, 50, "black");
+[~, p_PT] = ttest(X, Y);
+xRange = get(gca, "XLim");
+yRange = get(gca, "YLim");
+xyRange = [min([xRange, yRange]), max([xRange, yRange])];
+xlim(xyRange);
+ylim(xyRange);
+xlabel("\DeltaRM_{PT} (\muV)");
+ylabel("\DeltaRM_{REG} (\muV)");
+title(['PT vs REG | p=', num2str(p_PT), ' | N=', num2str(length(X))]);
+addLines2Axes(gca);
+addLines2Axes(gca, struct("X", 0));
+addLines2Axes(gca, struct("Y", 0));
 
 %% save
 params = [fieldnames(getVarsFromWorkspace('RM_\W*')); ...

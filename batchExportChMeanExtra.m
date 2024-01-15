@@ -1,10 +1,10 @@
 ccc;
 
-ROOTPATH = '..\DATA\MAT DATA - extra\pre';
-SAVEROOTPATH = '..\DATA\MAT DATA - extra\temp';
+ROOTPATH = getAbsPath('..\DATA\MAT DATA - extra\pre');
+SAVEROOTPATH = getAbsPath('..\DATA\MAT DATA - extra\temp');
 
 protocols = {'111', '112', '113'};
-windowNew = [-500, 2000]; % ms
+windowNew = [-500, 2500]; % ms
 
 for pIndex = 1:length(protocols)
     disp(['Current protocol: ', protocols{pIndex}]);
@@ -13,9 +13,9 @@ for pIndex = 1:length(protocols)
     DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput", false);
     SAVEPATHs = cellfun(@(x) strrep(fileparts(x), ROOTPATH, SAVEROOTPATH), DATAPATHs, "UniformOutput", false);
 
-    SUBJECTs = strrep(DATAPATHs, ROOTPATH, '');
-    SUBJECTs = strrep(SUBJECTs, [protocols{pIndex}, '\data.mat'], '');
-    SUBJECTs = strrep(SUBJECTs, '\', '');
+    SUBJECTs = strrep(DATAPATHs, ['\', protocols{pIndex}, '\data.mat'], '');
+    temp = split(SUBJECTs, '\');
+    SUBJECTs = rowFcn(@(x) x{end}, temp, "UniformOutput", false);
 
     cellfun(@mkdir, SAVEPATHs);
 

@@ -1,7 +1,7 @@
 ccc;
 cd(fileparts(mfilename("fullpath")));
 
-ROOTPATH = '..\DATA\MAT DATA - extra\temp';
+ROOTPATH = getAbsPath('..\DATA\MAT DATA - extra\temp');
 DATAPATHs = dir(fullfile(ROOTPATH, '**\111\chMean.mat'));
 DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput", false);
 
@@ -20,7 +20,7 @@ colors = [{[0.5, 0.5, 0.5]}; ...
 
 interval = 0;
 run("config\windowConfig.m");
-windowChange = 1000 + [50, 170]; % consider when N > 32 there might be off response
+windowChange = 1000 + [50, 130]; % consider when N > 32 there might be off response
 
 set(0, "DefaultAxesFontSize", 12);
 set(0, "DefaultAxesTitleFontWeight", "bold");

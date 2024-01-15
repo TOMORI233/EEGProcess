@@ -1,6 +1,6 @@
 ccc;
 
-ROOTPATH = '..\DATA\MAT DATA\temp';
+ROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
 
 margins = [0.05, 0.05, 0.1, 0.1];
 
@@ -10,7 +10,7 @@ freqs = [246.3054, 250];
 
 thL = 0.3;
 thH = 0.6;
-thBeh = 0.5;
+thBeh = 0.6;
 
 set(0, "DefaultAxesFontSize", 12);
 set(0, "DefaultAxesTitleFontWeight", "bold");
@@ -19,9 +19,9 @@ set(0, "DefaultAxesTitleFontWeight", "bold");
 DATAPATHs = dir(fullfile(ROOTPATH, '**\active1\behavior.mat'));
 DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput", false);
 
-SUBJECTs = strrep(DATAPATHs, ROOTPATH, '');
-SUBJECTs = strrep(SUBJECTs, 'active1\behavior.mat', '');
-SUBJECTs = strrep(SUBJECTs, '\', '');
+SUBJECTs = strrep(DATAPATHs, '\active1\behavior.mat', '');
+temp = split(SUBJECTs, '\');
+SUBJECTs = rowFcn(@(x) x{end}, temp, "UniformOutput", false);
 
 data = cellfun(@(x) load(x).behaviorRes, DATAPATHs, "UniformOutput", false);
 
@@ -53,9 +53,6 @@ save("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1", "resREG_A1", "
 save("..\DATA\MAT DATA\figure\subjectIdx_A2.mat", "subjectIdxA2", "resREG_A2", "resIRREG_A2");
 
 %% Plot
-fitResMeanREG_A1 = fitBehavior(mean(cell2mat(resREG_A1(subjectIdxA1)), 1), ICIsREG);
-fitResMeanREG_A2 = fitBehavior(mean(cell2mat(resREG_A2(subjectIdxA2)), 1), ICIsREG);
-
 FigFit = figure;
 maximizeFig;
 
@@ -66,7 +63,8 @@ for index = 1:length(temp)
     plot(ICIsREG, temp{index}, 'Color', [255 192 203] / 255);
     hold on;
 end
-plot(fitResMeanREG_A1(1, :), fitResMeanREG_A1(2, :), 'Color', 'r', 'LineWidth', 2);
+temp = changeCellRowNum(cellfun(@(x) x', temp, "UniformOutput", false));
+errorbar(ICIsREG, cellfun(@mean, temp), cellfun(@SE, temp), 'Color', 'r', 'LineWidth', 2);
 set(gca, "FontSize", 12);
 xticks(ICIsREG);
 xlabel('S2 ICI (ms)');
@@ -79,7 +77,7 @@ for index = 1:length(temp)
     plot(temp{index}, 'Color', [135 206 235] / 255);
     hold on;
 end
-errorbar(1:length(ICIsIRREG), mean(cell2mat(temp), 1), SE(cell2mat(temp), 1), 'Color', 'b', 'LineWidth', 2);
+errorbar(1:length(ICIsIRREG), mean(cell2mat(temp), 1)', SE(cell2mat(temp), 1)', 'Color', 'b', 'LineWidth', 2);
 set(gca, "FontSize", 12);
 xticks(1:length(ICIsIRREG));
 xticklabels(num2str(ICIsIRREG'));
@@ -93,7 +91,7 @@ for index = 1:length(temp)
     plot(temp{index}, 'Color', [189 252 201] / 255);
     hold on;
 end
-errorbar(1:length(freqs), mean(cell2mat(temp), 1), SE(cell2mat(temp), 1), 'Color', 'g', 'LineWidth', 2);
+errorbar(1:length(freqs), mean(cell2mat(temp), 1)', SE(cell2mat(temp), 1)', 'Color', 'g', 'LineWidth', 2);
 set(gca, "FontSize", 12);
 xticks(1:length(freqs));
 xticklabels(num2str(freqs'));
@@ -109,7 +107,8 @@ for index = 1:length(temp)
     hold on;
 end
 set(gca, "FontSize", 12);
-plot(fitResMeanREG_A2(1, :), fitResMeanREG_A2(2, :), 'Color', 'r', 'LineWidth', 2);
+temp = changeCellRowNum(cellfun(@(x) x', temp, "UniformOutput", false));
+errorbar(ICIsREG, cellfun(@mean, temp), cellfun(@SE, temp), 'Color', 'r', 'LineWidth', 2);
 xticks(ICIsREG);
 xlabel('S2 ICI (ms)');
 ylabel('Press for difference ratio');
@@ -176,23 +175,30 @@ end
 try
     load('..\DATA\MAT DATA\figure\behavior fitres.mat', "fitResREG_A1", "fitResREG_A2");
 catch
-    fitResREG_A1 = cellfun(@(x) fitBehavior(x, ICIsREG), resREG_A1(subjectIdx), "UniformOutput", false);
-    fitResREG_A2 = cellfun(@(x) fitBehavior(x, ICIsREG), resREG_A2(subjectIdx), "UniformOutput", false);
+    fitResREG_A1 = cellfun(@(x) fitBehavior(x, ICIsREG), resREG_A1, "UniformOutput", false);
+    fitResREG_A2 = cellfun(@(x) fitBehavior(x, ICIsREG), resREG_A2, "UniformOutput", false);
     save('..\DATA\MAT DATA\figure\behavior fitres.mat', "fitResREG_A1", "fitResREG_A2");
 end
 
 thREG_A1 = cellfun(@(x) findBehaviorThreshold(x, thBeh), fitResREG_A1);
 thREG_A2 = cellfun(@(x) findBehaviorThreshold(x, thBeh), fitResREG_A2);
-idx = find(thREG_A1 > ICIsREG(1) & thREG_A1 < ICIsREG(end) & thREG_A2 > ICIsREG(1) & thREG_A2 < ICIsREG(end));
+
+% Filter
+idx = thREG_A1 > ICIsREG(1) & thREG_A1 < ICIsREG(end) & thREG_A2 > ICIsREG(1) & thREG_A2 < ICIsREG(end);
+idxA1 = find(subjectIdxA1 & idx);
+idxA2 = find(subjectIdxA2 & idx);
+idxBoth = find(subjectIdxA1 & subjectIdxA2 & idx);
 
 %% Plot Behavior threshold res
 FigHist = figure;
 maximizeFig;
 mSubplot(2, 2, 1);
-for index = 1:length(idx)
-    plot(fitResREG_A1{idx(index)}(1, :), fitResREG_A1{idx(index)}(2, :), 'Color', 'r', 'LineWidth', 1.5);
-    hold on;
-    plot(fitResREG_A2{idx(index)}(1, :), fitResREG_A2{idx(index)}(2, :), 'Color', 'b', 'LineWidth', 1.5);
+hold(gca, "on");
+for index = 1:length(idxA1)
+    plot(fitResREG_A1{idxA1(index)}(1, :), fitResREG_A1{idxA1(index)}(2, :), 'Color', 'r', 'LineWidth', 1.5);
+end
+for index = 1:length(idxA2)
+    plot(fitResREG_A2{idxA2(index)}(1, :), fitResREG_A2{idxA2(index)}(2, :), 'Color', 'b', 'LineWidth', 1.5);
 end
 set(gca, "FontSize", 12);
 ylim([0, 1]);
@@ -201,9 +207,9 @@ xlabel('S2 ICI (ms)');
 ylabel('Press for difference ratio');
 
 mSubplot(2, 2, 3, "margin_top", 0.15);
-meanThREG_A1 = mean(thREG_A1(idx));
-meanThREG_A2 = mean(thREG_A2(idx));
-mHistogram([thREG_A1(idx), thREG_A2(idx)]', ...
+meanThREG_A1 = mean(thREG_A1(idxBoth));
+meanThREG_A2 = mean(thREG_A2(idxBoth));
+mHistogram([thREG_A1(idxBoth), thREG_A2(idxBoth)]', ...
            "BinWidth", mode(diff(ICIsREG)) / 2, ...
            "Color", {[1 0 0], ...
                      [0 0 1]}, ...
@@ -216,17 +222,62 @@ set(gca, "FontSize", 12);
 xlabel('Behavior threshold ICI (ms)');
 ylabel('Subject count');
 legend;
-[~, p] = ttest(thREG_A1(idx), thREG_A2(idx));
-title(['Pairwise t-test p=', num2str(p)])
+[~, p] = ttest(thREG_A1(idxBoth), thREG_A2(idxBoth));
+title(['Pairwise t-test p=', num2str(p)]);
 
 mSubplot(1, 2, 2, "shape", "square-min", "margin_left", 0.15);
-scatter(thREG_A1(idx), thREG_A2(idx), 100, "k");
+scatter(thREG_A1(idxBoth), thREG_A2(idxBoth), 100, "k");
 set(gca, "FontSize", 12);
-[R, p] = corr(thREG_A1(idx), thREG_A2(idx), "type", "Pearson");
+[R, p] = corr(thREG_A1(idxBoth), thREG_A2(idxBoth), "type", "Pearson");
 hold on;
 plot([ICIsREG(1), ICIsREG(end)], [ICIsREG(1), ICIsREG(end)], "k--", "LineWidth", 2);
 xlabel('Behavior threshold ICI (Seamless transition)');
 ylabel('Behavior threshold ICI (DMS delay = 600 ms)');
-title(['Pearson Corr R=', num2str(R), ' | p=', num2str(p), ' | N=', num2str(length(idx))]);
+title(['Pearson Corr R=', num2str(R), ' | p=', num2str(p), ' | N=', num2str(length(idxBoth))]);
 
 print(FigHist, '..\Docs\Figures\Figure 8&11\Hist.png', "-dpng", "-r300");
+
+%%
+[N, EDGES] = histcounts(thREG_A1(idxA1), 4:0.01/4:4.06);
+N = N';
+EDGES = EDGES(1:end - 1)' + mode(diff(EDGES)) / 2;
+thMedian = median(thREG_A1(idxA1));
+
+[N_A1, EDGES_A1] = histcounts(thREG_A1(idxBoth), 4:0.01/2:4.06);
+N_A1 = N_A1';
+EDGES_A1 = EDGES_A1(1:end - 1)' + mode(diff(EDGES_A1)) / 2;
+thMedianA1 = median(thREG_A1(idxBoth));
+
+[N_A2, EDGES_A2] = histcounts(thREG_A2(idxBoth), 4:0.01/2:4.06);
+N_A2 = N_A2';
+EDGES_A2 = EDGES_A2(1:end - 1)' + mode(diff(EDGES_A2)) / 2;
+thMedianA2 = median(thREG_A2(idxBoth));
+
+%% Figure result
+temp = arrayfun(@(x) cellfun(@(y) y(x), resREG_A1), [1:5]', "UniformOutput", false);
+res_mean_REG_A1 = cellfun(@mean, temp);
+res_se_REG_A1 = cellfun(@SE, temp);
+
+temp = arrayfun(@(x) cellfun(@(y) y(x), resIRREG_A1), [1:3]', "UniformOutput", false);
+res_mean_IRREG_A1 = cellfun(@mean, temp);
+res_se_IRREG_A1 = cellfun(@SE, temp);
+
+temp = arrayfun(@(x) cellfun(@(y) y(x), resPT_A1), [1:2]', "UniformOutput", false);
+res_mean_PT_A1 = flip(cellfun(@mean, temp)); % 250, 246
+res_se_PT_A1 = flip(cellfun(@SE, temp));
+
+temp = arrayfun(@(x) cellfun(@(y) y(x), resREG_A2), [1:5]', "UniformOutput", false);
+res_mean_REG_A2 = cellfun(@mean, temp);
+res_se_REG_A2 = cellfun(@SE, temp);
+
+res_mean_IRREG_A2 = [mean(temp1, 1), mean(temp2, 1)]';
+res_se_IRREG_A2 = [SE(temp1, 1), SE(temp2, 1)]';
+
+res_alone_th_hist_edge_A1 = EDGES;
+res_alone_th_hist_N_A1 = N;
+res_compare_th_hist_edge = EDGES_A1;
+res_compare_th_hist_N_A1 = N_A1;
+res_compare_th_hist_N_A2 = N_A2;
+
+res_compare_th_scatterX_nogapped = thREG_A1(idxBoth);
+res_compare_th_scatterY_gapped = thREG_A2(idxBoth);

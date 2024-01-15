@@ -1,7 +1,7 @@
 ccc;
 cd(fileparts(mfilename("fullpath")));
 
-ROOTPATH = '..\DATA\MAT DATA - extra\temp';
+ROOTPATH = getAbsPath('..\DATA\MAT DATA - extra\temp');
 DATAPATHs = dir(fullfile(ROOTPATH, '**\113\chMean.mat'));
 DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput", false);
 
@@ -85,7 +85,7 @@ chData = addfield(chData, "chErr", chErr);
 FigGrandAvg = plotRawWaveMulti(chData, window, ['Grand-averaged wave in ', char(area)]);
 xlabel('Time (ms)');
 ylabel('Response (\muV)');
-scaleAxes("x", [0, 2000]);
+scaleAxes("x", [0, 2500]);
 scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", {0; 1000; 2000}));
 print(FigGrandAvg, ['..\Docs\Figures\Figure 7\wave-', char(area), '.png'], "-dpng", "-r300");

@@ -1,7 +1,7 @@
 ccc;
 
-ROOTPATH = '..\DATA\MAT DATA\pre';
-SAVEROOTPATH = '..\DATA\MAT DATA\temp';
+ROOTPATH = getAbsPath('..\DATA\MAT DATA\pre');
+SAVEROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
 
 protocols = {'passive1', 'passive2', 'passive3', 'active1', 'active2'};
 
@@ -12,9 +12,9 @@ for pIndex = 1:length(protocols)
     DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput", false);
     SAVEPATHs = cellfun(@(x) strrep(fileparts(x), ROOTPATH, SAVEROOTPATH), DATAPATHs, "UniformOutput", false);
 
-    SUBJECTs = strrep(DATAPATHs, ROOTPATH, '');
-    SUBJECTs = strrep(SUBJECTs, [protocols{pIndex}, '\data.mat'], '');
-    SUBJECTs = strrep(SUBJECTs, '\', '');
+    SUBJECTs = strrep(DATAPATHs, ['\', protocols{pIndex}, '\data.mat'], '');
+    temp = split(SUBJECTs, '\');
+    SUBJECTs = rowFcn(@(x) x{end}, temp, "UniformOutput", false);
 
     cellfun(@mkdir, SAVEPATHs);
 
