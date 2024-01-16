@@ -5,6 +5,8 @@ area = "Temporal-Parietal-Occipital";
 dataA1 = load(strcat("..\DATA\MAT DATA\figure\Res_RM_A1-", area, ".mat"));
 dataP3 = load(strcat("..\DATA\MAT DATA\figure\Res_RM_P3-", area, ".mat"));
 
+load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
+
 ICIsREG = dataA1.ICIsREG;
 
 set(0, "DefaultAxesFontSize", 12);
@@ -33,8 +35,8 @@ scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", 0));
 
 mSubplot(2, 3, 5, "shape", "square-min");
+hold(gca, "on");
 errorbar((1:length(ICIsREG)) + 0.01, cellfun(@mean, dataA1.RM_deltaREG), cellfun(@SE, dataA1.RM_deltaREG), "Color", "r", "LineWidth", 2, "DisplayName", "Behavior");
-hold on;
 errorbar((1:length(ICIsREG)) - 0.01, cellfun(@mean, dataP3.RM_deltaREG), cellfun(@SE, dataP3.RM_deltaREG), "Color", "b", "LineWidth", 2, "DisplayName", "Non-behavior");
 legend("Location", "northwest");
 xticks(1:length(ICIsREG));
@@ -46,7 +48,22 @@ title("Tuning of RM");
 
 print(Fig, ['..\Docs\Figures\Figure 10\tuning-', char(area), '.png'], "-dpng", "-r300");
 
-[~, p] = cellfun(@(x, y) ttest2(x, y), dataA1.RM_deltaREG, dataP3.RM_deltaREG);
+[~, p] = rowFcn(@(x, y, z) ttest(x{1}, y{1}(~z)), dataA1.RM_deltaREG, dataP3.RM_deltaREG, dataA1.skipIdxREG');
+figure;
+maximizeFig;
+for index = 1:length(ICIsREG)
+    mSubplot(1, length(ICIsREG), index, "shape", "square-min", "margin_left", 0.2);
+    scatter(dataP3.RM_deltaREG{index}(~dataA1.skipIdxREG(:, index)), dataA1.RM_deltaREG{index}, 50, "black");
+    xRange = get(gca, "XLim");
+    yRange = get(gca, "YLim");
+    xyRange = [min([xRange, yRange]), max([xRange, yRange])];
+    xlim(xyRange);
+    ylim(xyRange);
+    xlabel("RM_{non-behavior} (\muV)");
+    ylabel("RM_{behavior} (\muV)");
+    title(['REG S2 ICI=', num2str(ICIsREG(index)), ' | p=', num2str(roundn(p(index), -4))]);
+    addLines2Axes(gca);
+end
 
 %% Figure result
 % wave
@@ -59,6 +76,11 @@ res_tuning_mean_behavior = cellfun(@mean, dataA1.RM_deltaREG);
 res_tuning_se_behavior = cellfun(@SE, dataA1.RM_deltaREG);
 res_tuning_mean_nonbehavior = cellfun(@mean, dataP3.RM_deltaREG);
 res_tuning_se_nonbehavior = cellfun(@SE, dataP3.RM_deltaREG);
+
+res_tuning_base_mean_behavior = cellfun(@(x) mean(x(~isnan(x))), dataA1.RM_baseREG);
+res_tuning_base_se_behavior = cellfun(@(x) SE(x(~isnan(x))), dataA1.RM_baseREG);
+res_tuning_base_mean_nonbehavior = cellfun(@(x) mean(x(~isnan(x))), dataP3.RM_baseREG);
+res_tuning_base_se_nonbehavior = cellfun(@(x) SE(x(~isnan(x))), dataP3.RM_baseREG);
 
 params = fieldnames(getVarsFromWorkspace('res_\W*'));
 save(['..\Docs\Figures\Figure 10\data-', char(area), '.mat'], params{:});

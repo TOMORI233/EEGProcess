@@ -9,9 +9,14 @@ SUBJECTs = strrep(DATAPATHs, ROOTPATH, '');
 SUBJECTs = strrep(SUBJECTs, 'active2\chMean.mat', '');
 SUBJECTs = strrep(SUBJECTs, '\', '');
 
+load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
+load("..\DATA\MAT DATA\figure\subjectIdx_A2.mat", "subjectIdxA2");
+
 window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
+data = data(subjectIdxA2);
+% data = data(subjectIdxA1 & subjectIdxA2); % for comparison A1&A2
 
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 

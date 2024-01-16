@@ -2,16 +2,21 @@ ccc;
 cd(fileparts(mfilename("fullpath")));
 
 ROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
-DATAPATHs = dir(fullfile(ROOTPATH, '**\active1\chMean.mat'));
+DATAPATHs = dir(fullfile(ROOTPATH, '**\active1\chMeanAll.mat'));
 DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput", false);
 
 SUBJECTs = strrep(DATAPATHs, ROOTPATH, '');
-SUBJECTs = strrep(SUBJECTs, 'active1\chMean.mat', '');
+SUBJECTs = strrep(SUBJECTs, 'active1\chMeanAll.mat', '');
 SUBJECTs = strrep(SUBJECTs, '\', '');
+
+load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
+load("..\DATA\MAT DATA\figure\subjectIdx_A2.mat", "subjectIdxA2");
 
 window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
+data = data(subjectIdxA1);
+% data = data(subjectIdxA1 & subjectIdxA2); % for comparison A1&A2
 
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
@@ -218,6 +223,7 @@ X(skipIdxREG(:, end) | skipIdxPT(:, 1)) = [];
 Y(skipIdxREG(:, end) | skipIdxPT(:, 1)) = [];
 scatter(X, Y, 50, "black");
 [~, p_PT] = ttest(X, Y);
+[R, p_Corr] = corr(X, Y, "type", "Pearson");
 xRange = get(gca, "XLim");
 yRange = get(gca, "YLim");
 xyRange = [min([xRange, yRange]), max([xRange, yRange])];
@@ -263,6 +269,11 @@ res_chErr  = cat(2, temp{:});
 res_tuning_delta_REG_mean = cellfun(@mean, RM_deltaREG);
 res_tuning_delta_REG_se = cellfun(@SE, RM_deltaREG);
 res_p_change_vs_base_REG = p_REG;
+
+% scatter
+res_scatterX_PT = X;
+res_scatterY_REG = Y;
+res_p_REG_vs_PT = p_PT;
 
 params = fieldnames(getVarsFromWorkspace('res_\W*'));
 save(['..\Docs\Figures\Figure 9\data-', char(area), '.mat'], params{:});

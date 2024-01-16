@@ -20,7 +20,7 @@ colors = [{[0.5, 0.5, 0.5]}; ...
 
 interval = 0;
 run("config\windowConfig.m");
-windowChange = 1000 + [50, 130]; % consider when N > 32 there might be off response
+windowChange = 1000 + [80, 160]; % consider when N > 32 there might be off response
 
 set(0, "DefaultAxesFontSize", 12);
 set(0, "DefaultAxesTitleFontWeight", "bold");
@@ -72,29 +72,29 @@ scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", {0; 1000 + 4.06; 2000}));
 print(FigGrandAvg, ['..\Docs\Figures\Figure 3\wave-', char(area), '.png'], "-dpng", "-r300");
 
-%% scatter plot
+%% scatter plot & tuning
 insertN(end) = inf;
+RM_deltaInsert = cellfun(@(x, y) x - y, RM_changeInsert, RM_baseInsert, "UniformOutput", false);
 
 FigResult = figure;
 maximizeFig;
-p_insert = zeros(length(insertN), 1);
-for index = 1:length(insertN)
-    mSubplot(2, length(insertN), index, "shape", "square-min", "margin_left", 0.2);
-    scatter(RM_baseInsert{index}, RM_changeInsert{index}, 50, "black");
-    [~, p_insert(index)] = ttest(RM_baseInsert{index}, RM_changeInsert{index});
+p_insert = zeros(length(insertN) - 1, 1);
+for index = 1:length(insertN) - 1
+    mSubplot(2, length(insertN) - 1, index, "shape", "square-min", "margin_left", 0.2);
+    scatter(RM_deltaInsert{index}, RM_deltaInsert{end}, 50, "black");
+    if index < length(insertN)
+        [~, p_insert(index)] = ttest(RM_deltaInsert{index}, RM_deltaInsert{end});
+    end
     xRange = get(gca, "XLim");
     yRange = get(gca, "YLim");
     xyRange = [min([xRange, yRange]), max([xRange, yRange])];
     xlim(xyRange);
     ylim(xyRange);
-    xlabel("RM_{before change} (\muV)");
-    ylabel("RM_{change} (\muV)");
+    xlabel("RM_{change} (\muV)");
+    ylabel("RM_{Reg 4-4.06} (\muV)");
     title(['N=', num2str(insertN(index)), ' | p=', num2str(p_insert(index))]);
     addLines2Axes(gca);
 end
-
-%% tunning
-RM_deltaInsert = cellfun(@(x, y) x - y, RM_changeInsert, RM_baseInsert, "UniformOutput", false);
 
 mSubplot(2, 3, 5);
 errorbar(1:length(insertN), cellfun(@mean, RM_deltaInsert), cellfun(@SE, RM_deltaInsert), "Color", "r", "LineWidth", 2);

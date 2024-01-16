@@ -3,7 +3,10 @@ ccc;
 ROOTPATH = getAbsPath('..\DATA\MAT DATA\pre');
 SAVEROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
 
-protocols = {'passive1', 'passive2', 'passive3', 'active1', 'active2'};
+% protocols = {'passive1', 'passive2', 'passive3', 'active1', 'active2'};
+% matName = 'chMean.mat';
+protocols = {'active1', 'active2'};
+matName = 'chMeanAll.mat';
 
 for pIndex = 1:length(protocols)
     disp(['Current protocol: ', protocols{pIndex}]);
@@ -21,7 +24,7 @@ for pIndex = 1:length(protocols)
     for sIndex = 1:length(DATAPATHs)
         disp(['Current: ', SUBJECTs{sIndex}]);
         
-        if exist(fullfile(SAVEPATHs{sIndex}, 'chMean.mat'), 'file')
+        if exist(fullfile(SAVEPATHs{sIndex}, matName), 'file')
             continue;
         end
 
@@ -29,8 +32,12 @@ for pIndex = 1:length(protocols)
         clearvars chData
 
         if contains(protocols{pIndex}, 'active')
-            idx = (([trialAll.type] == "REG" | [trialAll.type] == "PT") & [trialAll.correct]) ...
-                  | ([trialAll.type] == "IRREG" & ~[trialAll.miss]);
+            if strcmp(matName, 'chMeanAll.mat')
+                idx = ~[trialAll.miss];
+            else
+                idx = (([trialAll.type] == "REG" | [trialAll.type] == "PT") & [trialAll.correct]) ...
+                      | ([trialAll.type] == "IRREG" & ~[trialAll.miss]);
+            end
             trialAll = trialAll(idx);
             trialsEEG = trialsEEG(idx);
         end
@@ -87,6 +94,6 @@ for pIndex = 1:length(protocols)
             end
         end
 
-        save(fullfile(SAVEPATHs{sIndex}, 'chMean.mat'), "chData", "window", "fs");
+        save(fullfile(SAVEPATHs{sIndex}, matName), "chData", "window", "fs");
     end
 end

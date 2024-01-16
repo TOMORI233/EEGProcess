@@ -183,7 +183,7 @@ end
 thREG_A1 = cellfun(@(x) findBehaviorThreshold(x, thBeh), fitResREG_A1);
 thREG_A2 = cellfun(@(x) findBehaviorThreshold(x, thBeh), fitResREG_A2);
 
-% Filter
+% Th Filter
 idx = thREG_A1 > ICIsREG(1) & thREG_A1 < ICIsREG(end) & thREG_A2 > ICIsREG(1) & thREG_A2 < ICIsREG(end);
 idxA1 = find(subjectIdxA1 & idx);
 idxA2 = find(subjectIdxA2 & idx);
@@ -254,24 +254,21 @@ EDGES_A2 = EDGES_A2(1:end - 1)' + mode(diff(EDGES_A2)) / 2;
 thMedianA2 = median(thREG_A2(idxBoth));
 
 %% Figure result
-temp = arrayfun(@(x) cellfun(@(y) y(x), resREG_A1), [1:5]', "UniformOutput", false);
+temp = arrayfun(@(x) cellfun(@(y) y(x), resREG_A1(subjectIdxA1)), [1:5]', "UniformOutput", false);
 res_mean_REG_A1 = cellfun(@mean, temp);
 res_se_REG_A1 = cellfun(@SE, temp);
 
-temp = arrayfun(@(x) cellfun(@(y) y(x), resIRREG_A1), [1:3]', "UniformOutput", false);
+temp = arrayfun(@(x) cellfun(@(y) y(x), resIRREG_A1(subjectIdxA1)), [1:3]', "UniformOutput", false);
 res_mean_IRREG_A1 = cellfun(@mean, temp);
 res_se_IRREG_A1 = cellfun(@SE, temp);
 
-temp = arrayfun(@(x) cellfun(@(y) y(x), resPT_A1), [1:2]', "UniformOutput", false);
+temp = arrayfun(@(x) cellfun(@(y) y(x), resPT_A1(subjectIdxA1)), [1:2]', "UniformOutput", false);
 res_mean_PT_A1 = flip(cellfun(@mean, temp)); % 250, 246
 res_se_PT_A1 = flip(cellfun(@SE, temp));
 
-temp = arrayfun(@(x) cellfun(@(y) y(x), resREG_A2), [1:5]', "UniformOutput", false);
+temp = arrayfun(@(x) cellfun(@(y) y(x), resREG_A2(subjectIdxA2)), [1:5]', "UniformOutput", false);
 res_mean_REG_A2 = cellfun(@mean, temp);
 res_se_REG_A2 = cellfun(@SE, temp);
-
-res_mean_IRREG_A2 = [mean(temp1, 1), mean(temp2, 1)]';
-res_se_IRREG_A2 = [SE(temp1, 1), SE(temp2, 1)]';
 
 res_alone_th_hist_edge_A1 = EDGES;
 res_alone_th_hist_N_A1 = N;
@@ -279,5 +276,16 @@ res_compare_th_hist_edge = EDGES_A1;
 res_compare_th_hist_N_A1 = N_A1;
 res_compare_th_hist_N_A2 = N_A2;
 
+temp = arrayfun(@(x) cellfun(@(y) y(x), resREG_A1(subjectIdxA1 & subjectIdxA2)), [1:5]', "UniformOutput", false);
+res_compare_mean_REG_A1 = cellfun(@mean, temp);
+res_compare_se_REG_A1 = cellfun(@SE, temp);
+temp = arrayfun(@(x) cellfun(@(y) y(x), resREG_A2(subjectIdxA1 & subjectIdxA2)), [1:5]', "UniformOutput", false);
+res_compare_mean_REG_A2 = cellfun(@mean, temp);
+res_compare_se_REG_A2 = cellfun(@SE, temp);
+
 res_compare_th_scatterX_nogapped = thREG_A1(idxBoth);
 res_compare_th_scatterY_gapped = thREG_A2(idxBoth);
+
+res_scatterX_PT = cellfun(@(x) x(1), resPT_A1(subjectIdxA1));
+res_scatterY_REG = cellfun(@(x) x(end), resREG_A1(subjectIdxA1));
+[~, res_p_REG_vs_PT] = ttest(res_scatterX_PT, res_scatterY_REG);
