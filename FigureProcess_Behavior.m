@@ -287,5 +287,7 @@ res_compare_th_scatterX_nogapped = thREG_A1(idxBoth);
 res_compare_th_scatterY_gapped = thREG_A2(idxBoth);
 
 res_scatterX_PT = cellfun(@(x) x(1), resPT_A1(subjectIdxA1));
+res_scatterX_IRREG = cellfun(@(x) x(1), resIRREG_A1(subjectIdxA1));
 res_scatterY_REG = cellfun(@(x) x(end), resREG_A1(subjectIdxA1));
 [~, res_p_REG_vs_PT] = ttest(res_scatterX_PT, res_scatterY_REG);
+[~, res_p_REG_vs_IRREG] = ttest(res_scatterX_IRREG, res_scatterY_REG);

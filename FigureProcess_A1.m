@@ -109,7 +109,7 @@ addLines2Axes(struct("X", {0; 1000; 2000}));
 %% scatter plot
 FigScatter = figure;
 maximizeFig;
-p_REG = zeros(length(ICIsREG), 1);
+p_REG = zeros(length(ICIsREG) + 1, 1);
 for dIndex = 1:length(ICIsREG)
     mSubplot(2, length(ICIsREG), dIndex, "shape", "square-min", "margin_left", 0.15);
     scatter(RM_baseREG{dIndex}(~skipIdxREG(:, dIndex)), RM_changeREG{dIndex}(~skipIdxREG(:, dIndex)), 50, "black");
@@ -223,7 +223,7 @@ X(skipIdxREG(:, end) | skipIdxPT(:, 1)) = [];
 Y(skipIdxREG(:, end) | skipIdxPT(:, 1)) = [];
 scatter(X, Y, 50, "black");
 [~, p_PT] = ttest(X, Y);
-[R, p_Corr] = corr(X, Y, "type", "Pearson");
+[R_REG_vs_PT, p_Corr_REG_vs_PT] = corr(X, Y, "type", "Pearson");
 xRange = get(gca, "XLim");
 yRange = get(gca, "YLim");
 xyRange = [min([xRange, yRange]), max([xRange, yRange])];
@@ -268,12 +268,21 @@ res_chErr  = cat(2, temp{:});
 % tuning
 res_tuning_delta_REG_mean = cellfun(@mean, RM_deltaREG);
 res_tuning_delta_REG_se = cellfun(@SE, RM_deltaREG);
+p_ANOVA = anova1(cell2mat(RM_deltaREG), ...
+                 cell2mat(rowFcn(@(x, y) ones(numel(x{1}), 1) * y, RM_deltaREG, (1:length(RM_deltaREG))', "UniformOutput", false)), ...
+                 "off");
+p_REG(end) = p_ANOVA;
 res_p_change_vs_base_REG = p_REG;
 
 % scatter
 res_scatterX_PT = X;
+res_scatterX_IRREG = RM_deltaIRREG{2};
 res_scatterY_REG = Y;
 res_p_REG_vs_PT = p_PT;
+[~, res_p_REG_vs_IRREG] = ttest(res_scatterX_IRREG, res_scatterY_REG);
 
+[R_REG_vs_IRREG, p_Corr_REG_vs_IRREG] = corr(RM_deltaREG{end}, RM_deltaIRREG{end}, "type", "Pearson");
+
+res_comment = 'p值为与REG4-4比较，最后一个是组间ANOVA的';
 params = fieldnames(getVarsFromWorkspace('res_\W*'));
 save(['..\Docs\Figures\Figure 9\data-', char(area), '.mat'], params{:});

@@ -2,11 +2,11 @@ ccc;
 cd(fileparts(mfilename("fullpath")));
 
 ROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
-DATAPATHs = dir(fullfile(ROOTPATH, '**\active2\chMean.mat'));
+DATAPATHs = dir(fullfile(ROOTPATH, '**\active2\chMeanAll.mat'));
 DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput", false);
 
 SUBJECTs = strrep(DATAPATHs, ROOTPATH, '');
-SUBJECTs = strrep(SUBJECTs, 'active2\chMean.mat', '');
+SUBJECTs = strrep(SUBJECTs, 'active2\chMeanAll.mat', '');
 SUBJECTs = strrep(SUBJECTs, '\', '');
 
 load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
@@ -15,8 +15,8 @@ load("..\DATA\MAT DATA\figure\subjectIdx_A2.mat", "subjectIdxA2");
 window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
-data = data(subjectIdxA2);
-% data = data(subjectIdxA1 & subjectIdxA2); % for comparison A1&A2
+% data = data(subjectIdxA2);
+data = data(subjectIdxA1 & subjectIdxA2); % for comparison A1&A2
 
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
@@ -143,9 +143,6 @@ addLines2Axes(gca, struct("Y", 0));
 %% tunning
 RM_deltaREG = rowFcn(@(x, y, z) x{1}(~z) - y{1}(~z), RM_changeREG, RM_baseREG, skipIdxREG', "UniformOutput", false);
 RM_deltaIRREG = cellfun(@(x, y) x - y, RM_changeIRREG, RM_baseIRREG, "UniformOutput", false);
-X = cell2mat(RM_deltaREG);
-G = cell2mat(rowFcn(@(x, y) ones(numel(x{1}), 1) * y, RM_deltaREG, (1:length(RM_deltaREG))', "UniformOutput", false));
-p_REG(end) = anova1(X, G, "off");
 
 mSubplot(2, 2, 4, "shape", "square-min", "margin_top", 0.2);
 errorbar((1:length(ICIsREG)) + 0.01, cellfun(@mean, RM_deltaREG), cellfun(@SE, RM_deltaREG), "Color", "r", "LineWidth", 2, "DisplayName", "REG");
@@ -194,6 +191,10 @@ res_chErr  = cat(2, temp{:});
 % tuning
 res_tuning_delta_REG_mean = cellfun(@mean, RM_deltaREG);
 res_tuning_delta_REG_se = cellfun(@SE, RM_deltaREG);
+p_ANOVA = anova1(cell2mat(RM_deltaREG), ...
+                 cell2mat(rowFcn(@(x, y) ones(numel(x{1}), 1) * y, RM_deltaREG, (1:length(RM_deltaREG))', "UniformOutput", false)), ...
+                 "off");
+p_REG(end) = p_ANOVA;
 res_p_change_vs_base_REG = p_REG;
 
 res_comment = 'p值为与REG4-4比较，最后一个是组间ANOVA的';
