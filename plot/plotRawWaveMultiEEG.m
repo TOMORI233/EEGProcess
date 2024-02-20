@@ -61,7 +61,7 @@ function Fig = plotRawWaveMultiEEG(chData, window, titleStr, EEGPos)
 
     end
 
-    scaleAxes(Fig);
+    scaleAxes(Fig, "y", "on");
 
     return;
 end

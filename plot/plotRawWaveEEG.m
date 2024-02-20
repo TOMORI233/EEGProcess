@@ -52,7 +52,7 @@ function Fig = plotRawWaveEEG(chMean, chErr, window, titleStr, EEGPos)
 
     end
 
-    scaleAxes(Fig);
+    scaleAxes(Fig, "y", "on");
 
     return;
 end

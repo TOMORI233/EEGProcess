@@ -43,7 +43,7 @@ for index = 1:length(insertN)
         chDataAll(index, 1).legend = 'REG 4-4.06';
     else
         temp = cellfun(@(x) x([x.insertN] == insertN(index)).chMean, data, "UniformOutput", false);
-        chDataAll(index, 1).legend = ['Insert ', num2str(insertN(index))];
+        chDataAll(index, 1).legend = num2str(insertN(index));
     end
     chDataAll(index, 1).chMean = calchMean(temp);
     chDataAll(index, 1).color = colors{index};
@@ -78,12 +78,12 @@ RM_deltaInsert = cellfun(@(x, y) x - y, RM_changeInsert, RM_baseInsert, "Uniform
 
 FigResult = figure;
 maximizeFig;
-p_insert = zeros(length(insertN) - 1, 1);
+p_insert_vs_inf = zeros(length(insertN) - 1, 1);
 for index = 1:length(insertN) - 1
-    mSubplot(2, length(insertN) - 1, index, "shape", "square-min", "margin_left", 0.2);
+    mSubplot(3, length(insertN) - 1, index, "shape", "square-min", "margin_left", 0.2);
     scatter(RM_deltaInsert{index}, RM_deltaInsert{end}, 50, "black");
     if index < length(insertN)
-        [~, p_insert(index)] = ttest(RM_deltaInsert{index}, RM_deltaInsert{end});
+        [~, p_insert_vs_inf(index)] = ttest(RM_deltaInsert{index}, RM_deltaInsert{end});
     end
     xRange = get(gca, "XLim");
     yRange = get(gca, "YLim");
@@ -92,11 +92,29 @@ for index = 1:length(insertN) - 1
     ylim(xyRange);
     xlabel("RM_{change} (\muV)");
     ylabel("RM_{Reg 4-4.06} (\muV)");
-    title(['N=', num2str(insertN(index)), ' | p=', num2str(p_insert(index))]);
+    title(['N=', num2str(insertN(index)), ' | p=', num2str(p_insert_vs_inf(index))]);
     addLines2Axes(gca);
 end
 
-mSubplot(2, 3, 5);
+p_insert_vs_0 = zeros(length(insertN) - 1, 1);
+for index = 1:length(insertN) - 1
+    mSubplot(3, length(insertN) - 1, length(insertN) - 1 + index, "shape", "square-min", "margin_left", 0.2);
+    scatter(RM_deltaInsert{1}, RM_deltaInsert{index + 1}, 50, "black");
+    if index < length(insertN)
+        [~, p_insert_vs_0(index)] = ttest(RM_deltaInsert{1}, RM_deltaInsert{index + 1});
+    end
+    xRange = get(gca, "XLim");
+    yRange = get(gca, "YLim");
+    xyRange = [min([xRange, yRange]), max([xRange, yRange])];
+    xlim(xyRange);
+    ylim(xyRange);
+    xlabel("RM_{Reg 4-4} (\muV)");
+    ylabel("RM_{change} (\muV)");
+    title(['N=', num2str(insertN(index + 1)), ' | p=', num2str(p_insert_vs_0(index))]);
+    addLines2Axes(gca);
+end
+
+mSubplot(3, 3, 8, "margin_top", 0.1);
 errorbar(1:length(insertN), cellfun(@mean, RM_deltaInsert), cellfun(@SE, RM_deltaInsert), "Color", "r", "LineWidth", 2);
 xticks(1:length(insertN));
 xlim([0, length(insertN)] + 0.5);
@@ -138,7 +156,7 @@ res_chErr  = cat(2, temp{:});
 % tuning
 res_tuning_mean = cellfun(@mean, RM_deltaInsert);
 res_tuning_se = cellfun(@SE, RM_deltaInsert);
-res_p_change_vs_base = p_insert;
+res_p_change_vs_base = p_insert_vs_inf;
 
 params = fieldnames(getVarsFromWorkspace('res_\W*'));
 save(['..\Docs\Figures\Figure 3\data-', char(area), '.mat'], params{:});

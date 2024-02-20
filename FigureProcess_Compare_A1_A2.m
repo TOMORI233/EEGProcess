@@ -43,5 +43,8 @@ res_tuning_se_nogapped = cellfun(@SE, dataA1.RM_deltaREG);
 res_tuning_mean_gapped = cellfun(@mean, dataA2.RM_deltaREG);
 res_tuning_se_gapped = cellfun(@SE, dataA2.RM_deltaREG);
 
+res_p_tuning_anova_nogapped = anova1(cat(2, dataA1.RM_deltaREG{2:end}), [], "off");
+res_p_tuning_anova_gapped = anova1(cat(2, dataA2.RM_deltaREG{2:end}), [], "off");
+
 params = fieldnames(getVarsFromWorkspace('res_\W*'));
 save(['..\Docs\Figures\Figure 12\data-', char(area), '.mat'], params{:});

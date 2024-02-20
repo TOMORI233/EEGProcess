@@ -1,6 +1,10 @@
 ccc;
-run("config\avgConfig_Neuroscan64.m");
-EEGPos = EEGPos_Neuroscan64;
+% run("config\avgConfig_Neuroscan64.m");
+% EEGPos = EEGPos_Neuroscan64;
+
+run("config\avgConfig_Neuracle64.m");
+EEGPos = EEGPos_Neuracle64;
+
 gridSize = EEGPos.grid;
 chsIgnore = getOr(EEGPos, "ignore");
 channelNames = getOr(EEGPos, "channelNames");
@@ -20,12 +24,12 @@ for rIndex = 1:gridSize(1)
         end
 
         mSubplot(Fig, gridSize(1), gridSize(2), EEGPos.map(chNum), [1, 1], margins, paddings);
-        title(channelNames{chNum});
         xticklabels('');
         yticklabels('');
         if ismember(chNum, chs2Avg)
             scatter(1,1,100,"black","filled");
         end
+        title(channelNames{chNum});
     end
 
 end

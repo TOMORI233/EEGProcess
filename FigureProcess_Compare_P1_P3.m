@@ -1,34 +1,29 @@
 ccc;
 
-dataP1 = load("..\DATA\MAT DATA\figure\Res_RM_P1-Parietal.mat");
-dataP3 = load("..\DATA\MAT DATA\figure\Res_RM_P3-Parietal.mat");
+area = "Temporal-Parietal-Occipital";
+dataP1 = load(strcat("..\DATA\MAT DATA\figure\Res_RM_P1-", area, ".mat"));
+dataP3 = load(strcat("..\DATA\MAT DATA\figure\Res_RM_P3-", area, ".mat"));
 bData = load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat");
 
 set(0, "DefaultAxesFontSize", 12);
 set(0, "DefaultAxesTitleFontWeight", "bold");
 
 %% Plot wave
-chData = [dataP1.chDataIRREG_All(1); ...
-          dataP3.chDataIRREG_All(end)];
+chData = [dataP1.chDataIRREG(1); ...
+          dataP3.chDataIRREG(end)];
 chData(1).color = "r";
 chData(2).color = "b";
-chData(1).legend = "IRREG 4.06 (Base ICI)";
-chData(2).legend = "IRREG 4.06 (Ratio)";
+chData(1).legend = "IRREG 4-4.06 (Base ICI)";
+chData(2).legend = "IRREG 4-4.06 (Ratio)";
 
-windowP1 = dataP1.window;
+windowP1 = dataP1.windowNew;
 windowP3 = dataP3.window;
-window = windowP3;
-chData(1).chMean = cutData(chData(1).chMean, windowP1, window);
+window = 1000 + windowP1;
+chData(2).chMean = cutData(chData(2).chMean, windowP3, window);
+chData(2).chErr = cutData(chData(2).chErr, windowP3, window);
 
-plotRawWaveMultiEEG(chData, window, [], EEGPos_Neuroscan64);
-scaleAxes("x", [1000, 1500]);
-scaleAxes("y", "on", "symOpt", "max");
-addLines2Axes(struct("X", {0; 1000; 2000}));
-
-chMean = arrayfun(@(x) mean(x.chMean(dataP1.chs2Avg, :), 1), chData, "UniformOutput", false);
-chDataSingle = addfield(chData, "chMean", chMean);
-plotRawWaveMulti(chDataSingle, window, 'Influence of context');
-scaleAxes("x", [1000, 1500]);
+plotRawWaveMulti(chData, window, 'Influence of context');
+% scaleAxes("x", [1000, 1500]);
 scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", {0; 1000 ; 2000}));
 

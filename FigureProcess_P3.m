@@ -14,7 +14,7 @@ load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
 window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
-data = data(subjectIdxA1); % for comparison A1&P3
+% data = data(subjectIdxA1); % for comparison A1&P3
 
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
@@ -100,6 +100,39 @@ ylabel('Response (\muV)');
 scaleAxes("x", [0, 1500]);
 scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", {0; 1000; 2000}));
+
+%% Global field power
+chDataGFP = [];
+tIdx = find(t >= 1000, 1):find(t >= 1400, 1);
+chs = 1:64;
+chs([33, 43, 60, 64]) = [];
+for dIndex = 1:length(ICIsREG)
+    temp = cellfun(@(x) x([x.ICI] == ICIsREG(dIndex) & [x.type] == "REG").chMean, data, "UniformOutput", false);
+    GFP = cellfun(@(x) std(x(chs, :), [], 1), temp, "UniformOutput", false);
+    GFP_index{dIndex, 1} = cellfun(@(x) mean(std(x(chs, tIdx), [], 1), 2), temp);
+    
+    chDataGFP(dIndex, 1).chMean = mean(cat(1, GFP{:}), 1);
+    chDataGFP(dIndex, 1).chErr = SE(cat(1, GFP{:}), 1);
+    chDataGFP(dIndex, 1).color = colors{dIndex};
+    chDataGFP(dIndex, 1).legend = num2str(ICIsREG(dIndex));
+end
+plotRawWaveMulti(chDataGFP, window);
+title('Global Field Power | REG');
+scaleAxes("x", [900, 1500]);
+scaleAxes("y", "on");
+addLines2Axes(struct("X", {0; 1000}));
+
+figure;
+maximizeFig;
+mSubplot(1, 1, 1, "shape", "square-min");
+errorbar(1:length(ICIsREG), cellfun(@mean, GFP_index), cellfun(@SE, GFP_index), "Color", "r", "LineWidth", 2, "DisplayName", "REG");
+legend("Location", "northwest");
+xticks(1:length(ICIsREG));
+xlim([0, length(ICIsREG)] + 0.5);
+xticklabels(num2str(ICIsREG));
+xlabel("S2 ICI (ms)");
+ylabel("GFP (\muV)");
+title("Tuning of GFP");
 
 %% scatter plot
 FigScatter = figure;
@@ -263,6 +296,9 @@ save(strcat("..\DATA\MAT DATA\figure\Res_RM_P3-", area, ".mat"), ...
      "ICIsIRREG", ...
      "chs2Avg", ...
      "chDataREG", ...
+     "chDataIRREG", ...
+     "chDataPT", ...
+     "freqs", ...
      "window", ...
      "windowChange", ...
      "windowBase", ...
