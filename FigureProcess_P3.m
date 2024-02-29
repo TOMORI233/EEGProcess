@@ -306,20 +306,20 @@ save(strcat("..\DATA\MAT DATA\figure\Res_RM_P3-", area, ".mat"), ...
 
 %% Figure result
 FigREG = plotRawWaveEEG(chDataREG_All(end).chMean, [], window, [], EEGPos_Neuroscan64);
-scaleAxes(FigREG, "x", [0, 2000]);
+scaleAxes(FigREG, "x", [0, 2500]);
 yRange = scaleAxes(FigREG, "y", "on", "symOpt", "max");
-addLines2Axes(FigREG, struct("X", 1000 + ICIsREG(1), "color", [255 128 0] / 255, "width", 2));
+addLines2Axes(FigREG, struct("X", {0; 1000 + ICIsREG(1); 2000}, "color", [255 128 0] / 255, "width", 2));
 setAxes(FigREG, "Visible", "off");
 setAxes(FigREG, "LineWidth", 2);
-mPrint(FigREG, '..\Docs\Figures\Figure 2\REG 4-4.06.png', "-dpng", "-r300");
+print(FigREG, '..\Docs\Figures\Figure 2\REG 4-4.06.png', "-dpng", "-r300");
 
 FigIRREG = plotRawWaveEEG(chDataIRREG_All(end).chMean, [], window, [], EEGPos_Neuroscan64);
-scaleAxes(FigIRREG, "x", [0, 2000]);
+scaleAxes(FigIRREG, "x", [0, 2500]);
 scaleAxes(FigIRREG, "y", yRange);
-addLines2Axes(FigIRREG, struct("X", 1000 + ICIsREG(1), "color", [255 128 0] / 255, "width", 2));
+addLines2Axes(FigIRREG, struct("X", {0; 1000 + ICIsREG(1); 2000}, "color", [255 128 0] / 255, "width", 2));
 setAxes(FigIRREG, "Visible", "off");
 setAxes(FigIRREG, "LineWidth", 2);
-mPrint(FigIRREG, '..\Docs\Figures\Figure 2\IRREG 4-4.06.png', "-dpng", "-r300");
+print(FigIRREG, '..\Docs\Figures\Figure 2\IRREG 4-4.06.png', "-dpng", "-r300");
 
 % wave
 res_t = t - (1000 + ICIsREG(1));

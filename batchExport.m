@@ -20,10 +20,10 @@ end
 % window setting, ms
 windowBase = [-300, 0];
 windows = struct("window",   {[-500, 2500];  ... % passive1
-                              [-500, 2000];  ... % passive2
-                              [-500, 2000];  ... % passive3
-                              [-500, 2000];  ... % active1
-                              [-500, 2600]}, ... % active2
+                              [-500, 2500];  ... % passive2
+                              [-500, 2500];  ... % passive3
+                              [-500, 2500];  ... % active1
+                              [-500, 3100]}, ... % active2
                  "protocol", {"passive1"; ...
                               "passive2"; ...
                               "passive3"; ...
@@ -81,7 +81,7 @@ for dIndex = 1:length(DAYPATHs)
         % For each protocol
         for pIndex = 1:length(protocols)
             mkdir(fullfile(SAVEPATH, protocols{pIndex}));
-            MATNAME = fullfile(SAVEPATH, protocols{pIndex}, strcat(protocols(pIndex), ".mat"));
+            MATNAME = fullfile(SAVEPATH, protocols{pIndex}, "data.mat");
             window = windows([windows.protocol] == protocols{pIndex}).window;
             trialAll = trialDatasets([trialDatasets.protocol] == protocols(pIndex)).trialAll';
             trialsEEG = selectEEG(EEGDatasets([EEGDatasets.protocol] == protocols(pIndex)), ...

@@ -1,9 +1,9 @@
 ccc;
-% run("config\avgConfig_Neuroscan64.m");
-% EEGPos = EEGPos_Neuroscan64;
+run("config\avgConfig_Neuroscan64.m");
+EEGPos = EEGPos_Neuroscan64;
 
-run("config\avgConfig_Neuracle64.m");
-EEGPos = EEGPos_Neuracle64;
+% run("config\avgConfig_Neuracle64.m");
+% EEGPos = EEGPos_Neuracle64;
 
 gridSize = EEGPos.grid;
 chsIgnore = getOr(EEGPos, "ignore");

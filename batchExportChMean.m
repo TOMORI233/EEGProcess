@@ -5,8 +5,10 @@ SAVEROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
 
 % protocols = {'passive1', 'passive2', 'passive3', 'active1', 'active2'};
 % matName = 'chMean.mat';
-protocols = {'active1', 'active2'};
+protocols = {'active1'};
 matName = 'chMeanAll.mat';
+% protocols = {'active1', 'active2'};
+% matName = 'chMeanAll.mat';
 
 for pIndex = 1:length(protocols)
     disp(['Current protocol: ', protocols{pIndex}]);
@@ -23,10 +25,6 @@ for pIndex = 1:length(protocols)
 
     for sIndex = 1:length(DATAPATHs)
         disp(['Current: ', SUBJECTs{sIndex}]);
-        
-        if exist(fullfile(SAVEPATHs{sIndex}, matName), 'file')
-            continue;
-        end
 
         load(DATAPATHs{sIndex});
         clearvars chData
