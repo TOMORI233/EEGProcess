@@ -15,10 +15,9 @@ function Fig = plotRawWaveEEG(chMean, chErr, window, titleStr, EEGPos)
     chsIgnore = getOr(EEGPos, "ignore");
     channelNames = getOr(EEGPos, "channelNames");
 
-    Fig = figure;
+    Fig = figure("WindowState", "maximized");
     margins = [0.05, 0.05, 0.1, 0.1];
     paddings = [0.1, 0.1, 0.03, 0.06];
-    maximizeFig(Fig);
 
     for rIndex = 1:gridSize(1)
 
