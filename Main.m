@@ -1,30 +1,26 @@
-%% Figure 2
-run("FigureProcess_P3.m");
+ccc;
 
-%% Figure 3
-run("FigureProcess_111_insert.m");
+FILENAMEs = dir("FigureProcess_*.m");
 
-%% Figure 4
-run("FigureProcess_P1.m");
+% move compare script to the end
+idx = contains({FILENAMEs.name}, "FigureProcess_Compare");
+temp = FILENAMEs(idx);
+FILENAMEs(idx) = [];
+FILENAMEs = [FILENAMEs; temp];
 
-%% Figure 5
-% run("FigureProcess_P3.m");
+% move bahavior script to the top
+idx = contains({FILENAMEs.name}, "FigureProcess_Bahavior");
+temp = FILENAMEs(idx);
+FILENAMEs(idx) = [];
+FILENAMEs = [temp; FILENAMEs];
 
-%% Figure 6
-run("FigureProcess_112_variance.m");
+% move pre script to the top
+idx = contains({FILENAMEs.name}, "FigureProcess_Pre");
+temp = FILENAMEs(idx);
+FILENAMEs(idx) = [];
+FILENAMEs = [temp; FILENAMEs];
 
-%% Figure 7
-run("FigureProcess_113_pt.m");
+FILENAMEs = arrayfun(@(x) fullfile(x.folder, x.name), FILENAMEs, "UniformOutput", false);
+script = cellcat(1, join(cellfun(@(x) ['run(''', x, ''');'], FILENAMEs, "UniformOutput", false), newline));
 
-%% Figure 8&11
-run("FigureProcess_Behavior.m");
-
-%% Figure 9
-run("FigureProcess_A1.m");
-
-%% Figure 10
-run("FigureProcess_Compare_A1_P3.m");
-
-%% Figure 12
-run("FigureProcess_A2.m");
-run("FigureProcess_Compare_A1_A2.m");
+eval(script);

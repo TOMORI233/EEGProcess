@@ -1,7 +1,10 @@
 ccc;
 
+%% Path
 ROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
+FIGUREPATH = getAbsPath("..\Figures\healthy\population\Bahavior-Ratio");
 
+%% Params
 margins = [0.05, 0.05, 0.1, 0.1];
 
 ICIsREG = [4, 4.01, 4.02, 4.03, 4.06];
@@ -12,8 +15,7 @@ thL = 0.3;
 thH = 0.6;
 thBeh = 0.6;
 
-set(0, "DefaultAxesFontSize", 12);
-set(0, "DefaultAxesTitleFontWeight", "bold");
+run("config\plotConfig.m");
 
 %% Load - A1
 DATAPATHs = dir(fullfile(ROOTPATH, '**\active1\behavior.mat'));
@@ -54,7 +56,6 @@ save("..\DATA\MAT DATA\figure\subjectIdx_A2.mat", "subjectIdxA2", "resREG_A2", "
 
 %% Plot
 FigFit = figure;
-maximizeFig;
 
 % A1
 mSubplot(2, 3, 1, 'shape', 'square-min', "margins", margins);
@@ -132,14 +133,13 @@ xlabel('S2 ICI (ms)');
 ylabel('Press for difference ratio');
 title('A2 IRREG');
 
-print(FigFit, '..\Docs\Figures\Figure 8&11\Fit.png', "-dpng", "-r300");
+mPrint(FigFit, fullfile(FIGUREPATH, 'Fit.png'), "-dpng", "-r300");
 
 %% Compare
 subjectIdx = subjectIdxA1 & subjectIdxA2;
 
 % REG
 figure;
-maximizeFig;
 for index = 1:5
     mSubplot(2, 3, index, 'shape', 'square-min', "margins", margins);
     X = cellfun(@(x) x(index), resREG_A1(subjectIdx));
@@ -156,7 +156,6 @@ end
 
 % IRREG
 figure;
-maximizeFig;
 for index = 1:2
     mSubplot(1, 2, index, 'shape', 'square-min', "margins", margins);
     X = cellfun(@(x) x(index), resIRREG_A1(subjectIdx));
@@ -191,7 +190,6 @@ idxBoth = find(subjectIdxA1 & subjectIdxA2 & idx);
 
 %% Plot Behavior threshold res
 FigHist = figure;
-maximizeFig;
 mSubplot(2, 2, 1);
 hold(gca, "on");
 for index = 1:length(idxA1)
@@ -235,7 +233,7 @@ xlabel('Behavior threshold ICI (Seamless transition)');
 ylabel('Behavior threshold ICI (DMS delay = 600 ms)');
 title(['Pearson Corr R=', num2str(R), ' | p=', num2str(p), ' | N=', num2str(length(idxBoth))]);
 
-print(FigHist, '..\Docs\Figures\Figure 8&11\Hist.png', "-dpng", "-r300");
+mPrint(FigFit, fullfile(FIGUREPATH, 'Hist.png'), "-dpng", "-r300");
 
 %%
 [N, EDGES] = histcounts(thREG_A1(idxA1), 4:0.01/4:4.06);

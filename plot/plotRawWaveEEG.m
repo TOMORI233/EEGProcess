@@ -1,19 +1,24 @@
 function Fig = plotRawWaveEEG(chMean, chErr, window, titleStr, EEGPos)
-    narginchk(3, 5);
+narginchk(3, 5);
 
-    if nargin < 4 || isempty(titleStr)
-        titleStr = '';
-    else
-        titleStr = [' | ', char(titleStr)];
-    end
+if nargin < 4 || isempty(titleStr)
+    titleStr = '';
+else
+    titleStr = [' | ', char(titleStr)];
+end
 
-    if nargin < 5
-        EEGPos = EEGPos_Neuroscan64();
-    end
+if nargin < 5
+    EEGPos = EEGPos_Neuroscan64();
+end
 
-    gridSize = EEGPos.grid;
-    chsIgnore = getOr(EEGPos, "ignore");
-    channelNames = getOr(EEGPos, "channelNames");
+gridSize = EEGPos.grid;
+chsIgnore = getOr(EEGPos, "ignore");
+locs = getOr(EEGPos, "locs");
+channelNames = getOr(EEGPos, "channelNames");
+
+t = linspace(window(1), window(2), size(chMean, 2));
+
+if isempty(locs)
 
     Fig = figure("WindowState", "maximized");
     margins = [0.05, 0.05, 0.1, 0.1];
@@ -27,14 +32,13 @@ function Fig = plotRawWaveEEG(chMean, chErr, window, titleStr, EEGPos)
             if chNum > size(chMean, 1) || ismember(chNum, chsIgnore)
                 continue;
             end
-            
-            t = linspace(window(1), window(2), size(chMean, 2));
+
             mSubplot(Fig, gridSize(1), gridSize(2), EEGPos.map(chNum), [1, 1], margins, paddings);
-            
+
             if ~isempty(chErr)
                 y1 = chMean(chNum, :) + chErr(chNum, :);
                 y2 = chMean(chNum, :) - chErr(chNum, :);
-                fill([t fliplr(t)], [y1 fliplr(y2)], [0, 0, 0], 'edgealpha', '0', 'facealpha', '0.3', 'DisplayName', 'Error bar');
+                fill([t, fliplr(t)], [y1, fliplr(y2)], [0, 0, 0], 'edgealpha', '0', 'facealpha', '0.3', 'DisplayName', 'Error bar');
                 hold on;
             end
 
@@ -43,7 +47,7 @@ function Fig = plotRawWaveEEG(chMean, chErr, window, titleStr, EEGPos)
 
             xlim(window);
             if ~isempty(channelNames)
-                title(['CH ', num2str(chNum), ' | ', channelNames{chNum}, titleStr]);
+                title([channelNames{chNum}, titleStr]);
             else
                 title(['CH ', num2str(chNum), titleStr]);
             end
@@ -51,7 +55,43 @@ function Fig = plotRawWaveEEG(chMean, chErr, window, titleStr, EEGPos)
 
     end
 
-    scaleAxes(Fig, "y", "on");
+else
+    X = mapminmax(-[locs.Y], 0.05, 0.95);
+    Y = mapminmax([locs.X], 0.05, 0.95);
+    dX = 0.05;
+    dY = 0.05;
 
-    return;
+    Fig = figure("WindowState", "maximized");
+
+    for chNum = 1:length(X)
+
+        if ismember(chNum, chsIgnore)
+            continue;
+        end
+
+        axes('Position', [X(chNum) - dX / 2, Y(chNum) - dY / 2, dX, dY]);
+        hold(gca, "on");
+
+        if ~isempty(chErr)
+            y1 = chMean(chNum, :) + chErr(chNum, :);
+            y2 = chMean(chNum, :) - chErr(chNum, :);
+            fill([t, fliplr(t)], [y1, fliplr(y2)], [0, 0, 0], 'edgealpha', '0', 'facealpha', '0.3', 'DisplayName', 'Error bar');
+        end
+
+        plot(t, chMean(chNum, :), "k", "LineWidth", 1.5);
+        xlim(window);
+
+        if ~isempty(channelNames)
+            title([channelNames{chNum}, titleStr]);
+        else
+            title(['CH ', num2str(chNum), titleStr]);
+        end
+
+    end
+
+end
+
+scaleAxes(Fig, "y", "on");
+
+return;
 end
