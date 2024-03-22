@@ -16,6 +16,8 @@ FIGUREPATH = getAbsPath("..\Figures\healthy\population\Ratio No-Gapped Passive")
 %% Params
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
+alphaVal = 0.01;
+
 interval = 0;
 run(fullfile(pwd, "config\plotConfig.m"));
 run(fullfile(pwd, "config\avgConfig_Neuroscan64.m"));
@@ -85,19 +87,20 @@ scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", {0; 1000; 2000}));
 
 %% Window config for RM
-tIdx = t >= 1000 & t <= 1300;
+% change response
+tIdxChange = t >= 1000 & t <= 1300;
 
-[~, peakTime] = arrayfun(@(x) maxt(x.chMean(tIdx), t(tIdx)), chDataREG);
+[~, peakTime] = arrayfun(@(x) maxt(x.chMean(tIdxChange), t(tIdxChange)), chDataREG);
 windowChangePeakREG = peakTime + windowBand;
-[~, troughTime] = arrayfun(@(x, y) mint(x.chMean(tIdx & t > y), t(tIdx & t > y)), chDataREG, peakTime);
+[~, troughTime] = arrayfun(@(x, y) mint(x.chMean(tIdxChange & t > y), t(tIdxChange & t > y)), chDataREG, peakTime);
 windowChangeTroughREG = troughTime + windowBand;
 
-[~, peakTime] = arrayfun(@(x) maxt(x.chMean(tIdx), t(tIdx)), chDataIRREG);
+[~, peakTime] = arrayfun(@(x) maxt(x.chMean(tIdxChange), t(tIdxChange)), chDataIRREG);
 windowChangePeakIRREG = peakTime + windowBand;
-[~, troughTime] = arrayfun(@(x, y) mint(x.chMean(tIdx & t > y), t(tIdx & t > y)), chDataIRREG, peakTime);
+[~, troughTime] = arrayfun(@(x, y) mint(x.chMean(tIdxChange & t > y), t(tIdxChange & t > y)), chDataIRREG, peakTime);
 windowChangeTroughIRREG = troughTime + windowBand;
 
-%% RM computation
+%% RM computation (RM of grand-averaged wave)
 % REG
 RM_baseREG = cell(length(ICIsREG), 1);
 RM_changePeakREG = cell(length(ICIsREG), 1);
@@ -132,6 +135,39 @@ RM_delta_changePeakREG = cellfun(@(x, y) x - y, RM_changePeakREG, RM_baseREG, "U
 RM_delta_changePeakIRREG = cellfun(@(x, y) x - y, RM_changePeakIRREG, RM_baseIRREG, "UniformOutput", false);
 RM_delta_changeTroughREG = cellfun(@(x, y) x - y, RM_changeTroughREG, RM_baseREG, "UniformOutput", false);
 RM_delta_changeTroughIRREG = cellfun(@(x, y) x - y, RM_changeTroughIRREG, RM_baseIRREG, "UniformOutput", false);
+
+%% Topo RM computation
+% change response
+% REG 4-4.06
+temp = cellfun(@(x) x([x.ICI] == ICIsREG(end) & [x.type] == "REG").chMean, data, "UniformOutput", false);
+[~, peakTime] = maxt(chDataREG_All(end).chMean(:, tIdxChange), t(tIdxChange), 2);
+temp1 = cellfun(@(x) rmfcn(x, 2), cutData(temp, window, windowBase), "UniformOutput", false);
+temp2 = cellfun(@(x) rowFcn(@(y, z) rmfcn(cutData(y, window, z + windowBand), 2), x, peakTime), temp, "UniformOutput", false);
+RM_topo_delta_changePeakREG = calchMean(temp2 - temp1);
+[~, p_channels_REG_vs_base] = cellfun(@(x, y) ttest(x, y), changeCellRowNum(temp1), changeCellRowNum(temp2));
+p_channels_REG_vs_base = mafdr(p_channels_REG_vs_base, 'BHFDR', true);
+
+% IRREG 4-4.06
+temp = cellfun(@(x) x([x.ICI] == ICIsIRREG(end) & [x.type] == "IRREG").chMean, data, "UniformOutput", false);
+[~, peakTime] = maxt(chDataIRREG_All(end).chMean(:, tIdxChange), t(tIdxChange), 2);
+temp1 = cellfun(@(x) rmfcn(x, 2), cutData(temp, window, windowBase), "UniformOutput", false);
+temp2 = cellfun(@(x) rowFcn(@(y, z) rmfcn(cutData(y, window, z + windowBand), 2), x, peakTime), temp, "UniformOutput", false);
+RM_topo_delta_changePeakIRREG = calchMean(temp2 - temp1);
+[~, p_channels_IRREG_vs_base] = cellfun(@(x, y) ttest(x, y), changeCellRowNum(temp1), changeCellRowNum(temp2));
+p_channels_IRREG_vs_base = mafdr(p_channels_IRREG_vs_base, 'BHFDR', true);
+
+% onset response
+% REG 4
+tIdxOnset = t > 0 & t <= 300;
+temp = cellfun(@(x) {x([x.type] == "REG").chMean}', data, "UniformOutput", false);
+temp = cellfun(@calchMean, temp, "UniformOutput", false);
+chMean = calchMean(temp);
+[~, peakTime] = maxt(chMean(:, tIdxOnset), t(tIdxOnset), 2);
+temp1 = cellfun(@(x) rmfcn(x, 2), cutData(temp, window, windowBase0), "UniformOutput", false);
+temp2 = cellfun(@(x) rowFcn(@(y, z) rmfcn(cutData(y, window, z + windowBand), 2), x, peakTime), temp, "UniformOutput", false);
+RM_topo_delta_onsetPeakREG = calchMean(temp2 - temp1);
+[~, p_channels_onset_vs_base] = cellfun(@(x, y) ttest(x, y), changeCellRowNum(temp1), changeCellRowNum(temp2));
+p_channels_onset_vs_base = mafdr(p_channels_onset_vs_base, 'BHFDR', true);
 
 %% Statistics
 [~, p_RM_changePeakREG_vs_base] = cellfun(@(x, y) ttest(x, y), RM_baseREG, RM_changePeakREG);
@@ -201,7 +237,7 @@ addLines2Axes(gca, struct("Y", 0));
 mPrint(FigREG_vs_IRREG, fullfile(FIGUREPATH, ['REG vs IRREG (', char(area), ').png']), "-dpng", "-r300");
 
 %% save for comparison
-params = [fieldnames(getVarsFromWorkspace('RM_\W*')); ...
+params0 = [fieldnames(getVarsFromWorkspace('RM_\W*')); ...
           fieldnames(getVarsFromWorkspace('p_\W*')); ...
           fieldnames(getVarsFromWorkspace('window\W*'))];
 save(['..\DATA\MAT DATA\figure\Res P3 (', char(area), ').mat'], ...
@@ -211,7 +247,7 @@ save(['..\DATA\MAT DATA\figure\Res P3 (', char(area), ').mat'], ...
      "chs2Avg", ...
      "chDataREG", ...
      "chDataIRREG", ...
-     params{:});
+     params0{:});
 
 %% Grand average wave plot of all channels REG vs IRREG
 FigREG = plotRawWaveEEG(chDataREG_All(end).chMean, [], window, [], EEGPos_Neuroscan64);
@@ -235,3 +271,48 @@ for aIndex = 1:length(allAxes)
     allAxes(aIndex).YAxis.Visible = "off";
 end
 mPrint(FigIRREG, fullfile(FIGUREPATH, 'IRREG 4-4.06.png'), "-dpng", "-r300");
+
+%% Topo plot
+locs = readlocs('Neuroscan_chan64.loc');
+channels = 1:length(locs);
+chs2Plot = channels(~ismember(channels, [33, 43, 60, 64])); % Neuroscan
+% chsSelect = chs2Avg;
+
+params0 = [{'plotchans'}, {chs2Plot}                    , ... % indices of channels to plot
+           {'plotrad'  }, {0.36}                        , ... % plot radius
+           {'headrad'  }, {max([locs(chs2Plot).radius])}, ... % head radius
+           {'intrad'   }, {0.4}                         , ... % interpolate radius
+           {'conv'     }, {'on'}                        , ... % plot radius just covers maximum channel radius
+           {'colormap' }, {'jet'}                       , ...
+           {'emarker'  }, {[{'o', 'k', 8, 1}]}          ];    % {MarkerType, Color, Size, LineWidth}
+
+% NOTICE: channels selected in 'emaker2' option are from channels
+%         specified by 'plotchans', instead of from the original channels.
+
+figure;
+% onset
+chsSelect = find(p_channels_onset_vs_base < alphaVal);
+params = [params0, ...
+          {'emarker2'}, {[{find(ismember(chs2Plot, chsSelect)), '.', 'k', 30, 1}]}]; % {Channels, MarkerType, Color, Size, LineWidth}
+mSubplot(1, 3, 1, "shape", "square-min");
+topoplot(RM_topo_delta_onsetPeakREG, locs, params{:});
+title('Onset Response of REG 4', "FontSize", 14);
+colorbar;
+
+% REG
+chsSelect = find(p_channels_REG_vs_base < alphaVal);
+params = [params0, ...
+          {'emarker2'}, {[{find(ismember(chs2Plot, chsSelect)), '.', 'k', 30, 1}]}];
+mSubplot(1, 3, 2, "shape", "square-min");
+topoplot(RM_topo_delta_changePeakREG, locs, params{:});
+title(['Change Response of ', chDataREG(end).legend], "FontSize", 14);
+colorbar;
+
+% IRREG
+chsSelect = find(p_channels_IRREG_vs_base < alphaVal);
+params = [params0, ...
+          {'emarker2'}, {[{find(ismember(chs2Plot, chsSelect)), '.', 'k', 30, 1}]}];
+mSubplot(1, 3, 3, "shape", "square-min");
+topoplot(RM_topo_delta_changePeakIRREG, locs, params0{:});
+title(['Change Response of ', chDataIRREG(end).legend], "FontSize", 14);
+colorbar;

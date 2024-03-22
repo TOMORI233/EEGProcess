@@ -1,6 +1,7 @@
 %% plot config
 set(0, "DefaultFigureWindowState", "maximized");
 set(0, "DefaultAxesFontSize", 12);
+set(0, "DefaultAxesTitleFontSize", 1.1);
 set(0, "DefaultAxesTitleFontWeight", "bold");
 
 %% window config
