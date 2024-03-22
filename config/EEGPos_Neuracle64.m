@@ -4,7 +4,7 @@ EEGPos.ignore = [60:64];
 
 %% Actual location
 % locs file (highest priority, plot in actual location)
-% EEGPos.locs = readlocs('Neuracle_chan64.loc'); % comment this line to plot in grid
+EEGPos.locs = readlocs('Neuracle_chan64.loc'); % comment this line to plot in grid
 
 %% Grid
 % grid size

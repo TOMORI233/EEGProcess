@@ -284,7 +284,7 @@ params0 = [{'plotchans'}, {chs2Plot}                    , ... % indices of chann
            {'intrad'   }, {0.4}                         , ... % interpolate radius
            {'conv'     }, {'on'}                        , ... % plot radius just covers maximum channel radius
            {'colormap' }, {'jet'}                       , ...
-           {'emarker'  }, {[{'o', 'k', 8, 1}]}          ];    % {MarkerType, Color, Size, LineWidth}
+           {'emarker'  }, {{'o', 'k', 8, 1}}          ];    % {MarkerType, Color, Size, LineWidth}
 
 % NOTICE: channels selected in 'emaker2' option are from channels
 %         specified by 'plotchans', instead of from the original channels.
@@ -293,7 +293,7 @@ figure;
 % onset
 chsSelect = find(p_channels_onset_vs_base < alphaVal);
 params = [params0, ...
-          {'emarker2'}, {[{find(ismember(chs2Plot, chsSelect)), '.', 'k', 30, 1}]}]; % {Channels, MarkerType, Color, Size, LineWidth}
+          {'emarker2'}, {{find(ismember(chs2Plot, chsSelect)), '.', 'k', 30, 1}}]; % {Channels, MarkerType, Color, Size, LineWidth}
 mSubplot(1, 3, 1, "shape", "square-min");
 topoplot(RM_topo_delta_onsetPeakREG, locs, params{:});
 title('Onset Response of REG 4', "FontSize", 14);
@@ -302,7 +302,7 @@ colorbar;
 % REG
 chsSelect = find(p_channels_REG_vs_base < alphaVal);
 params = [params0, ...
-          {'emarker2'}, {[{find(ismember(chs2Plot, chsSelect)), '.', 'k', 30, 1}]}];
+          {'emarker2'}, {{find(ismember(chs2Plot, chsSelect)), '.', 'k', 30, 1}}];
 mSubplot(1, 3, 2, "shape", "square-min");
 topoplot(RM_topo_delta_changePeakREG, locs, params{:});
 title(['Change Response of ', chDataREG(end).legend], "FontSize", 14);
@@ -311,7 +311,7 @@ colorbar;
 % IRREG
 chsSelect = find(p_channels_IRREG_vs_base < alphaVal);
 params = [params0, ...
-          {'emarker2'}, {[{find(ismember(chs2Plot, chsSelect)), '.', 'k', 30, 1}]}];
+          {'emarker2'}, {{find(ismember(chs2Plot, chsSelect)), '.', 'k', 30, 1}}];
 mSubplot(1, 3, 3, "shape", "square-min");
 topoplot(RM_topo_delta_changePeakIRREG, locs, params0{:});
 title(['Change Response of ', chDataIRREG(end).legend], "FontSize", 14);

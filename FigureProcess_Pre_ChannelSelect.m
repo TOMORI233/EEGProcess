@@ -1,29 +1,47 @@
 ccc;
 
+%% Path
 cd(fileparts(mfilename("fullpath")));
+FIGUREPATH = getAbsPath("..\Figures\healthy\population\Channel Select");
 
-EEGPos = EEGPos_Neuroscan64;
-run(fullfile(pwd, "config/avgConfig_Neuroscan64.m"));
+%% Load
+% EEGPos = EEGPos_Neuroscan64;
+% run(fullfile(pwd, "config/avgConfig_Neuroscan64.m"));
+% FILENAME = fullfile(FIGUREPATH, 'Neuroscan 64.png');
 
-% EEGPos = EEGPos_Neuracle64;
-% run(fullfile(pwd, "config/avgConfig_Neuracle64.m"));
+EEGPos = EEGPos_Neuracle64;
+run(fullfile(pwd, "config/avgConfig_Neuracle64.m"));
+FILENAME = fullfile(FIGUREPATH, 'Neuracle 64.png');
 
+%% Params & conversion
 locs = EEGPos.locs;
-X = -[locs.Y];
-Y = [locs.X];
+[~, ~, Th, Rd, ~] = readlocs(locs);
+Th = pi / 180 * Th; % convert degrees to radians
+[XTemp, YTemp] = pol2cart(Th, Rd); % transform electrode locations from polar to cartesian coordinates
 
-channels = 1:length(X);
+% remove ignored channels
+channels = 1:length(locs);
+idx = ~ismember(channels, getOr(EEGPos, "ignore"));
+channels = channels(idx);
+XTemp = XTemp(idx);
+YTemp = YTemp(idx);
 
+% flip & normalize
+X = mapminmax(YTemp, -1, 1);
+Y = mapminmax(XTemp, -1, 1);
+
+%% Plot
 figure("WindowState", "maximized");
-mSubplot(1, 1, 1, "shape", "fill", "paddings", [0.2, 0.2, 0.01, 0.01]);
+mSubplot(1, 1, 1, "shape", "square-min");
 scatter(X(ismember(channels, chs2Avg)), Y(ismember(channels, chs2Avg)), 700, "red", "filled");
 hold on;
 scatter(X(~ismember(channels, chs2Avg)), Y(~ismember(channels, chs2Avg)), 700, "red", "LineWidth", 1);
-fplot(@(t) cos(t) / 1.1, @(t) sin(t), "Color", "k", "LineWidth", 2);
-arrayfun(@(x, y, z) text(gca, x, y, z.labels, "HorizontalAlignment", "center", "FontWeight", "bold", "FontSize", 12), X, Y, locs);
-xlim([-1, 1]);
-ylim([-1, 1]);
-set(gca, "Visible", "off");
+arrayfun(@(x, y, z) text(gca, x, y, z.labels, "HorizontalAlignment", "center", "FontWeight", "bold", "FontSize", 12), X, Y, locs(idx));
 
-FIGUREPATH = getAbsPath("..\Figures\healthy\population\Channel Select");
-mPrint(gcf, fullfile(FIGUREPATH, 'Neuroscan 64.png'), "-dpng", "-r300");
+% fplot(@(t) 1.15 * cos(t), @(t) 1.15 * sin(t), "Color", "k", "LineWidth", 2);
+% set(gca, "XLimitMethod", "tight");
+% set(gca, "YLimitMethod", "tight");
+% syncXY;
+
+set(gca, "Visible", "off");
+mPrint(gcf, FILENAME, "-dpng", "-r300");

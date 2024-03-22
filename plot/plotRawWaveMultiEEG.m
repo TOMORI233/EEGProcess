@@ -68,14 +68,23 @@ if isempty(locs)
     scaleAxes(Fig, "y", "on");
 
 else
-    X = mapminmax(-[locs.Y], 0.05, 0.95);
-    Y = mapminmax([locs.X], 0.05, 0.95);
+    [~, ~, Th, Rd, ~] = readlocs(locs);
+    Th = pi / 180 * Th; % convert degrees to radians
+    [XTemp, YTemp] = pol2cart(Th, Rd); % transform electrode locations from polar to cartesian coordinates
+    channels = 1:length(locs);
+
+    % flip
+    X = zeros(length(channels), 1);
+    Y = zeros(length(channels), 1);
+    idx = ~ismember(channels, chsIgnore);
+    X(idx) = mapminmax(YTemp(idx), 0.05, 0.95);
+    Y(idx) = mapminmax(XTemp(idx), 0.05, 0.95);
     dX = 0.05;
     dY = 0.05;
 
     Fig = figure("WindowState", "maximized");
     
-    for chNum = 1:length(X)
+    for chNum = 1:length(channels)
 
         if ismember(chNum, chsIgnore)
             continue;
