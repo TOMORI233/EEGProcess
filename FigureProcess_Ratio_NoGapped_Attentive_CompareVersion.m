@@ -206,6 +206,9 @@ RM_delta_changeTroughPT = cellfun(@(x, y) x - y, RM_changeTroughPT, RM_basePT, "
 
 [~, p_RM_delta_changePeak_PT_vs_REG] = ttest(RM_delta_changePeakPT{end}, RM_delta_changePeakREG{end});
 
+p_ANOVA_changePeakREG = anova1(cat(2, RM_changePeakREG{2:end}), [], "off");
+p_ANOVA_changeTroughREG = anova1(cat(2, RM_changeTroughREG{2:end}), [], "off");
+
 %% Tunning plot
 FigTuning = figure;
 mSubplot(1, 2, 1, "shape", "square-min");

@@ -16,7 +16,7 @@ FIGUREPATH = getAbsPath("..\Figures\healthy\population\Ratio No-Gapped Passive")
 %% Params
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
-alphaVal = 0.01;
+alphaVal = 0.05;
 
 interval = 0;
 run(fullfile(pwd, "config\plotConfig.m"));

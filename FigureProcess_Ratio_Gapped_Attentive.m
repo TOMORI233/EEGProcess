@@ -144,6 +144,9 @@ RM_delta_changeTroughIRREG = cellfun(@(x, y) x - y, RM_changeTroughIRREG, RM_bas
 [~, p_RM_changePeakIRREG_vs_control] = cellfun(@(x) ttest(RM_changePeakIRREG{1}, x), RM_changePeakIRREG);
 [~, p_RM_changeTroughIRREG_vs_control] = cellfun(@(x) ttest(RM_changeTroughIRREG{1}, x), RM_changeTroughIRREG);
 
+p_ANOVA_changePeakREG = anova1(cat(2, RM_changePeakREG{2:end}), [], "off");
+p_ANOVA_changeTroughREG = anova1(cat(2, RM_changeTroughREG{2:end}), [], "off");
+
 %% Tunning plot
 FigTuning = figure;
 mSubplot(1, 2, 1, "shape", "square-min");
