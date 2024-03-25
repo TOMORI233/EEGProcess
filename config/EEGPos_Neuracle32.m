@@ -1,6 +1,19 @@
 function EEGPos = EEGPos_Neuracle32()
+% channels not to plot
+EEGPos.ignore = [];
+
+%% Actual location
+% locs file (highest priority, plot in actual location)
+EEGPos.locs = readlocs('Neuracle_chan32.loc'); % comment this line to plot in grid
+
+%% Channel Alias
+EEGPos.channelNames = {EEGPos.locs.labels}';
+
+%% Grid
+% grid size
 EEGPos.grid = [8, 7];
 
+% channel map into grid
 EEGPos.map(1:2) = [3,5];
 EEGPos.map(3) = 11;
 EEGPos.map(4 : 5) = [10,12];
