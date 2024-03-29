@@ -1,13 +1,15 @@
 function EEGDataset = EEGFilter(EEGDataset, fhp, flp)
+% This function is obsolete. Use ECOGFILTER instead.
+warning("This function is obsolete. Please use ECOGFilter instead.");
+
 narginchk(1, 3);
-ft_setPath2Top;
 
 if nargin < 2
     fhp = 0.5;
 end
 
 if nargin < 3
-    flp = 100;
+    flp = 40;
 end
 
 fs0 = EEGDataset.fs;

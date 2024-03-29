@@ -9,6 +9,19 @@ EEGPos.locs = readlocs('Neuracle_chan32.loc'); % comment this line to plot in gr
 %% Channel Alias
 EEGPos.channelNames = {EEGPos.locs.labels}';
 
+%% Neighbours
+th = 0.4;
+neighbours = struct("label", EEGPos.channelNames);
+dists = squareform(pdist(cat(1, [EEGPos.locs.X], [EEGPos.locs.Y], [EEGPos.locs.Z])'));
+
+for index = 1:length(neighbours)
+    neighbours(index).neighbch = find(dists(index, :) < th);
+    neighbours(index).neighbch(neighbours(index).neighbch == index) = [];
+    neighbours(index).neighblabel = {neighbours(neighbours(index).neighbch).label};
+end
+
+EEGPos.neighbours = neighbours;
+
 %% Grid
 % grid size
 EEGPos.grid = [8, 7];

@@ -1,9 +1,5 @@
-function Fig = plotTopoEEG(topo, LOCPATH, ICs)
-    narginchk(1, 3);
-
-    if nargin < 2
-        LOCPATH = 'chan64.loc';
-    end
+function Fig = plotTopoEEG(topo, locs, ICs)
+    narginchk(2, 3);
 
     plotSize = autoPlotSize(size(topo, 2));
 
@@ -31,7 +27,7 @@ function Fig = plotTopoEEG(topo, LOCPATH, ICs)
 
             ICNum = ICs(rIndex, cIndex);
             mSubplot(Fig, plotSize(1), plotSize(2), (rIndex - 1) * plotSize(2) + cIndex, [1, 1], margins, paddings);
-            topoplot(topo(:, ICNum), LOCPATH);
+            topoplot(topo(:, ICNum), locs);
             title(['IC ', num2str(ICNum)]);
             colorbar;
         end
