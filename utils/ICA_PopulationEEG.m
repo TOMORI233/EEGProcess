@@ -48,7 +48,7 @@ function [comp, ICs] = ICA_PopulationEEG(trialsEEG, fs, windowICA, varargin)
     % IC topo
     channels = 1:size(trialsEEG{1}, 1);
     badCHs = channels(~ismember(channels, chs2doICA));
-    plotTopoEEG(insertRows(comp.topo, badCHs), LOCPATH);
+    plotTopoICA_EEG(insertRows(comp.topo, badCHs), LOCPATH);
     
     % Origin raw wave
     temp = changeCellRowNum(interpolateBadChs(trialsEEG, badCHs));
