@@ -1,3 +1,4 @@
+% This script is to perform ICA on data recorded by Neuroscan system
 ccc;
 
 ROOTPATH = '..\DATA\MAT DATA\pre';
@@ -20,7 +21,7 @@ for dIndex = 1:length(DATAPATHs)
 
     if ~exist(fullfile(SUBJECTPATH, "ICA", "ICA res.mat"), "file")
         channels = 1:size(trialsEEG{1}, 1);
-        [comp, ICs] = ICA_PopulationEEG(trialsEEG, fs, window, "chs2doICA", channels, "EEGPos", EEGPos, "LOCPATH", LOCPATH);
+        [comp, ICs] = ICA_PopulationEEG(trialsEEG, fs, window, "chs2doICA", channels, "EEGPos", EEGPos);
         
         trialsEEG = reconstructData(trialsEEG, comp, ICs);
         

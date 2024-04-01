@@ -1,3 +1,5 @@
+% This script is to export waves averaged across trials for each subject.
+% For Neuracle system.
 ccc;
 
 ROOTPATH = getAbsPath('..\DATA\MAT DATA - extra\pre');

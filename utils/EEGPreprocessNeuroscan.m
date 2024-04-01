@@ -1,4 +1,4 @@
-function [EEGDatasets, trialDatasets] = EEGPreprocess(ROOTPATH, opts)
+function [EEGDatasets, trialDatasets] = EEGPreprocessNeuroscan(ROOTPATH, opts)
     narginchk(1, 2);
 
     if nargin < 2

@@ -1,4 +1,4 @@
-function batchExport(CDTROOTPATH, protocolsToExport, DATESTRs, SUBJECTs)
+function batchExportNeuroscan(CDTROOTPATH, protocolsToExport, DATESTRs, SUBJECTs)
 % Export baseline-correted EEG wave and trials
 % SAVEROOTPATH = ROOTPATH\project\MAT DATA\pre\subject\protocol\date\
 narginchk(1, 4);
@@ -70,7 +70,7 @@ for dIndex = 1:length(DAYPATHs)
         SAVEPATH = fullfile(SAVEROOTPATH, SUBJECTsTemp{sIndex});
 
         opts.DATEStr = DATESTRs{dIndex};
-        [EEGDatasets, trialDatasets] = EEGPreprocess(DATAPATH, opts);
+        [EEGDatasets, trialDatasets] = EEGPreprocessNeuroscan(DATAPATH, opts);
         fs = EEGDatasets(1).fs;
         protocols = [trialDatasets.protocol]';
 
@@ -93,6 +93,7 @@ for dIndex = 1:length(DAYPATHs)
             tIdx = excludeTrials(trialsEEG, tTh, chTh, "userDefineOpt", "off");
             trialsEEG(tIdx) = [];
             trialAll(tIdx) = [];
+
             save(MATNAME, "windowBase", "window", "trialsEEG", "trialAll", "fs");
         end
 
