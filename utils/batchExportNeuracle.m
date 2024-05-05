@@ -1,3 +1,4 @@
+function batchExportNeuracle(DATAROOTPATH, SAVEROOTPATH)
 % This script is for single-subject data processing.
 % But it can also be applied to batching.
 % The only difference is the setting of data paths.
@@ -21,13 +22,7 @@
 %               |----evt.bdf
 %               |----103.mat (trial info)
 
-%% Clear workspace
-ccc;
-
 %% Path definition
-DATAROOTPATH = 'E:\EEG\Neuracle\浙江省人民医院\DATA';
-SAVEROOTPATH = 'D:\Education\Lab\Projects\EEG\DATA\MAT DATA - coma\pre';
-
 %%% Find the folder paths that contain data.bdf (Usually it is named [pID])
 % Use regular expression
 DATAPATHs = {dir(fullfile(char(DATAROOTPATH), "**\data.bdf")).folder}';

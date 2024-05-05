@@ -97,8 +97,11 @@ if strcmpi(icaOpt, "on") && nargout >= 4
     else
         disp('ICA result does not exist. Performing ICA on data...');
         channels = 1:size(trialsEEG{1}, 1);
+        plotRawWave(calchMean(trialsEEG), calchStd(trialsEEG), window);
+        bc = validateInput(['Input extra bad channels (besides ', num2str(badChs(:)'), '): '], @(x) isempty(x) || all(fix(x) == x & x > 0));
+        badChs = [badChs(:); bc(:)]';
         if ~isempty(badChs)
-            disp(['Channel ', num2str(reshape(badChs, [1, numel(badChs)])), ' are excluded from analysis.']);
+            disp(['Channel ', num2str(badChs(:)'), ' are excluded from analysis.']);
             channels(badChs) = [];
         end
         [comp, ICs] = ICA_PopulationEEG(trialsEEG, fs, window, "chs2doICA", channels, "EEGPos", EEGPos);

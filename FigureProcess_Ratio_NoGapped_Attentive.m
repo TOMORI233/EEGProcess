@@ -25,14 +25,16 @@ window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
 
+% Gender filter
+load("gender.mat", "genders", "subjectIDs");
+idx = cellfun(@(x) find(strcmp(SUBJECTs, x)), subjectIDs);
+genders = genders(idx);
+
 % Independent
 load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
-data = data(subjectIdxA1);
-
-% For A1&A2 comparison
-% load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
-% load("..\DATA\MAT DATA\figure\subjectIdx_A2.mat", "subjectIdxA2");
-% data = data(subjectIdxA1 & subjectIdxA2);
+% data = data(subjectIdxA1); % all
+% data = data(subjectIdxA1 & genders == 1); % male
+data = data(subjectIdxA1 & genders == 2); % female
 
 %% Wave plot
 % REG

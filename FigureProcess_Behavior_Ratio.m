@@ -25,7 +25,14 @@ SUBJECTs = strrep(DATAPATHs, '\active1\behavior.mat', '');
 temp = split(SUBJECTs, '\');
 SUBJECTs = rowFcn(@(x) x{end}, temp, "UniformOutput", false);
 
+% Gender filter
+load("gender.mat", "genders", "subjectIDs");
+idx = cellfun(@(x) find(strcmp(SUBJECTs, x)), subjectIDs);
+genders = genders(idx);
+
 data = cellfun(@(x) load(x).behaviorRes, DATAPATHs, "UniformOutput", false);
+% data = data(genders == 1); % male
+% data = data(genders == 2); % female
 
 temp = cellfun(@(x) x([x.type] == "REG" & ismember([x.ICI], ICIsREG)), data, "UniformOutput", false);
 resREG_A1 = cellfun(@(x) [x.nDiff] ./ [x.nTotal], temp, "UniformOutput", false);
@@ -41,6 +48,8 @@ DATAPATHs = dir(fullfile(ROOTPATH, '**\active2\behavior.mat'));
 DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput", false);
 
 data = cellfun(@(x) load(x).behaviorRes, DATAPATHs, "UniformOutput", false);
+% data = data(genders == 1); % male
+% data = data(genders == 2); % female
 
 temp = cellfun(@(x) x([x.type] == "REG" & ismember([x.ICI], ICIsREG)), data, "UniformOutput", false);
 resREG_A2 = cellfun(@(x) [x.nDiff] ./ [x.nTotal], temp, "UniformOutput", false);
@@ -178,6 +187,11 @@ catch
     fitResREG_A2 = cellfun(@(x) fitBehavior(x, ICIsREG), resREG_A2, "UniformOutput", false);
     save('..\DATA\MAT DATA\figure\behavior fitres.mat', "fitResREG_A1", "fitResREG_A2");
 end
+
+% fitResREG_A1 = fitResREG_A1(genders == 1); % male
+% fitResREG_A2 = fitResREG_A2(genders == 1); % male
+% fitResREG_A1 = fitResREG_A1(genders == 2); % female
+% fitResREG_A2 = fitResREG_A2(genders == 2); % female
 
 thREG_A1 = cellfun(@(x) findBehaviorThreshold(x, thBeh), fitResREG_A1);
 thREG_A2 = cellfun(@(x) findBehaviorThreshold(x, thBeh), fitResREG_A2);

@@ -27,6 +27,13 @@ window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
 
+% Gender filter
+load("gender.mat", "genders", "subjectIDs");
+idx = cellfun(@(x) find(strcmp(SUBJECTs, x)), subjectIDs);
+genders = genders(idx);
+% data = data(genders == 1); % male
+data = data(genders == 2); % female
+
 % For A1&P3 comparison 
 % load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
 % data = data(subjectIdxA1);
@@ -88,7 +95,7 @@ addLines2Axes(struct("X", {0; 1000; 2000}));
 
 %% Window config for RM
 % change response
-tIdxChange = t >= 1000 & t <= 1300;
+tIdxChange = t >= 1000 & t <= 1260;
 
 [~, peakTime] = arrayfun(@(x) maxt(x.chMean(tIdxChange), t(tIdxChange)), chDataREG);
 windowChangePeakREG = peakTime + windowBand;
@@ -221,7 +228,7 @@ xlabel('Time (ms)');
 xlim([0, 2000]);
 scaleAxes("y", "symOpt", "max");
 ylabel('Response (\muV)');
-title(['Grand-averaged wave in ', char(area), ' | N=', num2str(length(SUBJECTs))]);
+title(['Grand-averaged wave in ', char(area), ' | N=', num2str(length(data))]);
 addLines2Axes(gca, struct("X", 1000 + ICIsREG(1), "color", [255 128 0] / 255, "width", 2));
 
 mSubplot(1, 2, 2, "shape", "square-min", "margin_left", 0.15);

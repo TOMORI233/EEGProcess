@@ -25,10 +25,6 @@ window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
 
-% Independent
-% load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
-% data = data(subjectIdxA1);
-
 % For A1&A2 comparison
 load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
 load("..\DATA\MAT DATA\figure\subjectIdx_A2.mat", "subjectIdxA2");
