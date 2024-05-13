@@ -35,16 +35,44 @@ dataComa = cellfun(@(x) x([1, 3, 4]), dataComa, "UniformOutput", false);
 dataHealthy = cellfun(@(x) x([1, 2, 4]), dataHealthy, "UniformOutput", false);
 
 idxOnset = ismember(subjectIDsComa, cellstr(readlines("subjects.txt")));
+t = linspace(window(1), window(2), size(dataComa{1}(1).chMean, 2));
+
+%% 
+gfpComa = cellfun(@(x) calGFP(x(2).chMean), dataComa, "UniformOutput", false);
+gfpHealthy = cellfun(@(x) calGFP(x(2).chMean), dataHealthy, "UniformOutput", false);
+
+figure;
+mSubplot(3, 2, 3);
+hold on;
+for index = 1:length(gfpComa)
+    if idxOnset(index)
+        plot(t, gfpComa{index}, "Color", "b", "LineWidth", 1);
+    else
+        plot(t, gfpComa{index}, "Color", [.5, .5, .5], "LineWidth", 1);
+    end
+end
+plot(t, mean(cat(1, gfpComa{idxOnset}), 1), "Color", "r", "LineWidth", 2);
+xlabel("Time (ms)");
+ylabel("GFP (\muV)");
+title("Impaired consciousness");
+
+mSubplot(3, 2, 4);
+hold on;
+for index = 1:length(gfpHealthy)
+    plot(t, gfpHealthy{index}, "Color", "b", "LineWidth", 1);
+end
+plot(t, mean(cat(1, gfpHealthy{:}), 1), "Color", "r", "LineWidth", 2);
+xlabel("Time (ms)");
+ylabel("GFP (\muV)");
+title("Healthy");
+
+addLines2Axes(struct("X", {0; 1000; 2000}));
 
 %% RM computation
-t = linspace(window(1), window(2), size(dataComa{1}(1).chMean, 2));
 tIdxBase0 = t >= windowBase0(1) & t <= windowBase0(2);
 tIdxBase = t >= windowBase(1) & t <= windowBase(2);
 tIdxOnset = t >= windowOnset(1) & t <= windowOnset(2);
 tIdxChange = t >= windowChange(1) & t <= windowChange(2);
-
-gfpComa = cellfun(@(x) calGFP(x(2).chMean), dataComa, "UniformOutput", false);
-gfpHealthy = cellfun(@(x) calGFP(x(2).chMean), dataHealthy, "UniformOutput", false);
 
 [~, temp] = cellfun(@(x) maxt(x(tIdxOnset), t(tIdxOnset)), gfpComa, "UniformOutput", false);
 tIdxOnsetComa = cellfun(@(x) t >= x + windowBand(1) & t <= x + windowBand(2), temp, "UniformOutput", false);
@@ -77,7 +105,7 @@ RM_delta_change_healthy = RM_change_healthy - RM_base_healthy;
 
 %% plot
 figure;
-mSubplot(1, 2, 1, "shape", "square-min");
+mSubplot(1, 1, 1, "shape", "square-min");
 hold on;
 X = RM_delta_onset_coma(idxOnset);
 Y = RM_delta_change_coma(idxOnset);
@@ -99,21 +127,6 @@ xlabel("\DeltaRM_{onset} of Reg_{4-5}");
 ylabel("\DeltaRM_{change} of Reg_{4-5}");
 legend;
 
-mSubplot(2, 2, 2);
-temp = {cellfun(@(x) x(2) - x(1), RM_delta_change_coma(idxOnset));
-        cellfun(@(x) x(2) - x(1), RM_delta_change_coma(~idxOnset));
-        cellfun(@(x) x(2) - x(1), RM_delta_change_healthy)};
-mHistogram(temp, "DisplayName", {'Impaired consciousness (with onset response)', ...
-                                 'Impaired consciousness (without onset response)', ...
-                                 'Healthy'}, ...
-                 "FaceColor", {'b', 'none', 'r'}, ...
-                 "EdgeColor", {'b', 'b', 'r'}, ...
-                 "LineWidth", 1);
-[~, p_comaWithOnset_vs_healthy] = ttest2(temp{1}, temp{3});
-xlabel("\DeltaRM");
-ylabel("Counts");
-title(['Two-sample T-test p=', num2str(p_comaWithOnset_vs_healthy)]);
-
 %% Example
 grandAverageWave = cellfun(@(x) arrayfun(@(y) mean(y.chMean(chs2Avg, :), 1), x, "UniformOutput", false), dataComa, "UniformOutput", false);
 exampleSubject = "2024040801";
@@ -130,7 +143,3 @@ addLines2Axes(gca, struct("X", {0; 1000; 2000}));
 xlabel("Time (ms)");
 ylabel("Response (\muV)");
 title(strcat("Grand-average wave of subject", exampleSubject));
-
-%% 
-temp = cat(1, chDataHealthy(1:2).chMean)';
-temp = cat(1, chDataComaWithOnset(1:2).chMean)';
