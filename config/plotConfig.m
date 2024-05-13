@@ -5,7 +5,7 @@ set(0, "DefaultAxesTitleFontSize", 1.1);
 set(0, "DefaultAxesTitleFontWeight", "bold");
 
 %% window config
-windowBase0 = [-200, 0]; % ms
+windowBase0 = [-500, -300]; % ms
 if exist("interval", "var")
     windowBase = 1000 + interval + [-200, 0]; % ms
 end
