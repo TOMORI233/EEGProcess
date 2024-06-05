@@ -13,6 +13,9 @@
 *.mat
 **/*.mat
 
+#ignore xlsx
+*.xlsx
+
 #ignore following files;
 *.asv
 *.slxc

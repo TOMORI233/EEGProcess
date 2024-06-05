@@ -13,6 +13,8 @@ interval = 0;
 run(fullfile(pwd, "config\plotConfig.m"));
 run(fullfile(pwd, "config\avgConfig_Neuracle64.m"));
 
+chs2Avg = 26;
+
 windowOnset = [0, 300];
 windowChange = [1000, 1300];
 windowBase0 = [-500, -300];

@@ -28,11 +28,11 @@ fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
 
 % Gender filter
-load("gender.mat", "genders", "subjectIDs");
-idx = cellfun(@(x) find(strcmp(SUBJECTs, x)), subjectIDs);
-genders = genders(idx);
+% load("gender.mat", "genders", "subjectIDs");
+% idx = cellfun(@(x) find(strcmp(SUBJECTs, x)), subjectIDs);
+% genders = genders(idx);
 % data = data(genders == 1); % male
-data = data(genders == 2); % female
+% data = data(genders == 2); % female
 
 % For A1&P3 comparison 
 % load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");

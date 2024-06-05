@@ -9,6 +9,15 @@
             {"name": "chs2doICA", "kind": "namevalue"},
             {"name": "EEGPos", "kind": "namevalue", "type": ["struct"]}
         ]
+    },
+
+    "gfpPermTest": {
+        "inputs": [
+            {"name": "gfp1", "kind": "required", "type": ["numeric"]},
+            {"name": "gfp2", "kind": "required", "type": ["numeric"]},
+            {"name": "nperm", "kind": "ordered", "type": ["numeric", "scalar"]},
+            {"name": "Tail", "kind": "namevalue", "type": ["choices = {'both', 'left', 'right'}"]}
+        ]
     }
 
 }

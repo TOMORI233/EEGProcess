@@ -15,6 +15,11 @@ neighbours = struct("label", EEGPos.channelNames);
 dists = squareform(pdist(cat(1, [EEGPos.locs.X], [EEGPos.locs.Y], [EEGPos.locs.Z])'));
 
 for index = 1:length(neighbours)
+    
+    if ismember(index, EEGPos.ignore)
+        continue;
+    end
+
     neighbours(index).neighbch = find(dists(index, :) < th);
     neighbours(index).neighbch(neighbours(index).neighbch == index) = [];
     neighbours(index).neighblabel = {neighbours(neighbours(index).neighbch).label};

@@ -1,8 +1,9 @@
 %% Neuroscan 64
-% area = "Frontal";   chs2Avg = [1:23];
-% area = "Temporal";  chs2Avg = [15, 23, 24, 32, 34, 42];
-% area = "Parietal";  chs2Avg = [34:42, 44:59];
-% area = "Occipital"; chs2Avg = [53:59, 61:63];
+% area = "Frontal";      chs2Avg = [1:23];
+% area = "Temporal";     chs2Avg = [15, 23, 24, 32, 34, 42];
+% area = "Parietal";     chs2Avg = [34:42, 44:59];
+% area = "Occipital";    chs2Avg = [53:59, 61:63];
+% area = "All channels"; chs2Avg = 1:64;
 
 area = "Temporal-Parietal-Occipital";
 chs2Avg = [[15, 23, 24, 32, 34, 42], [34:37, 39:59], [53:64]];
