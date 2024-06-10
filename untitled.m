@@ -17,6 +17,7 @@ FIGUREPATH = getAbsPath("..\Figures\healthy\population\Ratio No-Gapped Passive")
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
 alphaVal = 0.05;
+nperm = 1e3;
 
 interval = 0;
 run(fullfile(pwd, "config\plotConfig.m"));
@@ -37,9 +38,17 @@ data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
 %% GFP plot
 % REG
 ICIsREG = unique([data{1}([data{1}.type] == "REG").ICI])';
+pREG = cell(length(ICIsREG) - 1, 1);
 for dIndex = 1:length(ICIsREG)
     temp = cellfun(@(x) x([x.ICI] == ICIsREG(dIndex) & [x.type] == "REG").chMean, data, "UniformOutput", false);
     temp = cellfun(@(x) calGFP(x, chs2Ignore), temp, "UniformOutput", false);
+
+    if dIndex == 1
+        gfpControl = temp;
+    else
+        pREG{dIndex - 1} = gfpPermTest(cell2mat(temp), cell2mat(gfpControl), nperm, "Tail", "left");
+    end
+
     chDataREG(dIndex, 1).chMean = calchMean(temp);
     chDataREG(dIndex, 1).chErr = calchErr(temp);
     chDataREG(dIndex, 1).color = colors{dIndex};
@@ -50,6 +59,18 @@ plotRawWaveMulti(chDataREG, window);
 scaleAxes("x", [1000 + ICIsREG(1), 1500]);
 scaleAxes("y", "on");
 addLines2Axes(struct("X", {0; 1000 + ICIsREG(1); 2000}));
+yRange = get(gca, "YLim");
+t = linspace(window(1), window(2), size(chDataREG(1).chMean, 2));
+for dIndex = 1:length(pREG)
+    h = fdr_bh(pREG{dIndex}, 0.01, 'pdep');
+    h = double(h);
+    h(h == 0) = nan;
+    h(h == 1) = yRange(2) + dIndex * 0.05;
+    h = scatter(t, h, "MarkerFaceColor", chDataREG(dIndex + 1).color, "MarkerEdgeColor", "none", ...
+                "Marker", "square");
+    setLegendOff(h);
+end
+set(gca, "YLim", [yRange(1), yRange(2) + (dIndex + 1) * 0.05]);
 
 % IRREG
 ICIsIRREG = unique([data{1}([data{1}.type] == "IRREG").ICI])';
@@ -66,8 +87,6 @@ plotRawWaveMulti(chDataIRREG, window);
 scaleAxes("x", [0, 1500]);
 scaleAxes("y", "on");
 addLines2Axes(struct("X", {0; 1000; 2000}));
-
-t = linspace(window(1), window(2), size(chDataREG(1).chMean, 2));
 
 %% RM computation (RM of grand-averaged wave)
 % REG
