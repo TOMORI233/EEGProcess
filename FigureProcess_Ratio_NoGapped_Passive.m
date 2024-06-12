@@ -323,3 +323,5 @@ mSubplot(1, 3, 3, "shape", "square-min");
 topoplot(RM_topo_delta_changePeakIRREG, locs, params0{:});
 title(['Change Response of ', chDataIRREG(end).legend], "FontSize", 14);
 colorbar;
+
+scaleAxes("c", "ignoreInvisible", false);

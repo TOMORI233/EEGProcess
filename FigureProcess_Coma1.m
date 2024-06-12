@@ -25,7 +25,7 @@ alphaVal = 0.01;
 
 %% 
 tb = readtable("CRS-R.xlsx");
-idx = contains(MATPATHsComa, ["2024032901", "2024053101", "2024053102"]);
+idx = contains(MATPATHsComa, ["2024032901"]);
 MATPATHsComa(idx) = [];
 tb(idx, :) = [];
 
@@ -41,8 +41,8 @@ window = load(MATPATHsComa{1}).window;
 dataComa = cellfun(@(x) load(x).chData, MATPATHsComa, "UniformOutput", false);
 dataHealthy = cellfun(@(x) load(x).chData, MATPATHsHealthy, "UniformOutput", false);
 
-dataComa = cellfun(@(x) x([1, 3, 4]), dataComa, "UniformOutput", false);
-dataHealthy = cellfun(@(x) x([1, 2, 4]), dataHealthy, "UniformOutput", false);
+dataComa = cellfun(@(x) x([1, 3]), dataComa, "UniformOutput", false);
+dataHealthy = cellfun(@(x) x([1, 2]), dataHealthy, "UniformOutput", false);
 
 idxOnset = ismember(subjectIDsComa, cellstr(readlines("subjects.txt")));
 t = linspace(window(1), window(2), size(dataComa{1}(1).chMean, 2));
@@ -116,8 +116,8 @@ temp1 = cell2mat(cellfun(@(x) x(1, :), gfpHealthy, "UniformOutput", false)); % s
 temp2 = cell2mat(cellfun(@(x) x(2, :), gfpHealthy, "UniformOutput", false));
 % temp1 = cell2mat(cellfun(@(x) x(1, :), gfpComa(~idxOnset), "UniformOutput", false)); % subject_sample
 % temp2 = cell2mat(cellfun(@(x) x(2, :), gfpComa(~idxOnset), "UniformOutput", false));
-p = gfpPermTest(temp1, temp2, nperm, "Tail", "both");
-h = fdr_bh(p, alphaVal, 'pdep');
+p = wavePermTest(temp1, temp2, nperm, "Tail", "right");
+h = fdr_bh(p, alphaVal, 'dep');
 h = double(h);
 h(h == 0) = nan;
 h(h == 1) = 0;
@@ -127,6 +127,7 @@ plot(t, mean(temp1, 1), "Color", "k", "LineWidth", 2);
 hold on;
 plot(t, mean(temp2, 1), "Color", "r", "LineWidth", 2);
 scatter(t, h, 50, "yellow", "filled");
+addLines2Axes(gca, struct("X", {0; 1000; 2000}));
 
 %% RM computation
 tIdxBase0 = t >= windowBase0(1) & t <= windowBase0(2);
@@ -146,56 +147,58 @@ RM_onset_healthy = cellfun(@(x) max(x(:, tIdxOnset), [], 2), gfpHealthy, "Unifor
 RM_change_coma = cellfun(@(x) max(x(:, tIdxChange), [], 2), gfpComa, "UniformOutput", false);
 RM_change_healthy = cellfun(@(x) max(x(:, tIdxChange), [], 2), gfpHealthy, "UniformOutput", false);
 
-RM_delta_onset_coma     = changeCellRowNum(cellfun(@(x, y) (x - y) ./ (x + y), RM_onset_coma, RM_base0_coma, "UniformOutput", false));
-RM_delta_change_coma    = changeCellRowNum(cellfun(@(x, y) (x - y) ./ (x + y), RM_change_coma, RM_base_coma, "UniformOutput", false));
-RM_delta_onset_healthy  = changeCellRowNum(cellfun(@(x, y) (x - y) ./ (x + y), RM_onset_healthy, RM_base0_healthy, "UniformOutput", false));
-RM_delta_change_healthy = changeCellRowNum(cellfun(@(x, y) (x - y) ./ (x + y), RM_change_healthy, RM_base_healthy, "UniformOutput", false)); 
+RM_delta_onset_coma     = changeCellRowNum(cellfun(@(x, y) x - y, RM_onset_coma, RM_base0_coma, "UniformOutput", false));
+RM_delta_change_coma    = changeCellRowNum(cellfun(@(x, y) x - y, RM_change_coma, RM_base_coma, "UniformOutput", false));
+RM_delta_onset_healthy  = changeCellRowNum(cellfun(@(x, y) x - y, RM_onset_healthy, RM_base0_healthy, "UniformOutput", false));
+RM_delta_change_healthy = changeCellRowNum(cellfun(@(x, y) x - y, RM_change_healthy, RM_base_healthy, "UniformOutput", false)); 
 
 %% plot
 figure;
 mSubplot(1, 2, 1, "shape", "square-min");
 hold on;
-temp = mean(cat(2, RM_delta_onset_coma{1:2}), 2);
+temp = mean(cat(2, RM_delta_onset_coma{2}), 2);
 X = temp(idxOnset);
-Y = RM_delta_change_coma{2}(idxOnset) - RM_delta_change_coma{1}(idxOnset);
+Y = RM_delta_change_coma{2}(idxOnset);
 scatter(X, Y, 100, "blue", "filled", "DisplayName", "Impaired consciousness (with onset response)");
 X = temp(~idxOnset);
-Y = RM_delta_change_coma{2}(~idxOnset) - RM_delta_change_coma{1}(~idxOnset);
+Y = RM_delta_change_coma{2}(~idxOnset);
 scatter(X, Y, 100, "filled", "MarkerFaceColor", [.5, .5, .5], "DisplayName", "Impaired consciousness (without onset response)");
-X = mean(cat(2, RM_delta_onset_healthy{1:2}), 2);
-Y = RM_delta_change_healthy{2} - RM_delta_change_healthy{1};
+X = mean(cat(2, RM_delta_onset_healthy{2}), 2);
+Y = RM_delta_change_healthy{2};
 scatter(X, Y, 100, "red", "filled", "DisplayName", "Healthy");
 syncXY;
 addLines2Axes(gca, struct("X", 0));
 addLines2Axes(gca, struct("Y", 0));
 xlabel("RM_{onset}");
-ylabel("\DeltaRM_{change}");
+ylabel("RM_{change}");
 legend;
 
 mSubplot(2, 2, 2, "margin_top", 0.1, "margin_bottom", 0.1);
-temp = mean(cat(2, RM_delta_onset_coma{1:2}), 2);
+temp = mean(cat(2, RM_delta_onset_coma{2}), 2);
 mHistogram({temp(idxOnset); ...
             temp(~idxOnset); ...
-            mean(cat(2, RM_delta_onset_healthy{1:2}), 2)}, ...
+            mean(cat(2, RM_delta_onset_healthy{2}), 2)}, ...
             "FaceColor", {'b'; [.5, .5, .5]; 'r'}, ...
-            "BinWidth", 0.1);
+            "BinWidth", 0.5);
 xlabel("RM_{onset}");
 ylabel("Count");
+[~, p1] = ttest2(temp, mean(cat(2, RM_delta_onset_healthy{2}), 2));
 
 mSubplot(2, 2, 4, "margin_top", 0.1, "margin_bottom", 0.1);
-mHistogram({RM_delta_change_coma{2}(idxOnset) - RM_delta_change_coma{1}(idxOnset); ...
-            RM_delta_change_coma{2}(~idxOnset) - RM_delta_change_coma{1}(~idxOnset); ...
-            RM_delta_change_healthy{2} - RM_delta_change_healthy{1}}, ...
+mHistogram({RM_delta_change_coma{2}(idxOnset); ...
+            RM_delta_change_coma{2}(~idxOnset); ...
+            RM_delta_change_healthy{2}}, ...
             "FaceColor", {'b'; [.5, .5, .5]; 'r'}, ...
-            "BinWidth", 0.1);
-xlabel("\DeltaRM_{change}");
+            "BinWidth", 0.5);
+xlabel("RM_{change}");
 ylabel("Count");
+[~, p2] = ttest2(RM_delta_change_coma{2}, RM_delta_change_healthy{2});
 
 %% 
 figure;
 mSubplot(1, 2, 1, "shape", "square-min");
 X = scoreAuditory;
-Y = mean(cat(2, RM_delta_onset_coma{1:2}), 2);
+Y = mean(cat(2, RM_delta_onset_coma{2}), 2);
 scatter(X(~isnan(X) & idxOnset), Y(~isnan(X) & idxOnset), 100, "blue", "filled");
 hold on;
 scatter(X(~isnan(X) & ~idxOnset), Y(~isnan(X) & ~idxOnset), 100, "black", "filled");
@@ -204,7 +207,7 @@ ylabel("RM_{onset}");
 
 mSubplot(1, 2, 2, "shape", "square-min");
 X = scoreTotal;
-Y = mean(cat(2, RM_delta_onset_coma{1:2}), 2);
+Y = mean(cat(2, RM_delta_onset_coma{2}), 2);
 [r_corr1, p_corr1] = corr(X(~isnan(X)), Y(~isnan(X)), "type", "Pearson");
 scatter(X(~isnan(X) & idxOnset), Y(~isnan(X) & idxOnset), 100, "blue", "filled");
 hold on;
@@ -215,28 +218,28 @@ ylabel("RM_{onset}");
 figure;
 mSubplot(1, 2, 1, "shape", "square-min");
 X = scoreAuditory;
-Y = RM_delta_change_coma{2} - RM_delta_change_coma{1};
+Y = RM_delta_change_coma{2};
 scatter(X(~isnan(X) & idxOnset), Y(~isnan(X) & idxOnset), 100, "blue", "filled");
 hold on;
 scatter(X(~isnan(X) & ~idxOnset), Y(~isnan(X) & ~idxOnset), 100, "black", "filled");
 xlabel("CRS-r score (Auditory)");
-ylabel("\DeltaRM_{change}");
+ylabel("RM_{change}");
 
 mSubplot(1, 2, 2, "shape", "square-min");
 X = scoreTotal;
-Y = RM_delta_change_coma{2} - RM_delta_change_coma{1};
+Y = RM_delta_change_coma{2};
 [r_corr2, p_corr2] = corr(X(~isnan(X)), Y(~isnan(X)), "type", "Pearson");
 scatter(X(~isnan(X) & idxOnset), Y(~isnan(X) & idxOnset), 100, "blue", "filled");
 hold on;
 scatter(X(~isnan(X) & ~idxOnset), Y(~isnan(X) & ~idxOnset), 100, "black", "filled");
 xlabel("CRS-r score (Total)");
-ylabel("\DeltaRM_{change}");
+ylabel("RM_{change}");
 
 %%
 figure("WindowState", "maximized");
 mSubplot(1, 1, 1, "shape", "square-min");
-X = mean(cat(2, RM_delta_onset_coma{1:2}), 2);
-Y = RM_delta_change_coma{2} - RM_delta_change_coma{1};
+X = mean(cat(2, RM_delta_onset_coma{2}), 2);
+Y = RM_delta_change_coma{2};
 Z = scoreTotal;
 scatter(X(~isnan(Z) & idxOnset), ...
         Y(~isnan(Z) & idxOnset), ...
