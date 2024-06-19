@@ -24,7 +24,9 @@
                 ]
             ]},
             {"name": "nperm", "kind": "ordered", "type": ["numeric", "scalar"]},
-            {"name": "Tail", "kind": "namevalue", "type": ["choices = {'both', 'left', 'right'}"]}
+            {"name": "Tail", "kind": "namevalue", "type": ["choices = {'both', 'left', 'right'}"]},
+            {"name": "Type", "kind": "namevalue", "type": ["choices = {'ERP', 'GFP'}"]},
+            {"name": "chs2Ignore", "kind": "namevalue", "type": ["numeric", "positive"]}
         ]
     }
 

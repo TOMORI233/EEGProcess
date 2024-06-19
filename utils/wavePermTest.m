@@ -18,11 +18,13 @@ mIp.addRequired("data2", @(x) validateattributes(x, {'numeric', 'cell'}, {'2d'})
 mIp.addOptional("nperm", 1e3, @(x) validateattributes(x, {'numeric'}, {'scalar', 'integer', 'positive'}));
 mIp.addParameter("Tail", "both", @(x) any(validatestring(x, {'both', 'left', 'right'})));
 mIp.addParameter("Type", "ERP", @(x) any(validatestring(x, {'ERP', 'GFP'})));
+mIp.addParameter("chs2Ignore", [], @(x) validateattributes(x, {'numeric'}, {'positive', 'integer', 'vector'}));
 mIp.parse(data1, data2, varargin{:});
 
 nperm = mIp.Results.nperm;
 Tail = mIp.Results.Tail;
 Type = mIp.Results.Type;
+chs2Ignore = mIp.Results.chs2Ignore;
 
 if isa(data1, "double") && isa(data2, "double")
     disp(['Treat input data as ', char(Type), ' data.']);
@@ -61,12 +63,12 @@ elseif iscell(data1) && iscell(data2)
     for index = 1:nperm
         shuffleIdx = 1:(A + B);
         shuffleIdx = randperm(length(shuffleIdx));
-        resPerm1(index, :) = calGFP(calchMean(temp(shuffleIdx(1:A))));
-        resPerm2(index, :) = calGFP(calchMean(temp(shuffleIdx(A + 1:A + B))));
+        resPerm1(index, :) = calGFP(calchMean(temp(shuffleIdx(1:A))), chs2Ignore);
+        resPerm2(index, :) = calGFP(calchMean(temp(shuffleIdx(A + 1:A + B))), chs2Ignore);
     end
 
-    wave1 = calGFP(calchMean(data1));
-    wave2 = calGFP(calchMean(data2));
+    wave1 = calGFP(calchMean(data1), chs2Ignore);
+    wave2 = calGFP(calchMean(data2), chs2Ignore);
     dWave = wave1 - wave2;
 else
     error("Invalid data type.");

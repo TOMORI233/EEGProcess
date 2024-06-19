@@ -111,22 +111,23 @@ for index = 1:length(gfpHealthy)
 end
 addLines2Axes(struct("X", {0; 1000; 2000}));
 
+%% 
 % permute at sample level
 temp1 = cell2mat(cellfun(@(x) x(1, :), gfpHealthy, "UniformOutput", false)); % subject_sample
 temp2 = cell2mat(cellfun(@(x) x(2, :), gfpHealthy, "UniformOutput", false));
 % temp1 = cell2mat(cellfun(@(x) x(1, :), gfpComa(~idxOnset), "UniformOutput", false)); % subject_sample
 % temp2 = cell2mat(cellfun(@(x) x(2, :), gfpComa(~idxOnset), "UniformOutput", false));
-p = wavePermTest(temp1, temp2, nperm, "Tail", "right");
+p = wavePermTest(temp1, temp2, nperm, "Tail", "right", "Type", "GFP", "chs2Ignore", chs2Ignore);
 h = fdr_bh(p, alphaVal, 'dep');
 h = double(h);
 h(h == 0) = nan;
 h(h == 1) = 0;
 
 figure;
-plot(t, mean(temp1, 1), "Color", "k", "LineWidth", 2);
+plot(t, mean(temp1, 1)', "Color", "k", "LineWidth", 2);
 hold on;
-plot(t, mean(temp2, 1), "Color", "r", "LineWidth", 2);
-scatter(t, h, 50, "yellow", "filled");
+plot(t, mean(temp2, 1)', "Color", "r", "LineWidth", 2);
+scatter(t, h', 50, "yellow", "filled");
 addLines2Axes(gca, struct("X", {0; 1000; 2000}));
 
 %% RM computation
@@ -263,16 +264,14 @@ cb.Label.Rotation = -90;
 cb.Label.VerticalAlignment = "baseline";
 
 %% 
-exampleID = "2024041102";
-% exampleID = "2024040801";
+% exampleID = "2024041102";
+exampleID = "2024040801";
 idx = strcmp(exampleID, subjectIDsComa);
 
 t1 = (t' - 1000) / 1000;
 
 res_example_coma_GFP_REG4_4 = gfpComa{idx}(1, :)';
 res_example_coma_GFP_REG4_5 = gfpComa{idx}(2, :)';
-res_population_healthy_GFP_REG4_4 = mean(cell2mat(cellfun(@(x) x(1, :), gfpHealthy, "UniformOutput", false)), 1)';
-res_population_healthy_GFP_REG4_5 = mean(cell2mat(cellfun(@(x) x(2, :), gfpHealthy, "UniformOutput", false)), 1)';
 
 figure;
 mSubplot(1, 2, 1, "shape", "square-min");
@@ -285,11 +284,13 @@ ylabel("GFP (\muV)");
 title(['Global field power of coma subject ', char(exampleID)]);
 
 mSubplot(1, 2, 2, "shape", "square-min");
-plot(t1, res_population_healthy_GFP_REG4_4, "Color", "k", "LineWidth", 2, "DisplayName", "REG 4-4");
+temp1 = mean(dataComa{idx}(1).chMean(chs2Avg, :), 1)';
+plot(t1, temp1, "Color", "k", "LineWidth", 2);
 hold on;
-plot(t1, res_population_healthy_GFP_REG4_5, "Color", "r", "LineWidth", 2, "DisplayName", "REG 4-5");
-legend;
-xlabel("Time (sec)");
-ylabel("GFP (\muV)");
-title(['Global field power of healthy subjects (N=', num2str(length(gfpHealthy)), ')']);
-addLines2Axes(struct("X", {-1; 0; 1}));
+temp2 = mean(dataComa{idx}(2).chMean(chs2Avg, :), 1)';
+plot(t1, temp2, "Color", "r", "LineWidth", 2);
+
+temp = dataComa{idx};
+temp(1).color = "k";
+temp(2).color = "r";
+plotRawWaveMultiEEG(temp, window, [], EEGPos_Neuracle64);
