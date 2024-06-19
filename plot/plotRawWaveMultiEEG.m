@@ -97,7 +97,7 @@ else
             chMean = chData(dIndex).chMean;
             t = linspace(window(1), window(2), size(chMean, 2));
             legendStr = getOr(chData(dIndex), "legend", '');
-            h = plot(t, chMean(chNum, :), "LineWidth", 1.5, "Color", chData(dIndex).color, "DisplayName", legendStr);
+            h = plot(t, chMean(chNum, :), "LineWidth", 2, "Color", chData(dIndex).color, "DisplayName", legendStr);
 
             if isempty(legendStr) || chNum > 1
                 setLegendOff(h);
