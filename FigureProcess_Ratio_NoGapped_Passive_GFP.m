@@ -46,7 +46,7 @@ for dIndex = 1:length(ICIsREG)
     if dIndex == 1
         gfpControl = temp;
     else
-        pREG{dIndex - 1} = gfpPermTest(cell2mat(temp), cell2mat(gfpControl), nperm, "Tail", "left");
+        pREG{dIndex - 1} = wavePermTest(cell2mat(temp), cell2mat(gfpControl), nperm, "Tail", "left");
     end
 
     chDataREG(dIndex, 1).chMean = calchMean(temp);

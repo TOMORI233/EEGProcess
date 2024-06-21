@@ -9,10 +9,11 @@ alphaVal = 0.01;
 %% 
 trialsEEG1 = trialsEEG([trialAll.ICI2] == 4);
 trialsEEG2 = trialsEEG([trialAll.ICI2] == 5);
-gfp1 = calGFP(calchMean(trialsEEG1));
-gfp2 = calGFP(calchMean(trialsEEG2));
+chs2Ignore = 60:64;
+gfp1 = calGFP(calchMean(trialsEEG1), chs2Ignore);
+gfp2 = calGFP(calchMean(trialsEEG2), chs2Ignore);
 
-p = wavePermTest(trialsEEG1, trialsEEG2, nperm, "Tail", "right", "Type", "GFP");
+p = wavePermTest(trialsEEG1, trialsEEG2, nperm, "Tail", "right", "Type", "GFP", "chs2Ignore", chs2Ignore);
 
 %% 
 chData(1).chMean = calchMean(trialsEEG1);
@@ -41,7 +42,7 @@ end
 mPrint(gcf, "..\temp\example_2024040801_REG4-5.jpg", "-dpng", "-r300");
 
 %% 
-h = fdr_bh(p, alphaVal, 'dep');
+h = fdr_bh(p, alphaVal, 'pdep');
 h = double(h);
 h(h == 0) = nan;
 h(h == 1) = 0;
