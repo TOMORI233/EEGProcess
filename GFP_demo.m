@@ -13,14 +13,24 @@ chs2Ignore = 60:64;
 gfp1 = calGFP(calchMean(trialsEEG1), chs2Ignore);
 gfp2 = calGFP(calchMean(trialsEEG2), chs2Ignore);
 
-p = wavePermTest(trialsEEG1, trialsEEG2, nperm, "Tail", "right", "Type", "GFP", "chs2Ignore", chs2Ignore);
-
-%% 
 chData(1).chMean = calchMean(trialsEEG1);
 chData(1).color = [.5, .5, .5];
 chData(2).chMean = calchMean(trialsEEG2);
 chData(2).color = [.5, 0, .5];
 
+[A, f] = cellfun(@(x) mfft(x, fs, [], 2), trialsEEG, "UniformOutput", false);
+A = calchMean(A);
+f = f{1};
+figure;
+plot(f, A(~ismember(1:size(A, 1), chs2Ignore), :), 'b');
+
+plotRawWaveEEG(A, [], [0, 500], [], EEGPos_Neuracle64)
+scaleAxes("x", [0, 10]);
+scaleAxes("y", "on", [0, inf]);
+
+p = wavePermTest(trialsEEG1, trialsEEG2, nperm, "Tail", "right", "Type", "GFP", "chs2Ignore", chs2Ignore);
+
+%% 
 temp = chData(1);
 temp.color = [0, 0, 0];
 plotRawWaveMultiEEG(temp, window, [], EEGPos_Neuracle64);
