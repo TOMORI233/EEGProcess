@@ -1,8 +1,8 @@
 function [p, dResPerm] = wavePermTest(data1, data2, varargin)
-% Perform permutation test on average wave data.
+% Perform permutation test on GFP data.
 % [data1] and [data2] are N-by-S double (N is subject number, S is sample
 % number) or T-by-1 cell with elements of C-by-S double (C is channel number).
-% If [data1] and [data2] are double matrices (wave), shuffle at sample level between 
+% If [data1] and [data2] are double matrices (GFP data), shuffle at sample level between 
 % conditions and then average across subjects.
 % If [data1] and [data2] are cell arrays (trial data), do permutation test for single
 % subject and shuffle at trial level → compute ERP → compute GFP.

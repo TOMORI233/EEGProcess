@@ -28,7 +28,7 @@ chs2Ignore = EEGPos.ignore;
 
 %% Window config for RM
 % change response
-windowChange = [1000, 1280];
+windowChange = [1000, 1300];
 
 %% Load
 window = load(DATAPATHs{1}).window;
@@ -57,9 +57,7 @@ end
 
 plotRawWaveMulti(chDataREG, window);
 scaleAxes("x", [1000 + ICIsREG(1), 1500]);
-scaleAxes("y", "on");
-addLines2Axes(struct("X", {0; 1000 + ICIsREG(1); 2000}));
-yRange = get(gca, "YLim");
+yRange = scaleAxes("y", "on");
 t = linspace(window(1), window(2), size(chDataREG(1).chMean, 2));
 for dIndex = 1:length(pREG)
     h = fdr_bh(pREG{dIndex}, 0.01, 'pdep');
@@ -71,12 +69,21 @@ for dIndex = 1:length(pREG)
     setLegendOff(h);
 end
 set(gca, "YLim", [yRange(1), yRange(2) + (dIndex + 1) * 0.05]);
+addLines2Axes(struct("X", {0; 1000 + ICIsREG(1); 2000}));
 
 % IRREG
 ICIsIRREG = unique([data{1}([data{1}.type] == "IRREG").ICI])';
+pIRREG = cell(length(ICIsIRREG) - 1, 1);
 for dIndex = 1:length(ICIsIRREG)
     temp = cellfun(@(x) x([x.ICI] == ICIsIRREG(dIndex) & [x.type] == "IRREG").chMean, data, "UniformOutput", false);
     temp = cellfun(@(x) calGFP(x, chs2Ignore), temp, "UniformOutput", false);
+
+    if dIndex == 1
+        gfpControl = temp;
+    else
+        pIRREG{dIndex - 1} = wavePermTest(cell2mat(temp), cell2mat(gfpControl), nperm, "Tail", "left");
+    end
+
     chDataIRREG(dIndex, 1).chMean = calchMean(temp);
     chDataIRREG(dIndex, 1).chErr = calchErr(temp);
     chDataIRREG(dIndex, 1).color = colors{dIndex};
@@ -85,7 +92,17 @@ end
 
 plotRawWaveMulti(chDataIRREG, window);
 scaleAxes("x", [0, 1500]);
-scaleAxes("y", "on");
+yRange = scaleAxes("y", "on");
+for dIndex = 1:length(pIRREG)
+    h = fdr_bh(pIRREG{dIndex}, 0.01, 'pdep');
+    h = double(h);
+    h(h == 0) = nan;
+    h(h == 1) = yRange(2) + dIndex * 0.05;
+    h = scatter(t, h, "MarkerFaceColor", chDataIRREG(dIndex + 1).color, "MarkerEdgeColor", "none", ...
+                "Marker", "square");
+    setLegendOff(h);
+end
+set(gca, "YLim", [yRange(1), yRange(2) + (dIndex + 1) * 0.05]);
 addLines2Axes(struct("X", {0; 1000; 2000}));
 
 %% RM computation (RM of grand-averaged wave)
@@ -96,9 +113,9 @@ for dIndex = 1:length(ICIsREG)
     temp = cellfun(@(x) x([x.ICI] == ICIsREG(dIndex) & [x.type] == "REG").chMean, data, "UniformOutput", false);
     temp = cellfun(@(x) calGFP(x, chs2Ignore), temp, "UniformOutput", false);
     temp1 = cutData(temp, window, windowBase);
-    RM_baseREG{dIndex} = cellfun(@(x) rmfcn(mean(x, 1)), temp1);
+    RM_baseREG{dIndex} = cellfun(@mean, temp1);
     temp2 = cutData(temp, window, windowChange);
-    RM_changeREG{dIndex} = cellfun(@(x) max(mean(x, 1)), temp2);
+    RM_changeREG{dIndex} = cellfun(@max, temp2);
 end
 
 % IRREG
@@ -108,13 +125,13 @@ for dIndex = 1:length(ICIsIRREG)
     temp = cellfun(@(x) x([x.ICI] == ICIsIRREG(dIndex) & [x.type] == "IRREG").chMean, data, "UniformOutput", false);
     temp = cellfun(@(x) calGFP(x, chs2Ignore), temp, "UniformOutput", false);
     temp1 = cutData(temp, window, windowBase);
-    RM_baseIRREG{dIndex} = cellfun(@(x) rmfcn(mean(x, 1)), temp1);
+    RM_baseIRREG{dIndex} = cellfun(@mean, temp1);
     temp2 = cutData(temp, window, windowChange);
-    RM_changeIRREG{dIndex} = cellfun(@(x) max(mean(x, 1)), temp2);
+    RM_changeIRREG{dIndex} = cellfun(@max, temp2);
 end
 
-RM_delta_changeREG = cellfun(@(x, y)   (x - y) ./ (x + y), RM_changeREG, RM_baseREG, "UniformOutput", false);
-RM_delta_changeIRREG = cellfun(@(x, y) (x - y) ./ (x + y), RM_changeIRREG, RM_baseIRREG, "UniformOutput", false);
+RM_delta_changeREG = cellfun(@(x, y)   x - y, RM_changeREG, RM_baseREG, "UniformOutput", false);
+RM_delta_changeIRREG = cellfun(@(x, y) x - y, RM_changeIRREG, RM_baseIRREG, "UniformOutput", false);
 
 %% Statistics
 [~, p_RM_changeREG_vs_base] = cellfun(@(x, y) ttest(x, y), RM_baseREG, RM_changeREG);

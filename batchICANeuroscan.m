@@ -8,28 +8,52 @@ DATAPATHs = arrayfun(@(x) fullfile(x.folder, x.name), DATAPATHs, "UniformOutput"
 DATAPATHs(strcmp(filenames, "ICA res")) = [];
 [~, filenames] = cellfun(@fileparts, DATAPATHs, "UniformOutput", false);
 
+%% 
+sameIcaOpt = false;
 EEGPos = EEGPos_Neuroscan64;
-LOCPATH = 'Neuroscan_chan64.loc';
-badChs = [];
 
+%% 
 for dIndex = 1:length(DATAPATHs)
     close all force;
     disp(['Current data: ', DATAPATHs{dIndex}]);
 
-    load(DATAPATHs{dIndex});
-    SUBJECTPATH = getRootDirPath(fileparts(DATAPATHs{dIndex}), 1);
+    if sameIcaOpt
+        load(DATAPATHs{dIndex});
+        SUBJECTPATH = getRootDirPath(fileparts(DATAPATHs{dIndex}), 1);
+    
+        if ~exist(fullfile(SUBJECTPATH, "ICA", "ICA res.mat"), "file")
+            channels = 1:size(trialsEEG{1}, 1);
+            [comp, ICs] = ICA_PopulationEEG(trialsEEG, fs, window, "chs2doICA", channels, "EEGPos", EEGPos);
+            
+            trialsEEG = reconstructData(trialsEEG, comp, ICs);
+            
+            mkdir(fullfile(SUBJECTPATH, "ICA"));
+            save(fullfile(SUBJECTPATH, "ICA", "ICA res.mat"), "comp", "ICs");
+        else
 
-    if ~exist(fullfile(SUBJECTPATH, "ICA", "ICA res.mat"), "file")
-        channels = 1:size(trialsEEG{1}, 1);
-        [comp, ICs] = ICA_PopulationEEG(trialsEEG, fs, window, "chs2doICA", channels, "EEGPos", EEGPos);
-        
-        trialsEEG = reconstructData(trialsEEG, comp, ICs);
-        
-        mkdir(fullfile(SUBJECTPATH, "ICA"));
-        save(fullfile(SUBJECTPATH, "ICA", "ICA res.mat"), "comp", "ICs");
+            if exist(fullfile(fileparts(DATAPATHs{dIndex}), "ICA res.mat"), "file")
+                disp("ICA already performed. Skip");
+            else
+                load(fullfile(SUBJECTPATH, "ICA", "ICA res.mat"));
+                trialsEEG = reconstructData(trialsEEG, comp, ICs);
+                save(fullfile(fileparts(DATAPATHs{dIndex}), "ICA res.mat"), "comp", "ICs");
+            end
+            
+        end
+
     else
-        load(fullfile(SUBJECTPATH, "ICA", "ICA res.mat"));
-        trialsEEG = reconstructData(trialsEEG, comp, ICs);
+
+        if exist(fullfile(fileparts(DATAPATHs{dIndex}), "ICA res.mat"), "file")
+            disp("ICA already performed. Skip");
+        else
+            load(DATAPATHs{dIndex});
+            channels = 1:size(trialsEEG{1}, 1);
+            [comp, ICs] = ICA_PopulationEEG(trialsEEG, fs, window, "chs2doICA", channels, "EEGPos", EEGPos);
+            
+            trialsEEG = reconstructData(trialsEEG, comp, ICs);
+            save(fullfile(fileparts(DATAPATHs{dIndex}), "ICA res.mat"), "comp", "ICs");
+        end
+
     end
 
     save(fullfile(fileparts(DATAPATHs{dIndex}), "data.mat"), "trialsEEG", "trialAll", "window", "windowBase", "fs");
