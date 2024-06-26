@@ -61,7 +61,7 @@ addLines2Axes(struct("X", 0));
 mPrint(FigGrandAvg, fullfile(FIGUREPATH, ['Grand average wave (', char(area), ').png']), "-dpng", "-r300");
 
 %% Window config for RM
-tIdx = t >= 0 & t <= 325;
+tIdx = t >= 50 & t <= 300;
 
 [~, peakTime] = arrayfun(@(x) maxt(x.chMean(tIdx), t(tIdx)), chDataREG);
 windowChangePeakREG = peakTime + windowBand;

@@ -5,7 +5,7 @@ narginchk(1, 4);
 
 addpath(genpath(fileparts(mfilename("fullpath"))), "-begin");
 
-SAVEROOTPATH = fullfile(getRootDirPath(fileparts(mfilename("fullpath")), 1), "DATA", "MAT DATA", "pre");
+SAVEROOTPATH = fullfile(getRootDirPath(fileparts(mfilename("fullpath")), 2), "DATA", "MAT DATA", "pre");
 
 opts.fhp = 0.5;
 opts.flp = 40;

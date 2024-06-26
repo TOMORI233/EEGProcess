@@ -5,6 +5,8 @@ function [EEGDatasets, trialDatasets] = EEGPreprocessNeuroscan(ROOTPATH, opts)
         opts = [];
     end
 
+
+    preprocessConfig = path2func(fullfile(getRootDirPath(fileparts(mfilename("fullpath")), 1), "config", "preprocessConfig.m"));
     opts = getOrFull(opts, preprocessConfig());
     rulesROOTPATH = fullfile(getRootDirPath(fileparts(mfilename("fullpath")), 1), "rules");
     rulesForOneDay = dir(rulesROOTPATH);
@@ -40,7 +42,8 @@ function [EEGDatasets, trialDatasets] = EEGPreprocessNeuroscan(ROOTPATH, opts)
             EEGDatasets(idx).fs = EEG.srate;
             EEGDatasets(idx).channels = 1:size(EEGDatasets(idx).data, 1);
             EEGDatasets(idx).event = EEG.event;
-            EEGDatasets(idx) = EEGFilter(EEGDatasets(idx), opts.fhp, opts.flp);
+            temp = ECOGFilter({EEGDatasets(idx).data}, opts.fhp, opts.flp, EEGDatasets(idx).fs, "Notch", "on");
+            EEGDatasets(idx).data = temp{1};
 
             trialDatasets(idx).protocol = protocols(pIndex);
             trialDatasets(idx).trialAll = EEGBehaviorProcess(data(cellfun(@string, {data.protocol}) == protocols(pIndex)).trialsData, EEGDatasets(idx), opts.rules);
