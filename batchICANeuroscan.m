@@ -29,6 +29,7 @@ for dIndex = 1:length(DATAPATHs)
             
             mkdir(fullfile(SUBJECTPATH, "ICA"));
             save(fullfile(SUBJECTPATH, "ICA", "ICA res.mat"), "comp", "ICs");
+            save(fullfile(fileparts(DATAPATHs{dIndex}), "ICA res.mat"), "comp", "ICs");
         else
 
             if exist(fullfile(fileparts(DATAPATHs{dIndex}), "ICA res.mat"), "file")
