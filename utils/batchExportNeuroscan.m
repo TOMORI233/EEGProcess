@@ -4,8 +4,7 @@ function batchExportNeuroscan(CDTROOTPATH, SAVEROOTPATH, PROTOCOLs)
 narginchk(2, 3);
 
 if nargin < 3
-%     opts.protocols = ["passive3", "passive1", "active1", "active2"];
-    opts.protocols = ["passive3"];
+    opts.protocols = ["passive3", "passive1", "active1", "active2"];
 else
     opts.protocols = PROTOCOLs;
 end
@@ -83,12 +82,8 @@ for dIndex = 1:length(DAYPATHs)
             trialAll = trialDatasets([trialDatasets.protocol] == protocols(pIndex)).trialAll(:);
             trialsEEG = selectEEG(EEGDatasets([EEGDatasets.protocol] == protocols(pIndex)), trialAll, window);
 
-            % First trial exclusion
-            tIdx = excludeTrials(trialsEEG, 0.4, 20, "userDefineOpt", "off", "badCHs", opts.badChs);
-            trialsEEG(tIdx) = [];
-
             % Perform ICA
-            if strcmpi(sameICAOpt, "on")
+            if strcmpi(opts.icaOpt, "on")
                 ICAPATH = dir(fullfile(SAVEPATH, '**\ICA res.mat'));
 
                 if isempty(ICAPATH)
@@ -97,37 +92,41 @@ for dIndex = 1:length(DAYPATHs)
                     opts.ICAPATH = ICAPATH(1).folder;
                 end
 
-                if strcmpi(opts.icaOpt, "on")
+                if strcmpi(sameICAOpt, "on") && ~isempty(opts.ICAPATH) && exist(fullfile(opts.ICAPATH, "ICA res.mat"), "file")
+                    load(fullfile(opts.ICAPATH, "ICA res.mat"), "-mat", "comp");
+                    channels = comp.channels;
+                    ICs = comp.ICs;
+                    badChs = comp.badChs;
+                else
+                    disp('ICA result does not exist. Performing ICA on data...');
+                    channels = 1:size(trialsEEG{1}, 1);
+                    temp = baselineCorrection(trialsEEG, fs, window, windowBase);
+                    plotRawWave(calchMean(temp), calchStd(temp), window);
+                    bc = validateInput(['Input extra bad channels (besides ', num2str(badChs(:)'), '): '], @(x) isempty(x) || all(fix(x) == x & x > 0));
+                    badChs = [opts.badChs(:); bc(:)];
 
-                    if ~isempty(opts.ICAPATH) && exist(fullfile(opts.ICAPATH, "ICA res.mat"), "file")
-                        load(fullfile(opts.ICAPATH, "ICA res.mat"), "-mat", "comp");
-                        channels = comp.channels;
-                        ICs = comp.ICs;
-                        badChs = comp.badChs;
-                    else
-                        disp('ICA result does not exist. Performing ICA on data...');
-                        channels = 1:size(trialsEEG{1}, 1);
-                        temp = baselineCorrection(trialsEEG, fs, window, windowBase);
-                        plotRawWave(calchMean(temp), calchStd(temp), window);
-                        bc = validateInput(['Input extra bad channels (besides ', num2str(badChs(:)'), '): '], @(x) isempty(x) || all(fix(x) == x & x > 0));
-                        badChs = [opts.badChs(:); bc(:)];
-                        if ~isempty(badChs)
-                            disp(['Channel ', num2str(badChs(:)'), ' are excluded from analysis.']);
-                            channels(badChs) = [];
-                        end
-                        [comp, ICs] = ICA_PopulationEEG(trialsEEG(1:min(length(trialsEEG), 100)), fs, window, "chs2doICA", channels, "EEGPos", EEGPos);
+                    % First trial exclusion before ICA
+                    tIdx = excludeTrials(trialsEEG, 0.4, 20, "userDefineOpt", "off", "badCHs", badChs);
+                    trialsEEG(tIdx) = [];
+                    trialAll(tIdx) = [];
+
+                    if ~isempty(badChs)
+                        disp(['Channel ', num2str(badChs(:)'), ' are excluded from analysis.']);
+                        channels(badChs) = [];
                     end
-                    
-                    % reconstruct data
-                    trialsEEG = cellfun(@(x) x(channels, :), trialsEEG, "UniformOutput", false);
-                    trialsEEG = reconstructData(trialsEEG, comp, ICs);
-                    trialsEEG = cellfun(@(x) insertRows(x, badChs), trialsEEG, "UniformOutput", false);
-                    trialsEEG = interpolateBadChs(trialsEEG, badChs, EEGPos.neighbours);
-                
-                    comp.channels = channels;
-                    comp.ICs = ICs;
-                    comp.badChs = badChs;
+
+                    [comp, ICs] = ICA_PopulationEEG(trialsEEG(1:min(length(trialsEEG), 100)), fs, window, "chs2doICA", channels, "EEGPos", EEGPos);
                 end
+
+                % reconstruct data
+                trialsEEG = cellfun(@(x) x(channels, :), trialsEEG, "UniformOutput", false);
+                trialsEEG = reconstructData(trialsEEG, comp, ICs);
+                trialsEEG = cellfun(@(x) insertRows(x, badChs), trialsEEG, "UniformOutput", false);
+                trialsEEG = interpolateBadChs(trialsEEG, badChs, EEGPos.neighbours);
+            
+                comp.channels = channels;
+                comp.ICs = ICs;
+                comp.badChs = badChs;
 
                 save(fullfile(SAVEPATH, protocols{pIndex}, "ICA res.mat"), "comp");
             else

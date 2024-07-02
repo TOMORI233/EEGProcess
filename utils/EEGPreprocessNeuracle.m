@@ -53,10 +53,6 @@ EEG.data = ECOGFilter(EEG.data, fhp, flp, fs, "Notch", "on");
 % epoching
 trialsEEG = arrayfun(@(x) EEG.data(:, x + fix(window(1) / 1000 * fs):x + fix(window(2) / 1000 * fs)), latency, "UniformOutput", false);
 
-% first trial exclusion
-tIdx = excludeTrials(trialsEEG, 0.4, 20, "userDefineOpt", "off", "badCHs", badChs);
-trialsEEG(tIdx) = [];
-
 % ICA
 if strcmpi(icaOpt, "on") && nargout >= 4
     if ~isempty(ICAPATH) && exist(fullfile(ICAPATH, "ICA res.mat"), "file")
@@ -70,10 +66,17 @@ if strcmpi(icaOpt, "on") && nargout >= 4
         plotRawWave(calchMean(trialsEEG), calchStd(trialsEEG), window);
         bc = validateInput(['Input extra bad channels (besides ', num2str(badChs(:)'), '): '], @(x) isempty(x) || all(fix(x) == x & x > 0));
         badChs = [badChs(:); bc(:)]';
+
+        % first trial exclusion
+        tIdx = excludeTrials(trialsEEG, 0.4, 20, "userDefineOpt", "off", "badCHs", badChs);
+        trialsEEG(tIdx) = [];
+        trialAll(tIdx) = [];
+
         if ~isempty(badChs)
             disp(['Channel ', num2str(badChs(:)'), ' are excluded from analysis.']);
             channels(badChs) = [];
         end
+        
         [comp, ICs] = ICA_PopulationEEG(trialsEEG, fs, window, "chs2doICA", channels, "EEGPos", EEGPos);
     end
     
