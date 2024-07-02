@@ -54,9 +54,6 @@ badChs = 60:64; % for Neuracle 64-channel system
 % ----For Neuracle 64-channel system----
 EEGPos = EEGPos_Neuracle64();
 
-% ----For Neuroscan 64-channel system----
-% EEGPos = EEGPos_Neuroscan64();
-
 %%% -----------You can also specify other parameters by assigning it as a field to [opts]----------------
 % See private\EEGPreprocessNeuracle.m for other parameters
 
@@ -69,6 +66,7 @@ sameICAOpt = "on";
 
 %% Preprocess and save
 % required parameters
+opts = preprocessConfigEEG;
 opts.badChs = badChs;
 opts.window = window;
 opts.EEGPos = EEGPos;

@@ -72,7 +72,7 @@ function [comp, ICs] = ICA_PopulationEEG(trialsEEG, fs, windowICA, varargin)
         k = validateInput('Press Y or Enter to continue or N to reselect ICs: ', @(x) isempty(x) || any(validatestring(x, {'y', 'n', 'N', 'Y', ''})), 's');
     end
 
-    comp.trial = [];
+    comp = rmfield(comp, ["trial", "time"]);
 
     return;
 end

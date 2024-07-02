@@ -23,6 +23,8 @@ interval = 0;
 run(fullfile(pwd, "config\plotConfig.m"));
 run(fullfile(pwd, "config\avgConfig_Neuracle64.m"));
 
+alphaVal = 0.05;
+
 %% Load
 window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
@@ -65,6 +67,8 @@ tIdx = t >= 1000 & t <= 1300;
 
 [~, peakTime] = arrayfun(@(x) maxt(x.chMean(tIdx), t(tIdx)), chData);
 windowChangePeak = peakTime + windowBand;
+
+windowChangePeak = repmat(peakTime(end, :) + windowBand, 8, 1);
 [~, troughTime] = arrayfun(@(x, y) mint(x.chMean(tIdx & t > y), t(tIdx & t > y)), chData, peakTime);
 windowChangeTrough = troughTime + windowBand;
 
@@ -105,8 +109,14 @@ insertN(isnan(insertN)) = inf;
 
 FigTuning = figure;
 mSubplot(1, 1, 1, "shape", "square-min");
-errorbar((1:length(insertN)) - 0.05, cellfun(@mean, RM_delta_changePeak), cellfun(@SE, RM_delta_changePeak), "Color", "r", "LineWidth", 2, "DisplayName", "Peak");
+X = (1:length(insertN)) - 0.05;
+Y = cellfun(@mean, RM_delta_changePeak);
+E = cellfun(@SE, RM_delta_changePeak);
+errorbar(X, Y, E, "Color", "r", "LineWidth", 2, "DisplayName", "Peak");
 hold on;
+h(1) = scatter(X(p_RM_changePeak_vs_control1 < alphaVal), Y(p_RM_changePeak_vs_control1 < alphaVal) - E(p_RM_changePeak_vs_control1 < alphaVal) - 0.08, 80, "Marker", "*", "MarkerEdgeColor", "k");
+h(2) = scatter(X(p_RM_changePeak_vs_control2 < alphaVal), Y(p_RM_changePeak_vs_control2 < alphaVal) + E(p_RM_changePeak_vs_control2 < alphaVal) + 0.08, 60, "Marker", "o", "MarkerEdgeColor", "k");
+setLegendOff(h);
 errorbar((1:length(insertN)) + 0.05, cellfun(@mean, RM_delta_changeTrough), cellfun(@SE, RM_delta_changeTrough), "Color", "b", "LineWidth", 2, "DisplayName", "Trough");
 legend("Location", "northwest");
 xticks(1:length(insertN));

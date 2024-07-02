@@ -6,27 +6,9 @@ if nargin < 2
 end
 
 %% Parameter settings
-EEGPos = opts.EEGPos;
-
-% for trial segmentation
-window = getOr(opts, "window", [-1000, 3000]); % ms
-
-% for baseline correction
-windowBase = getOr(opts, "windowBase", [-300, 0]); % ms
-
-% for filter
-fhp = getOr(opts, "fhp", 0.5); % Hz
-flp = getOr(opts, "flp", 40); % Hz
-
-% for trial exclusion
-tTh = getOr(opts, "tTh", 0.2);
-chTh = getOr(opts, "chTh", 20);
-absTh = getOr(opts, "absTh");
-badChs = getOr(opts, "badChs");
-
-% for ICA
-icaOpt = getOr(opts, "icaOpt", "on");
-ICAPATH = getOr(opts, "ICAPATH");
+opts = getOrFull(opts, preprocessConfigEEG);
+window = opts.window; % variable name conflicts with built-in function
+parseStruct(opts);
 
 %% Data loading
 % convert ROOTPATH to char
@@ -66,26 +48,14 @@ exIdx = isnan(codes) | ~ismember(codes, rules.code) | latency > size(EEG.data, 2
 latency(exIdx) = [];
 
 % filter
-EEG.data = ECOGFilter({EEG.data}, fhp, flp, fs);
-EEG.data = EEG.data{1};
+EEG.data = ECOGFilter(EEG.data, fhp, flp, fs, "Notch", "on");
 
-% trial segmentation
+% epoching
 trialsEEG = arrayfun(@(x) EEG.data(:, x + fix(window(1) / 1000 * fs):x + fix(window(2) / 1000 * fs)), latency, "UniformOutput", false);
 
-% baseline correction
-trialsEEG = baselineCorrection(trialsEEG, fs, window, windowBase);
-
-% exclude bad trials
-params = {trialsEEG, tTh, chTh};
-if ~isempty(absTh)
-    params = [params, {"absTh", absTh}];
-end
-if ~isempty(badChs)
-    params = [params, {"badCHs", badChs}];
-end
-exIdx = excludeTrials(params{:});
-trialsEEG(exIdx) = [];
-trialAll(exIdx) = [];
+% first trial exclusion
+tIdx = excludeTrials(trialsEEG, 0.4, 20, "userDefineOpt", "off", "badCHs", badChs);
+trialsEEG(tIdx) = [];
 
 % ICA
 if strcmpi(icaOpt, "on") && nargout >= 4
@@ -119,6 +89,21 @@ if strcmpi(icaOpt, "on") && nargout >= 4
 
     varargout{1} = comp;
 end
+
+% baseline correction
+trialsEEG = baselineCorrection(trialsEEG, fs, window, windowBase);
+
+% exclude bad trials
+params = {trialsEEG, tTh, chTh};
+if ~isempty(absTh)
+    params = [params, {"absTh", absTh}];
+end
+if ~isempty(badChs)
+    params = [params, {"badCHs", badChs}];
+end
+exIdx = excludeTrials(params{:});
+trialsEEG(exIdx) = [];
+trialAll(exIdx) = [];
 
 return;
 end

@@ -1,20 +1,21 @@
 function [EEGDatasets, trialDatasets] = EEGPreprocessNeuroscan(ROOTPATH, opts)
+    % This function exports CDT data
     narginchk(1, 2);
 
     if nargin < 2
         opts = [];
     end
 
-
-    preprocessConfig = path2func(fullfile(getRootDirPath(fileparts(mfilename("fullpath")), 1), "config", "preprocessConfig.m"));
-    opts = getOrFull(opts, preprocessConfig());
     rulesROOTPATH = fullfile(getRootDirPath(fileparts(mfilename("fullpath")), 1), "rules");
     rulesForOneDay = dir(rulesROOTPATH);
     rulesForOneDay = {rulesForOneDay(cellfun(@(x) strcmp(obtainArgoutN(@fileparts, 3, x), '.xlsx'), {rulesForOneDay.name}')).name}';
 
-    if ~isempty(opts.DATEStr) && any(contains(rulesForOneDay, opts.DATEStr))
+    DATEStr = getOr(opts, "DATEStr");
+    if ~isempty(DATEStr) && any(contains(rulesForOneDay, DATEStr))
         % Specify rules for one day if rules file exists
-        opts.rules = rulesConfig(fullfile(rulesROOTPATH, rulesForOneDay{contains(rulesForOneDay, opts.DATEStr)}));
+        opts.rules = rulesConfig(fullfile(rulesROOTPATH, rulesForOneDay{contains(rulesForOneDay, DATEStr)}));
+    else
+        opts.rules = rulesConfig();
     end
 
     files = dir(ROOTPATH);
@@ -42,8 +43,8 @@ function [EEGDatasets, trialDatasets] = EEGPreprocessNeuroscan(ROOTPATH, opts)
             EEGDatasets(idx).fs = EEG.srate;
             EEGDatasets(idx).channels = 1:size(EEGDatasets(idx).data, 1);
             EEGDatasets(idx).event = EEG.event;
-            temp = ECOGFilter({EEGDatasets(idx).data}, opts.fhp, opts.flp, EEGDatasets(idx).fs, "Notch", "on");
-            EEGDatasets(idx).data = temp{1};
+%             temp = ECOGFilter({EEGDatasets(idx).data}, opts.fhp, opts.flp, EEGDatasets(idx).fs, "Notch", "on");
+%             EEGDatasets(idx).data = temp{1};
 
             trialDatasets(idx).protocol = protocols(pIndex);
             trialDatasets(idx).trialAll = EEGBehaviorProcess(data(cellfun(@string, {data.protocol}) == protocols(pIndex)).trialsData, EEGDatasets(idx), opts.rules);
