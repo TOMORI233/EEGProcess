@@ -43,7 +43,7 @@ for dIndex = 1:length(ICIsREG)
 end
 
 plotRawWaveMultiEEG(chDataREG_All, window, [], EEGPos_Neuroscan64);
-scaleAxes("x", [1000 + ICIsREG(1), 1500] + interval);
+scaleAxes("x", [1000, 2000] + interval);
 scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", {0; 1000 + ICIsREG(1) + interval; 2000 + interval}));
 

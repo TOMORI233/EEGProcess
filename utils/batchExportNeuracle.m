@@ -1,7 +1,9 @@
-function batchExportNeuracle(DATAROOTPATH, SAVEROOTPATH)
+function batchExportNeuracle(DATAROOTPATH, SAVEROOTPATH, pIDs)
 % This script is for single-subject data processing.
 % But it can also be applied to batching.
 % The only difference is the setting of data paths.
+%
+% You can specify a list of [pIDs] to export (in double).
 %
 % Before using it, you must make sure that there is only ONE [pID].mat
 % file matched to data.bdf in one folder.
@@ -22,10 +24,22 @@ function batchExportNeuracle(DATAROOTPATH, SAVEROOTPATH)
 %               |----evt.bdf
 %               |----103.mat (trial info)
 
+%% 
+narginchk(2, 3);
+
+if nargin < 3
+    pIDs = [];
+end
+
 %% Path definition
 %%% Find the folder paths that contain data.bdf (Usually it is named [pID])
 % Use regular expression
 DATAPATHs = {dir(fullfile(char(DATAROOTPATH), "**\data.bdf")).folder}';
+pIDs0 = cellfun(@(x) str2double(getLastDirPath(x, 1)), DATAPATHs);
+
+if ~isempty(pIDs)
+    DATAPATHs = DATAPATHs(ismember(pIDs0, pIDs));
+end
 
 %%% Define the folder paths where you save your MAT data
 % By replacing the root path of raw data with the root path of MAT data
@@ -77,7 +91,7 @@ for index = 1:length(DATAPATHs)
 
     % Skip preprocessing for existed MAT data
     if exist(fullfile(SAVEPATHs{index}, "data.mat"), "file")
-        disp(['Data file exists in ', SAVEPATHs{index}, '. Skip']);
+        disp(['Data file exists in ', char(SAVEPATHs{index}), '. Skip']);
         continue;
     end
 

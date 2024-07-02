@@ -1,7 +1,7 @@
 ccc;
 
-ROOTPATH = '..\DATA\MAT DATA\pre';
-SAVEROOTPATH = '..\DATA\MAT DATA\temp';
+ROOTPATH = getAbsPath('..\DATA\MAT DATA\pre');
+SAVEROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
 
 protocols = {'active1', 'active2'};
 

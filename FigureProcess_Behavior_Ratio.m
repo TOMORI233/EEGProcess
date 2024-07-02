@@ -26,9 +26,9 @@ temp = split(SUBJECTs, '\');
 SUBJECTs = rowFcn(@(x) x{end}, temp, "UniformOutput", false);
 
 % Gender filter
-load("gender.mat", "genders", "subjectIDs");
-idx = cellfun(@(x) find(strcmp(SUBJECTs, x)), subjectIDs);
-genders = genders(idx);
+% load("gender.mat", "genders", "subjectIDs");
+% idx = cellfun(@(x) find(strcmp(SUBJECTs, x)), subjectIDs);
+% genders = genders(idx);
 
 data = cellfun(@(x) load(x).behaviorRes, DATAPATHs, "UniformOutput", false);
 % data = data(genders == 1); % male

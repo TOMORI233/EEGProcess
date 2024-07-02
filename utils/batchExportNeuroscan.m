@@ -115,7 +115,13 @@ for dIndex = 1:length(DAYPATHs)
                         channels(badChs) = [];
                     end
 
-                    [comp, ICs] = ICA_PopulationEEG(trialsEEG(1:min(length(trialsEEG), 100)), fs, window, "chs2doICA", channels, "EEGPos", EEGPos);
+                    if isempty(nMaxIcaTrial)
+                        idx = 1:length(trialsEEG);
+                    else
+                        idx = 1:min(length(trialsEEG), nMaxIcaTrial);
+                    end
+
+                    [comp, ICs] = ICA_PopulationEEG(trialsEEG(idx), fs, window, "chs2doICA", channels, "EEGPos", EEGPos);
                 end
 
                 % reconstruct data

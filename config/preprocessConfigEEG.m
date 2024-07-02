@@ -23,6 +23,7 @@ opts.badChs = [];
 % for ICA
 opts.icaOpt = "on";
 opts.ICAPATH = [];
+opts.nMaxIcaTrial = 100; % if left empty, use all trials
 
 return;
 end
