@@ -111,7 +111,7 @@ title('A1 Tone');
 
 % A2
 mSubplot(2, 3, 4, 'shape', 'square-min', "margins", margins);
-temp = resREG_A2(subjectIdxA2);
+temp = resREG_A2(subjectIdxA1 & subjectIdxA2);
 for index = 1:length(temp)
     plot(ICIsREG, temp{index}, 'Color', [255 192 203] / 255);
     hold on;
@@ -122,10 +122,10 @@ errorbar(ICIsREG, cellfun(@mean, temp), cellfun(@SE, temp), 'Color', 'r', 'LineW
 xticks(ICIsREG);
 xlabel('S2 ICI (ms)');
 ylabel('Press for difference ratio');
-title(['A2 REG | N=', num2str(sum(subjectIdxA2))]);
+title(['A2 REG | N=', num2str(sum(subjectIdxA1 & subjectIdxA2))]);
 
 mSubplot(2, 3, 5, 'shape', 'square-min', "margins", margins);
-temp = resIRREG_A2(subjectIdxA2);
+temp = resIRREG_A2(subjectIdxA1 & subjectIdxA2);
 for index = 1:length(temp)
     plot(temp{index}, 'Color', [135 206 235] / 255);
     hold on;

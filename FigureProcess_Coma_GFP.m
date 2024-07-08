@@ -25,9 +25,6 @@ alphaVal = 0.01;
 
 %% 
 tb = readtable("CRS-R.xlsx");
-idx = contains(MATPATHsComa, ["2024032901"]);
-MATPATHsComa(idx) = [];
-tb(idx, :) = [];
 
 id = cellstr(num2str(tb.id));
 scoreTotal = tb.score;
@@ -236,6 +233,13 @@ scatter(X(~isnan(X) & ~idxOnset), Y(~isnan(X) & ~idxOnset), 100, "black", "fille
 xlabel("CRS-r score (Total)");
 ylabel("RM_{change}");
 
+figure;
+X = RM_delta_onset_coma{2};
+Y = RM_delta_change_coma{2};
+Z = scoreTotal;
+mSubplot(1, 1, 1, "shape", "square-min");
+scatter3(X, Y, Z, "black", "filled");
+
 %%
 figure("WindowState", "maximized");
 mSubplot(1, 1, 1, "shape", "square-min");
@@ -294,3 +298,8 @@ temp = dataComa{idx};
 temp(1).color = "k";
 temp(2).color = "r";
 plotRawWaveMultiEEG(temp, window, [], EEGPos_Neuracle64);
+
+resComa = [t(:) / 1000 - 1, calchMean(cellfun(@(x) x(1, :), gfpComa, "UniformOutput", false))', ...
+                            calchMean(cellfun(@(x) x(2, :), gfpComa, "UniformOutput", false))'];
+resHealthy = [t(:) / 1000 - 1, calchMean(cellfun(@(x) x(1, :), gfpHealthy, "UniformOutput", false))', ...
+                               calchMean(cellfun(@(x) x(2, :), gfpHealthy, "UniformOutput", false))'];

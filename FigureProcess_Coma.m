@@ -24,8 +24,6 @@ alphaVal = 0.01;
 % rmfcn = path2func(fullfile(matlabroot, "toolbox/signal/signal/rms.m"));
 
 %% 
-idx = contains(MATPATHsComa, ["2024032901"]);
-MATPATHsComa(idx) = [];
 [~, temp] = cellfun(@(x) getLastDirPath(x, 2), MATPATHsComa, "UniformOutput", false);
 subjectIDsComa = cellfun(@(x) x{1}, temp, "UniformOutput", false);
 
@@ -182,3 +180,7 @@ title(['Two-sample T-test p=', num2str(p_comaWithOnset_vs_healthy)]);
 resComa = [(t(:) - 1000) / 1000, chDataComaWithOnset(1).chMean(:), chDataComaWithOnset(2).chMean(:)];
 resHealthy = [(t(:) - 1000) / 1000, chDataHealthy(1).chMean(:), chDataHealthy(2).chMean(:)];
 
+res_scatter_X_onset_coma = cellfun(@(x) x(2), RM_delta_onset_coma);
+res_scatter_Y_change_coma = cellfun(@(x) x(2), RM_delta_change_coma);
+res_scatter_X_onset_healthy = cellfun(@(x) x(2), RM_delta_onset_healthy);
+res_scatter_Y_change_healthy = cellfun(@(x) x(2), RM_delta_change_healthy);

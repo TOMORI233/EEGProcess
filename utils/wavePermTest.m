@@ -51,7 +51,20 @@ elseif iscell(data1) && iscell(data2)
     end
 
     if strcmpi(Type, "ERP")
-        error("For permutation test on ERP of multi-channel trial data, please use CBPT instead.");
+        channels = 1:size(data1{1}, 1);
+        t = linspace(0, 1, size(data1{1}, 2)); % normalized
+        data(1).time = t(:)';
+        data(1).label = arrayfun(@num2str, channels(:), "UniformOutput", false);
+        data(1).trial = cell2mat(cellfun(@(x) permute(x, [3, 1, 2]), data1, "UniformOutput", false));
+        data(1).trialinfo = ones(length(data1), 1);
+        data(2).time = t(:)';
+        data(2).label = arrayfun(@num2str, channels(:), "UniformOutput", false);
+        data(2).trial = cell2mat(cellfun(@(x) permute(x, [3, 1, 2]), data2, "UniformOutput", false));
+        data(2).trialinfo = 2 * ones(length(data1), 1);
+        stat = CBPT(data);
+        p = stat.prob;
+        dResPerm = [];
+        return;
     end
     
     temp = [data1; data2];

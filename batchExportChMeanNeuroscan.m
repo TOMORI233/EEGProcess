@@ -8,8 +8,14 @@ SAVEROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
 % protocols = {'passive1', 'passive3'};
 % matName = 'chMean.mat';
 
+% protocols = {'active1', 'active2'};
+% matName = 'chMeanAll.mat';
+
 protocols = {'active1', 'active2'};
-matName = 'chMeanAll.mat';
+matName = 'chMeanC.mat';
+
+% protocols = {'active1', 'active2'};
+% matName = 'chMeanW.mat';
 
 for pIndex = 1:length(protocols)
     disp(['Current protocol: ', protocols{pIndex}]);
@@ -33,6 +39,11 @@ for pIndex = 1:length(protocols)
         if contains(protocols{pIndex}, 'active')
             if strcmp(matName, 'chMeanAll.mat')
                 idx = ~[trialAll.miss];
+            elseif strcmp(matName, 'chMeanW.mat')
+                idx =  ~[trialAll.miss] & ((([trialAll.type] == "REG" | [trialAll.type] == "PT") & ~[trialAll.correct]) ...
+                      | [trialAll.type] == "IRREG");
+            elseif strcmp(matName, 'chMeanC.mat')
+                idx = [trialAll.correct];
             else
                 idx = (([trialAll.type] == "REG" | [trialAll.type] == "PT") & [trialAll.correct]) ...
                       | ([trialAll.type] == "IRREG" & ~[trialAll.miss]);

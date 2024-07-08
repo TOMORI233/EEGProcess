@@ -92,8 +92,8 @@ RM_delta_changePeakREG = cellfun(@(x, y) x - y, RM_changePeakREG, RM_baseREG, "U
 RM_delta_changeTroughREG = cellfun(@(x, y) x - y, RM_changeTroughREG, RM_baseREG, "UniformOutput", false);
 
 %% Statistics
-[~, p_RM_changePeakREG_vs_base] = cellfun(@(x, y) ttest(x, y), RM_baseREG, RM_changePeakREG);
-[~, p_RM_changeTroughREG_vs_base] = cellfun(@(x, y) ttest(x, y), RM_baseREG, RM_changeTroughREG);
+[~, p_RM_changePeakREG_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_baseREG, RM_changePeakREG);
+[~, p_RM_changeTroughREG_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_baseREG, RM_changeTroughREG);
 
 %% Tunning plot
 FigTuning = figure;

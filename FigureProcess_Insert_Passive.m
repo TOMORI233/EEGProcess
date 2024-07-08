@@ -96,11 +96,11 @@ RM_delta_changePeak = cellfun(@(x, y) x - y, RM_changePeak, RM_base, "UniformOut
 RM_delta_changeTrough = cellfun(@(x, y) x - y, RM_changeTrough, RM_base, "UniformOutput", false);
 
 %% Statistics
-[~, p_RM_changePeak_vs_base] = cellfun(@(x, y) ttest(x, y), RM_base, RM_changePeak);
+[~, p_RM_changePeak_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_base, RM_changePeak);
 [~, p_RM_changePeak_vs_control1] = cellfun(@(x) ttest(RM_changePeak{1}, x), RM_changePeak);
 [~, p_RM_changePeak_vs_control2] = cellfun(@(x) ttest(RM_changePeak{end}, x), RM_changePeak);
 
-[~, p_RM_changeTrough_vs_base] = cellfun(@(x, y) ttest(x, y), RM_base, RM_changeTrough);
+[~, p_RM_changeTrough_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_base, RM_changeTrough);
 [~, p_RM_changeTrough_vs_control1] = cellfun(@(x) ttest(RM_changeTrough{1}, x), RM_changeTrough);
 [~, p_RM_changeTrough_vs_control2] = cellfun(@(x) ttest(RM_changeTrough{end}, x), RM_changeTrough);
 
@@ -114,7 +114,7 @@ Y = cellfun(@mean, RM_delta_changePeak);
 E = cellfun(@SE, RM_delta_changePeak);
 errorbar(X, Y, E, "Color", "r", "LineWidth", 2, "DisplayName", "Peak");
 hold on;
-h(1) = scatter(X(p_RM_changePeak_vs_control1 < alphaVal), Y(p_RM_changePeak_vs_control1 < alphaVal) - E(p_RM_changePeak_vs_control1 < alphaVal) - 0.08, 80, "Marker", "*", "MarkerEdgeColor", "k");
+h(1) = scatter(X(p_RM_changePeak_vs_base < alphaVal), Y(p_RM_changePeak_vs_base < alphaVal) - E(p_RM_changePeak_vs_base < alphaVal) - 0.08, 80, "Marker", "*", "MarkerEdgeColor", "k");
 h(2) = scatter(X(p_RM_changePeak_vs_control2 < alphaVal), Y(p_RM_changePeak_vs_control2 < alphaVal) + E(p_RM_changePeak_vs_control2 < alphaVal) + 0.08, 60, "Marker", "o", "MarkerEdgeColor", "k");
 setLegendOff(h);
 errorbar((1:length(insertN)) + 0.05, cellfun(@mean, RM_delta_changeTrough), cellfun(@SE, RM_delta_changeTrough), "Color", "b", "LineWidth", 2, "DisplayName", "Trough");

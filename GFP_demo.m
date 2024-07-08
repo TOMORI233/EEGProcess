@@ -1,10 +1,13 @@
 clear; clc;
 
+%% 
 load("..\DATA\MAT DATA - coma\pre\2024040801\151\data.mat");
 % load("..\DATA\MAT DATA - coma\pre\2024041102\151\data.mat");
 % load("..\DATA\MAT DATA - extra\pre\subject002\113\data.mat");
 nperm = 1e3;
 alphaVal = 0.01;
+
+run("config\avgConfig_Neuracle64.m");
 
 %% 
 trialsEEG1 = trialsEEG([trialAll.ICI2] == 4);
@@ -31,12 +34,12 @@ scaleAxes("y", "on", [0, inf]);
 p = wavePermTest(trialsEEG1, trialsEEG2, nperm, "Tail", "right", "Type", "GFP", "chs2Ignore", chs2Ignore);
 
 %% 
-temp = chData(1);
-temp.color = [0, 0, 0];
-plotRawWaveMultiEEG(temp, window, [], EEGPos_Neuracle64);
-scaleAxes("x", [-300, 2000]);
-scaleAxes("y", "on", "symOpt", "max");
-addLines2Axes(struct("X", {0; 1000; 2000}, "width", 2, "color", [1, .5, 0]));
+% temp = chData(1);
+% temp.color = [0, 0, 0];
+% plotRawWaveMultiEEG(temp, window, [], EEGPos_Neuracle64);
+% scaleAxes("x", [-300, 2000]);
+% scaleAxes("y", "on", "symOpt", "max");
+% addLines2Axes(struct("X", {0; 1000; 2000}, "width", 2, "color", [1, .5, 0]));
 
 temp = chData(2);
 temp.color = [0, 0, 0];

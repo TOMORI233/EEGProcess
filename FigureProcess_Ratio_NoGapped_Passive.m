@@ -27,13 +27,6 @@ window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
 
-% Gender filter
-% load("gender.mat", "genders", "subjectIDs");
-% idx = cellfun(@(x) find(strcmp(SUBJECTs, x)), subjectIDs);
-% genders = genders(idx);
-% data = data(genders == 1); % male
-% data = data(genders == 2); % female
-
 % For A1&P3 comparison 
 % load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
 % data = data(subjectIdxA1);
@@ -177,14 +170,14 @@ RM_topo_delta_onsetPeakREG = calchMean(temp2 - temp1);
 p_channels_onset_vs_base = mafdr(p_channels_onset_vs_base, 'BHFDR', true);
 
 %% Statistics
-[~, p_RM_changePeakREG_vs_base] = cellfun(@(x, y) ttest(x, y), RM_baseREG, RM_changePeakREG);
+[~, p_RM_changePeakREG_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_baseREG, RM_changePeakREG);
 [~, p_RM_changePeakREG_vs_control] = cellfun(@(x) ttest(RM_changePeakREG{1}, x), RM_changePeakREG);
-[~, p_RM_changeTroughREG_vs_base] = cellfun(@(x, y) ttest(x, y), RM_baseREG, RM_changeTroughREG);
+[~, p_RM_changeTroughREG_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_baseREG, RM_changeTroughREG);
 [~, p_RM_changeTroughREG_vs_control] = cellfun(@(x) ttest(RM_changeTroughREG{1}, x), RM_changeTroughREG);
 
-[~, p_RM_changePeakIRREG_vs_base] = cellfun(@(x, y) ttest(x, y), RM_baseIRREG, RM_changePeakIRREG);
+[~, p_RM_changePeakIRREG_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_baseIRREG, RM_changePeakIRREG);
 [~, p_RM_changePeakIRREG_vs_control] = cellfun(@(x) ttest(RM_changePeakIRREG{1}, x), RM_changePeakIRREG);
-[~, p_RM_changeTroughIRREG_vs_base] = cellfun(@(x, y) ttest(x, y), RM_baseIRREG, RM_changeTroughIRREG);
+[~, p_RM_changeTroughIRREG_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_baseIRREG, RM_changeTroughIRREG);
 [~, p_RM_changeTroughIRREG_vs_control] = cellfun(@(x) ttest(RM_changeTroughIRREG{1}, x), RM_changeTroughIRREG);
 
 [~, p_RM_delta_changePeak_REG_vs_IRREG] = ttest(RM_delta_changePeakREG{end}, RM_delta_changePeakIRREG{end});
@@ -220,16 +213,16 @@ mPrint(FigTuning, fullfile(FIGUREPATH, ['RM tuning (', char(area), ').png']), "-
 %% REG 4-4.06 vs IRREG 4-4.06
 FigREG_vs_IRREG = figure;
 mSubplot(1, 2, 1, "shape", "square-min", "margin_left", 0.15);
-plot(t, chDataREG(end).chMean, "Color", "r", "LineWidth", 2, "DisplayName", "REG 4-4.06");
+plot(t - 1000 - ICIsREG(1), chDataREG(end).chMean(:), "Color", "r", "LineWidth", 2, "DisplayName", "REG 4-4.06");
 hold on;
-plot(t, chDataIRREG(end).chMean, "Color", "k", "LineWidth", 2, "DisplayName", "IRREG 4-4.06");
+plot(t - 1000 - ICIsREG(1), chDataIRREG(end).chMean(:), "Color", "k", "LineWidth", 2, "DisplayName", "IRREG 4-4.06");
 legend;
 xlabel('Time (ms)');
-xlim([0, 2000]);
+xlim([-1000, 1000]);
 scaleAxes("y", "symOpt", "max");
 ylabel('Response (\muV)');
 title(['Grand-averaged wave in ', char(area), ' | N=', num2str(length(data))]);
-addLines2Axes(gca, struct("X", 1000 + ICIsREG(1), "color", [255 128 0] / 255, "width", 2));
+addLines2Axes(gca, struct("X", 0, "color", [255 128 0] / 255, "width", 2));
 
 mSubplot(1, 2, 2, "shape", "square-min", "margin_left", 0.15);
 scatter(RM_delta_changePeakIRREG{end}, RM_delta_changePeakREG{end}, 50, "black");
@@ -282,7 +275,7 @@ mPrint(FigIRREG, fullfile(FIGUREPATH, 'IRREG 4-4.06.png'), "-dpng", "-r300");
 %% Topo plot
 locs = readlocs('Neuroscan_chan64.loc');
 channels = 1:length(locs);
-chs2Plot = channels(~ismember(channels, [33, 43, 60, 64])); % Neuroscan
+chs2Plot = channels(~ismember(channels, [33, 43, 60, 64]))'; % Neuroscan
 % chsSelect = chs2Avg;
 
 params0 = [{'plotchans'}, {chs2Plot}                    , ... % indices of channels to plot
@@ -320,8 +313,23 @@ chsSelect = find(p_channels_IRREG_vs_base < alphaVal);
 params = [params0, ...
           {'emarker2'}, {{find(ismember(chs2Plot, chsSelect)), '.', 'k', 30, 1}}];
 mSubplot(1, 3, 3, "shape", "square-min");
-topoplot(RM_topo_delta_changePeakIRREG, locs, params0{:});
+topoplot(RM_topo_delta_changePeakIRREG, locs, params{:});
 title(['Change Response of ', chDataIRREG(end).legend], "FontSize", 14);
 colorbar;
 
 scaleAxes("c", "ignoreInvisible", false);
+
+%% 
+params = params0;
+params{end} = {'.', 'k', [], 1};
+figure;
+mSubplot(1, 2, 1, "shape", "square-min");
+topoplot(RM_topo_delta_changePeakREG, locs, params{:});
+title(['Change Response of ', chDataREG(end).legend], "FontSize", 14);
+colorbar;
+mSubplot(1, 2, 2, "shape", "square-min");
+topoplot(RM_topo_delta_changePeakIRREG, locs, params{:});
+title(['Change Response of ', chDataIRREG(end).legend], "FontSize", 14);
+colorbar;
+scaleAxes("c", "ignoreInvisible", false);
+mPrint(gcf, "..\temp\topo.jpg", "-djpeg", "-r300");

@@ -91,10 +91,12 @@ RM_delta_changePeak = cellfun(@(x, y) x - y, RM_changePeak, RM_base, "UniformOut
 RM_delta_changeTrough = cellfun(@(x, y) x - y, RM_changeTrough, RM_base, "UniformOutput", false);
 
 %% Statistics
-[~, p_RM_changePeak_vs_base] = cellfun(@(x, y) ttest(x, y), RM_base, RM_changePeak);
+[~, p_RM_changePeak_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_base, RM_changePeak);
 [~, p_RM_changePeak_vs_control] = cellfun(@(x) ttest(RM_changePeak{1}, x), RM_changePeak);
-[~, p_RM_changeTrough_vs_base] = cellfun(@(x, y) ttest(x, y), RM_base, RM_changeTrough);
+[~, p_RM_changeTrough_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_base, RM_changeTrough);
 [~, p_RM_changeTrough_vs_control] = cellfun(@(x) ttest(RM_changeTrough{1}, x), RM_changeTrough);
+
+[~, p_temp] = ttest(RM_changePeak{end - 1}, RM_changePeak{end});
 
 %% Tunning plot
 variance(isnan(variance)) = 0;

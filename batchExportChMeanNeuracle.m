@@ -2,8 +2,11 @@
 % For Neuracle system.
 ccc;
 
-ROOTPATH = getAbsPath('..\DATA\MAT DATA - extra\pre');
-SAVEROOTPATH = getAbsPath('..\DATA\MAT DATA - extra\temp');
+% ROOTPATH = getAbsPath('..\DATA\MAT DATA - extra\pre');
+% SAVEROOTPATH = getAbsPath('..\DATA\MAT DATA - extra\temp');
+
+ROOTPATH = getAbsPath('F:\backup\DATA\MAT DATA - extra\pre');
+SAVEROOTPATH = getAbsPath('F:\backup\DATA\MAT DATA - extra\temp');
 
 protocols = {'111', '112', '113'};
 windowNew = [-500, 2500]; % ms
