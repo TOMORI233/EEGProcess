@@ -37,6 +37,21 @@ for pIndex = 1:length(protocols)
         clearvars chData
 
         if contains(protocols{pIndex}, 'active')
+            
+            for tIndex = 1:length(trialAll)
+                if trialAll(tIndex).key == 0
+                    trialAll(tIndex).correct = false;
+                    trialAll(tIndex).miss = true;
+                else
+                    trialAll(tIndex).miss = false;
+                    if (trialAll(tIndex).ICI1 ~= trialAll(tIndex).ICI2 && trialAll(tIndex).key == 37) || (trialAll(tIndex).ICI1 == trialAll(tIndex).ICI2 && trialAll(tIndex).key == 39)
+                        trialAll(tIndex).correct = true;
+                    else
+                        trialAll(tIndex).correct = false;
+                    end
+                end
+            end
+
             if strcmp(matName, 'chMeanAll.mat')
                 idx = ~[trialAll.miss];
             elseif strcmp(matName, 'chMeanW.mat')

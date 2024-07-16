@@ -16,6 +16,7 @@ FIGUREPATH = getAbsPath("..\Figures\healthy\population\Ratio No-Gapped Passive")
 %% Params
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
 
+nperm = 1e3;
 alphaVal = 0.05;
 
 interval = 0;
@@ -211,11 +212,20 @@ title("Tuning of RM_{change trough}");
 mPrint(FigTuning, fullfile(FIGUREPATH, ['RM tuning (', char(area), ').png']), "-dpng", "-r300");
 
 %% REG 4-4.06 vs IRREG 4-4.06
+temp1 = cellfun(@(x) mean(x([x.ICI] == ICIsREG(end) & [x.type] == "REG").chMean(chs2Avg, :), 1), data, "UniformOutput", false);
+temp2 = cellfun(@(x) mean(x([x.ICI] == ICIsIRREG(end) & [x.type] == "IRREG").chMean(chs2Avg, :), 1), data, "UniformOutput", false);
+
+pPerm = wavePermTest(temp1, temp2, nperm, "Tail", "both", "Type", "ERP");
+
 FigREG_vs_IRREG = figure;
 mSubplot(1, 2, 1, "shape", "square-min", "margin_left", 0.15);
-plot(t - 1000 - ICIsREG(1), chDataREG(end).chMean(:), "Color", "r", "LineWidth", 2, "DisplayName", "REG 4-4.06");
 hold on;
-plot(t - 1000 - ICIsREG(1), chDataIRREG(end).chMean(:), "Color", "k", "LineWidth", 2, "DisplayName", "IRREG 4-4.06");
+T = t(:) - 1000 - ICIsREG(1);
+plot(T, chDataREG(end).chMean(:), "Color", "r", "LineWidth", 2, "DisplayName", "REG 4-4.06");
+plot(T, chDataIRREG(end).chMean(:), "Color", "k", "LineWidth", 2, "DisplayName", "IRREG 4-4.06");
+idx = pPerm < alphaVal;
+h = scatter(T(idx), zeros(sum(idx), 1), 40, "yellow", "filled");
+setLegendOff(h);
 legend;
 xlabel('Time (ms)');
 xlim([-1000, 1000]);

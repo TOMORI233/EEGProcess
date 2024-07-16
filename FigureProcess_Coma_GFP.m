@@ -293,11 +293,13 @@ plot(t1, temp1, "Color", "k", "LineWidth", 2);
 hold on;
 temp2 = mean(dataComa{idx}(2).chMean(chs2Avg, :), 1)';
 plot(t1, temp2, "Color", "r", "LineWidth", 2);
+addLines2Axes(struct("X", {0; 1}));
 
 temp = dataComa{idx};
 temp(1).color = "k";
 temp(2).color = "r";
 plotRawWaveMultiEEG(temp, window, [], EEGPos_Neuracle64);
+addLines2Axes(struct("X", {0; 1000}));
 
 resComa = [t(:) / 1000 - 1, calchMean(cellfun(@(x) x(1, :), gfpComa, "UniformOutput", false))', ...
                             calchMean(cellfun(@(x) x(2, :), gfpComa, "UniformOutput", false))'];

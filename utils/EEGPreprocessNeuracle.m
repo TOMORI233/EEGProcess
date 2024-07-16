@@ -40,8 +40,7 @@ end
 codes = arrayfun(@(x) str2double(x.type), EEG.event); % marker
 latency = [EEG.event.latency]'; % unit: sample
 fs = EEG.srate; % Hz
-controlIdx = find(rules.ICI1 == rules.ICI2);
-trialAll = generalProcessFcn(trialsData, rules, controlIdx);
+trialAll = generalProcessFcn(trialsData, rules);
 
 % exclude accidental codes
 exIdx = isnan(codes) | ~ismember(codes, rules.code) | latency > size(EEG.data, 2) - fix(window(2) / 1000 * fs);
