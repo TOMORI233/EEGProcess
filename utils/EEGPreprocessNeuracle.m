@@ -29,22 +29,27 @@ temp = dir(fullfile(ROOTPATH, '*.mat'));
 if numel(temp) > 1
     error("More than 1 MAT data found in your directory.");
 elseif isempty(temp)
-    error("No MAT data found in your directory.");
-end
-load(fullfile(temp.folder, temp.name), "rules", "trialsData");
-if ~exist("rules", "var") || ~exist("trialsData", "var")
-    error("Related MAT data is missing.");
+    warning("No MAT data found in your directory.");
+else
+    load(fullfile(temp.folder, temp.name), "rules", "trialsData");
+    if ~exist("rules", "var") || ~exist("trialsData", "var")
+        error("MAT data not matched. Related MAT data is missing.");
+    end
 end
 
 %% Preprocess
 codes = arrayfun(@(x) str2double(x.type), EEG.event); % marker
 latency = [EEG.event.latency]'; % unit: sample
 fs = EEG.srate; % Hz
-trialAll = generalProcessFcn(trialsData, rules);
+if exist("trialsData", "var")
+    trialAll = generalProcessFcn(trialsData, rules);
+end
 
 % exclude accidental codes
-exIdx = isnan(codes) | ~ismember(codes, rules.code) | latency > size(EEG.data, 2) - fix(window(2) / 1000 * fs);
-latency(exIdx) = [];
+if exist("rules", "var")
+    exIdx = isnan(codes) | ~ismember(codes, rules.code) | latency > size(EEG.data, 2) - fix(window(2) / 1000 * fs);
+    latency(exIdx) = [];
+end
 
 % filter
 EEG.data = ECOGFilter(EEG.data, fhp, flp, fs, "Notch", "on");
@@ -69,7 +74,10 @@ if strcmpi(icaOpt, "on") && nargout >= 4
         % first trial exclusion
         tIdx = excludeTrials(trialsEEG, 0.4, 20, "userDefineOpt", "off", "badCHs", badChs);
         trialsEEG(tIdx) = [];
-        trialAll(tIdx) = [];
+
+        if exist("trialAll", "var")
+            trialAll(tIdx) = [];
+        end
 
         if ~isempty(badChs)
             disp(['Channel ', num2str(badChs(:)'), ' are excluded from analysis.']);
@@ -111,7 +119,12 @@ if ~isempty(badChs)
 end
 exIdx = excludeTrials(params{:});
 trialsEEG(exIdx) = [];
-trialAll(exIdx) = [];
+
+if exist("trialAll", "var")
+    trialAll(exIdx) = [];
+else
+    trialAll = [];
+end
 
 return;
 end

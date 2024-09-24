@@ -331,7 +331,7 @@ scaleAxes("c", "ignoreInvisible", false);
 
 %% 
 params = params0;
-params{end} = {'.', 'k', [], 1};
+params{end} = {'.', 'k', 10, 1};
 figure;
 mSubplot(1, 2, 1, "shape", "square-min");
 topoplot(RM_topo_delta_changePeakREG, locs, params{:});

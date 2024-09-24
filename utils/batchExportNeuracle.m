@@ -32,6 +32,10 @@ if nargin < 3
 end
 
 %% Path definition
+%%% Convert relative path to absolute path
+DATAROOTPATH = getAbsPath(DATAROOTPATH);
+SAVEROOTPATH = getAbsPath(SAVEROOTPATH);
+
 %%% Find the folder paths that contain data.bdf (Usually it is named [pID])
 % Use regular expression
 DATAPATHs = {dir(fullfile(char(DATAROOTPATH), "**\data.bdf")).folder}';

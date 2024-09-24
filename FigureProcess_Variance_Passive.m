@@ -93,6 +93,7 @@ RM_delta_changeTrough = cellfun(@(x, y) x - y, RM_changeTrough, RM_base, "Unifor
 %% Statistics
 [~, p_RM_changePeak_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_base, RM_changePeak);
 [~, p_RM_changePeak_vs_control] = cellfun(@(x) ttest(RM_changePeak{1}, x), RM_changePeak);
+[~, p_RM_changePeak_vs_mu_2] = cellfun(@(x) ttest(RM_changePeak{end}, x), RM_changePeak);
 [~, p_RM_changeTrough_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_base, RM_changeTrough);
 [~, p_RM_changeTrough_vs_control] = cellfun(@(x) ttest(RM_changeTrough{1}, x), RM_changeTrough);
 
