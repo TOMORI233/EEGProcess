@@ -74,6 +74,7 @@ if strcmpi(icaOpt, "on") && nargout >= 4
         % first trial exclusion
         tIdx = excludeTrials(trialsEEG, 0.4, 20, "userDefineOpt", "off", "badCHs", badChs);
         trialsEEG(tIdx) = [];
+        latency(tIdx) = [];
 
         if exist("trialAll", "var")
             trialAll(tIdx) = [];
@@ -119,12 +120,17 @@ if ~isempty(badChs)
 end
 exIdx = excludeTrials(params{:});
 trialsEEG(exIdx) = [];
+latency(exIdx) = [];
 
 if exist("trialAll", "var")
     trialAll(exIdx) = [];
 else
-    trialAll = [];
+    trialAll = struct("trialNum", num2cell((1:length(trialsEEG))'));
 end
+
+% convert latency to tim, unit: sec
+latency = latency / fs;
+trialAll = addfield(trialAll, "latency", latency);
 
 return;
 end

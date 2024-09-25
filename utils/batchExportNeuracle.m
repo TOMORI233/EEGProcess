@@ -55,7 +55,7 @@ cellfun(@mkdir, SAVEPATHs);
 %% Parameter settings (IMPORTANT!!)
 %%% ------------Time window for trial segmentation, in ms-----------------
 % DO NOT make it larger than your inter-trial interval
-window = [-1000, 3000];
+window = [-1000, 4000];
 
 %%% -------------Bad channel numbers in your recording--------------------
 % This setting may influence your ICA result. Be cautious
@@ -80,7 +80,7 @@ EEGPos = EEGPos_Neuracle64();
 
 %%% ------------ICA option---------------
 % If set "on", apply the ICA result of one protocol to the others for one subject
-sameICAOpt = "on";
+sameICAOpt = "off";
 
 %% Preprocess and save
 % required parameters
@@ -108,6 +108,8 @@ for index = 1:length(DATAPATHs)
         else
             opts.ICAPATH = ICAPATH(1).folder;
         end
+    else
+        opts.ICAPATH = SAVEPATHs{index};
     end
 
     % Proprocess

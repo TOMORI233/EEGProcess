@@ -6,6 +6,8 @@ function [p, dResPerm] = wavePermTest(data1, data2, varargin)
 % conditions and then average across subjects.
 % If [data1] and [data2] are cell arrays (trial data), do permutation test for single
 % subject and shuffle at trial level → compute ERP → compute GFP.
+% [Type] specifies which kind of data (ERP or GFP) to compare. (default: 'ERP')
+% To compare ERP, use `CBPT`.
 % [p] returned as two-tailed (default) or one-tailed p value of the
 % permutation test. For 'left' tail, the null hypothesis is data1<data2. In
 % this case, if p<0.01 (for example), then reject the null hypothesis (The 
@@ -60,7 +62,7 @@ elseif iscell(data1) && iscell(data2)
         data(2).time = t(:)';
         data(2).label = arrayfun(@num2str, channels(:), "UniformOutput", false);
         data(2).trial = cell2mat(cellfun(@(x) permute(x, [3, 1, 2]), data2, "UniformOutput", false));
-        data(2).trialinfo = 2 * ones(length(data1), 1);
+        data(2).trialinfo = 2 * ones(length(data2), 1);
         stat = CBPT(data);
         p = stat.prob;
         dResPerm = [];
