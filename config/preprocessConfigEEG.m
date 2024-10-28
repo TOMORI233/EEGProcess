@@ -1,5 +1,7 @@
-function opts = preprocessConfigEEG()
-% Default parameters for EEG preprocessing
+function opts = preprocessConfigEEG(varargin)
+% Default parameters for EEG preprocessing.
+% You can change parameters with input name-value pairs.
+% Copy this file to 'config\local' folder as your local config file.
 
 % EEG pos file
 opts.EEGPos = [];
@@ -23,7 +25,14 @@ opts.badChs = [];
 % for ICA
 opts.icaOpt = "on";
 opts.ICAPATH = [];
-opts.nMaxIcaTrial = 100; % if left empty, use all trials
+opts.nMaxIcaTrial = 100; % If left empty, use all trials
+opts.sameICAOpt = "off"; % If set "on", apply the ICA result of one 
+                         % protocol to the others for one subject
+
+% parse name-value pairs
+for index = 1:2:nargin
+    opts.(varargin{index}) = varargin{index + 1};
+end
 
 return;
 end

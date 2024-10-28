@@ -1,7 +1,7 @@
-function batchExportNeuroscan(CDTROOTPATH, SAVEROOTPATH, PROTOCOLs)
+function batchExportNeuroscan(CDTROOTPATH, SAVEROOTPATH, PROTOCOLs, opts)
 % Export baseline-correted EEG wave and trials
 % SAVEROOTPATH = ROOTPATH\project\MAT DATA\pre\subject\protocol\date\
-narginchk(2, 3);
+narginchk(2, 4);
 
 if nargin < 3
     opts.protocols = ["passive3", "passive1", "active1", "active2"];
@@ -10,9 +10,11 @@ else
 end
 
 %% Parameter settings
-opts = getOrFull(opts, preprocessConfigEEG);
-opts.EEGPos = EEGPos_Neuroscan64;
-opts.badChs = [33, 43]; % M1, M2
+if nargin < 4
+    opts = getOrFull(opts, preprocessConfigEEG);
+    opts.EEGPos = EEGPos_Neuroscan64;
+    opts.badChs = [33, 43]; % M1, M2
+end
 parseStruct(opts);
 window = opts.window;
 
