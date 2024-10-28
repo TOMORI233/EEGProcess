@@ -184,3 +184,31 @@ res_scatter_X_onset_coma = cellfun(@(x) x(2), RM_delta_onset_coma);
 res_scatter_Y_change_coma = cellfun(@(x) x(2), RM_delta_change_coma);
 res_scatter_X_onset_healthy = cellfun(@(x) x(2), RM_delta_onset_healthy);
 res_scatter_Y_change_healthy = cellfun(@(x) x(2), RM_delta_change_healthy);
+
+%% example
+EEGPos = EEGPos_Neuracle64;
+channelNames = EEGPos.channelNames;
+temp = cellfun(@(x) x([x.ICI] == 5).chMean, dataComa, "UniformOutput", false);
+chMean = temp{subjectIDsComa == "2024040801"};
+channels = 1:size(chMean, 1);
+Fig = plotRawWaveEEG(chMean, [], window, [], EEGPos);
+scaleAxes(Fig, "x", [-300, 2500]);
+yRange = scaleAxes(Fig, "y", "on", "symOpt", "max");
+addLines2Axes(Fig, struct("X", {0; 1000 + 5; 2000}, "color", [255 128 0] / 255, "width", 1.5));
+allAxes = findobj(Fig, "Type", "axes");
+for aIndex = 1:length(allAxes)
+    allAxes(aIndex).TickLength = [0, 0];
+    allAxes(aIndex).Title.FontSize = 10;
+    if any(contains(channelNames(ismember(channels, chs2Avg)), allAxes(aIndex).Title.String))
+        allAxes(aIndex).Box = "on";
+        allAxes(aIndex).XAxis.LineWidth = 2;
+        allAxes(aIndex).YAxis.LineWidth = 2;
+        allAxes(aIndex).XTickLabel = '';
+        allAxes(aIndex).YTickLabel = '';
+    else
+        allAxes(aIndex).XAxis.Visible = "off";
+        allAxes(aIndex).YAxis.Visible = "off";
+    end
+end
+mPrint(Fig, "D:\Education\Lab\Projects\EEG\temp\example_2024080401_REG4-5", "-djpeg", "-r1200");
+

@@ -11,11 +11,11 @@ SAVEROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
 % protocols = {'active1', 'active2'};
 % matName = 'chMeanAll.mat';
 
-protocols = {'active1', 'active2'};
-matName = 'chMeanC.mat';
-
 % protocols = {'active1', 'active2'};
-% matName = 'chMeanW.mat';
+% matName = 'chMeanC.mat';
+
+protocols = {'active1', 'active2'};
+matName = 'chMeanW.mat';
 
 for pIndex = 1:length(protocols)
     disp(['Current protocol: ', protocols{pIndex}]);
@@ -38,16 +38,18 @@ for pIndex = 1:length(protocols)
 
         if contains(protocols{pIndex}, 'active')
             
-            for tIndex = 1:length(trialAll)
-                if trialAll(tIndex).key == 0
-                    trialAll(tIndex).correct = false;
-                    trialAll(tIndex).miss = true;
-                else
-                    trialAll(tIndex).miss = false;
-                    if (trialAll(tIndex).ICI1 ~= trialAll(tIndex).ICI2 && trialAll(tIndex).key == 37) || (trialAll(tIndex).ICI1 == trialAll(tIndex).ICI2 && trialAll(tIndex).key == 39)
-                        trialAll(tIndex).correct = true;
-                    else
+            if ~isfield(trialAll, "correct")
+                for tIndex = 1:length(trialAll)
+                    if trialAll(tIndex).key == 0
                         trialAll(tIndex).correct = false;
+                        trialAll(tIndex).miss = true;
+                    else
+                        trialAll(tIndex).miss = false;
+                        if (trialAll(tIndex).ICI1 ~= trialAll(tIndex).ICI2 && trialAll(tIndex).key == 37) || (trialAll(tIndex).ICI1 == trialAll(tIndex).ICI2 && trialAll(tIndex).key == 39)
+                            trialAll(tIndex).correct = true;
+                        else
+                            trialAll(tIndex).correct = false;
+                        end
                     end
                 end
             end
@@ -55,8 +57,7 @@ for pIndex = 1:length(protocols)
             if strcmp(matName, 'chMeanAll.mat')
                 idx = ~[trialAll.miss];
             elseif strcmp(matName, 'chMeanW.mat')
-                idx =  ~[trialAll.miss] & ((([trialAll.type] == "REG" | [trialAll.type] == "PT") & ~[trialAll.correct]) ...
-                      | [trialAll.type] == "IRREG");
+                idx = ~[trialAll.miss] & ~[trialAll.correct];
             elseif strcmp(matName, 'chMeanC.mat')
                 idx = [trialAll.correct];
             else

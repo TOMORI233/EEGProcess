@@ -6,6 +6,17 @@ EEGPos.ignore = [60:64];
 % locs file (highest priority, plot in actual location)
 EEGPos.locs = readlocs('Neuracle_chan64.loc'); % comment this line to plot in grid
 
+% adjust
+[~, ~, Th, Rd, ~] = readlocs(EEGPos.locs);
+Th = pi / 180 * Th; % convert degrees to radians
+Rd(48:49) = Rd(48:49) + 0.01;
+Rd(55:56) = Rd(55:56) + 0.05;
+Th(53) = Th(53) - pi / 60;
+Th(54) = Th(54) + pi / 60;
+Th = Th / pi * 180; % convert radians to degrees
+EEGPos.locs = addfield(EEGPos.locs, "theta", Th(:));
+EEGPos.locs = addfield(EEGPos.locs, "radius", Rd(:));
+
 %% Channel Alias
 EEGPos.channelNames = {EEGPos.locs.labels}';
 

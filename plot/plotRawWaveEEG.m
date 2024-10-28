@@ -65,10 +65,10 @@ else
     X = zeros(length(channels), 1);
     Y = zeros(length(channels), 1);
     idx = ~ismember(channels, chsIgnore);
-    X(idx) = mapminmax(YTemp(idx), 0.05, 0.95);
-    Y(idx) = mapminmax(XTemp(idx), 0.05, 0.95);
+    X(idx) = mapminmax(YTemp(idx), 0.2, 0.8);
+    Y(idx) = mapminmax(XTemp(idx), 0.05, 0.92);
     dX = 0.05;
-    dY = 0.05;
+    dY = 0.06;
 
     Fig = figure("WindowState", "maximized");
 

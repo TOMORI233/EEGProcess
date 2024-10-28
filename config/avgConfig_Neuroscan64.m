@@ -12,4 +12,5 @@ chs2Avg = [[15, 23, 24, 32, 34, 42], [34:37, 39:59], [53:64]];
 chs2Avg = unique(chs2Avg);
 
 % Exclude A1,A2,CB1,CB2 from analysis
-chs2Avg(ismember(chs2Avg, [33, 43, 60, 64])) = [];
+chsIgnore = [33, 43, 60, 64];
+chs2Avg(ismember(chs2Avg, chsIgnore)) = [];

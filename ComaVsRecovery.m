@@ -22,16 +22,16 @@ chData(2).color = "k";
 
 Fig1 = plotRawWaveMultiEEG(chData(1), data1.window, [], EEGPos_Neuracle64);
 Fig2 = plotRawWaveMultiEEG(chData(2), data1.window, [], EEGPos_Neuracle64);
-scaleAxes([Fig1, Fig2], "x", [0, 2000]);
+scaleAxes([Fig1, Fig2], "x", [-300, 2500]);
 scaleAxes([Fig1, Fig2], "y", "on", "symOpt", "max");
-addLines2Axes([Fig1, Fig2], struct("X", {0; 1000}, "color", [255 128 0] / 255, "width", 2));
+addLines2Axes([Fig1, Fig2], struct("X", {0; 1000; 2000}, "color", [255 128 0] / 255, "width", 1.5));
 allAxes = findobj([Fig1, Fig2], "Type", "axes");
 for aIndex = 1:length(allAxes)
     allAxes(aIndex).XAxis.Visible = "off";
     allAxes(aIndex).YAxis.Visible = "off";
 end
-mPrint(Fig1, '..\temp\example_coma.jpg', '-djpeg', '-r300');
-mPrint(Fig2, '..\temp\example_recover.jpg', '-djpeg', '-r300');
+mPrint(Fig1, '..\temp\example_coma.jpg', '-djpeg', '-r1200');
+mPrint(Fig2, '..\temp\example_recover.jpg', '-djpeg', '-r1200');
 
 chData(2).color = "r";
 plotRawWaveMulti(chData, data1.window);
@@ -64,4 +64,5 @@ plot(t, chData(1).chMean(58, :)', "Color", "k", "LineWidth", 2, "DisplayName", "
 hold on;
 plot(t, chData(2).chMean(58, :)', "Color", "r", "LineWidth", 2, "DisplayName", "After");
 legend;
+title("O1");
 addLines2Axes(struct("X", {0; 1000; 2000}, "color", [255 128 0] / 255, "width", 2));

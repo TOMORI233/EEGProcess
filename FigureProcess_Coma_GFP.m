@@ -157,10 +157,14 @@ hold on;
 temp = mean(cat(2, RM_delta_onset_coma{2}), 2);
 X = temp(idxOnset);
 Y = RM_delta_change_coma{2}(idxOnset);
-scatter(X, Y, 100, "blue", "filled", "DisplayName", "Impaired consciousness (with onset response)");
+s = scatter(X, Y, 100, "blue", "filled", "DisplayName", "Impaired consciousness (with onset response)");
+s.DataTipTemplate.DataTipRows(end + 1) = dataTipTextRow("S", string(subjectIDsComa(idxOnset)));
+
 X = temp(~idxOnset);
 Y = RM_delta_change_coma{2}(~idxOnset);
-scatter(X, Y, 100, "filled", "MarkerFaceColor", [.5, .5, .5], "DisplayName", "Impaired consciousness (without onset response)");
+s = scatter(X, Y, 100, "filled", "MarkerFaceColor", [.5, .5, .5], "DisplayName", "Impaired consciousness (without onset response)");
+s.DataTipTemplate.DataTipRows(end + 1) = dataTipTextRow("S", string(subjectIDsComa(~idxOnset)));
+
 X = mean(cat(2, RM_delta_onset_healthy{2}), 2);
 Y = RM_delta_change_healthy{2};
 scatter(X, Y, 100, "red", "filled", "DisplayName", "Healthy");
