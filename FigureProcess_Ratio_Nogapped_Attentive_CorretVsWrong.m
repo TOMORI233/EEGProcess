@@ -98,9 +98,10 @@ for chNum = 1:length(channels)
     ax = axes('Position', [X(chNum) - dX / 2, Y(chNum) - dY / 2, dX, 2 * dY]);
     if p(chNum) < alphaVal
         scatter(indexW{chNum}, indexC{chNum}, 16, "black", "filled");
-        ax.XAxis.LineWidth = 2;
-        ax.YAxis.LineWidth = 2;
-        ax.Box = "on";
+        % ax.XAxis.LineWidth = 2;
+        % ax.YAxis.LineWidth = 2;
+        % ax.Box = "on";
+        set(gca, "Color", [.85, .85, .85]);
     else
         scatter(indexW{chNum}, indexC{chNum}, 16, "black", "filled");
     end

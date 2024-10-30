@@ -228,7 +228,7 @@ h = scatter(T(idx), zeros(sum(idx), 1), 40, "yellow", "filled");
 setLegendOff(h);
 legend;
 xlabel('Time (ms)');
-xlim([-1000, 1000]);
+xlim([-1200, 1500]);
 scaleAxes("y", "symOpt", "max");
 ylabel('Response (\muV)');
 title(['Grand-averaged wave in ', char(area), ' | N=', num2str(length(data))]);

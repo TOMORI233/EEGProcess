@@ -12,3 +12,4 @@ end
 windowBand = [-25, 25]; % ms
 
 rmfcn = @mean;
+% rmfcn = path2func(fullfile(matlabroot, "toolbox/matlab/datafun/rms.m"));

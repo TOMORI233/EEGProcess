@@ -24,7 +24,7 @@ run(fullfile(pwd, "config\plotConfig.m"));
 run(fullfile(pwd, "config\avgConfig_Neuracle64.m"));
 
 nperm = 1e3;
-alphaVal = 0.025;
+alphaVal = 0.05;
 
 EEGPos = EEGPos_Neuracle64;
 chs2Ignore = EEGPos.ignore;
@@ -50,21 +50,24 @@ for index = 1:length(insertN)
         chData(index, 1).legend = num2str(insertN(index));
     end
 
+    % Normalize
+    temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
+
     gfp{index} = cellfun(@(x) calGFP(x, chs2Ignore), temp, "UniformOutput", false);
     chData(index, 1).chMean = calchMean(gfp{index});
-%     chData(index, 1).chErr  = calchErr(gfp{index});
-    chData(index, 1).color = colors{index};
+    % chData(index, 1).chErr  = calchErr(gfp{index});
+    chData(index, 1).color  = colors{index};
 end
 
 gfp = cellfun(@cell2mat, gfp, "UniformOutput", false);
 [p_vs_control1, p_vs_control2] = deal(cell(length(gfp), 1));
 for index = 1:length(gfp) - 1
-    p_vs_control1{index + 1} = wavePermTest(gfp{index + 1}, gfp{1}, nperm, "chs2Ignore", chs2Ignore, "Type", "GFP", "Tail", "left");
+    p_vs_control1{index + 1}   = wavePermTest(gfp{index + 1}, gfp{1}, nperm, "chs2Ignore", chs2Ignore, "Type", "GFP", "Tail", "left");
     p_vs_control2{end - index} = wavePermTest(gfp{end - index}, gfp{end}, nperm, "chs2Ignore", chs2Ignore, "Type", "GFP", "Tail", "right");
 end
 
 plotRawWaveMulti(chData, window);
-scaleAxes("x", [1000, 1500]);
+scaleAxes("x", [900, 1400]);
 yRange = scaleAxes("y", "on");
 t = linspace(window(1), window(2), size(chData(1).chMean, 2));
 for index = 1:length(p_vs_control1) - 1
@@ -92,36 +95,72 @@ xlabel("Time (ms)");
 
 %% RM computation
 RM_base = cell(length(insertN), 1);
-RM_change = cell(length(insertN), 1);
+RM_changeP1 = cell(length(insertN), 1);
+RM_changeN2 = cell(length(insertN), 1);
+[~, tP1] = maxt(chData(end).chMean(t >= 1080 & t <= 1160), t(t >= 1080 & t <= 1160));
+[~, tN2] = maxt(chData(end).chMean(t >= 1160 & t <= 1260), t(t >= 1160 & t <= 1260));
 for index = 1:length(insertN)
-    temp1 = cutData(gfp{index}, window, windowBase);
-    RM_base{index} = mean(temp1, 2);
-    temp2 = cutData(gfp{index}, window, windowChange);
-    RM_change{index} = max(temp2, [], 2);
+    temp = cutData(gfp{index}, window, windowBase);
+    RM_base{index} = mean(temp, 2);
+
+    temp = cutData(gfp{index}, window, tP1 + windowBand);
+    RM_changeP1{index} = mean(temp, 2);
+
+    temp = cutData(gfp{index}, window, tN2 + windowBand);
+    RM_changeN2{index} = mean(temp, 2);
 end
 
-RM_delta_change = cellfun(@(x, y) x - y, RM_change, RM_base, "UniformOutput", false);
+RM_delta_changeP1 = cellfun(@(x, y) x - y, RM_changeP1, RM_base, "UniformOutput", false);
+RM_delta_changeN2 = cellfun(@(x, y) x - y, RM_changeN2, RM_base, "UniformOutput", false);
 
 %% Statistics
-[~, p_RM_changePeak_vs_base] = cellfun(@(x, y) ttest(x, y), RM_base, RM_change);
-[~, p_RM_changePeak_vs_control1] = cellfun(@(x) ttest(RM_change{1}, x), RM_change);
-[~, p_RM_changePeak_vs_control2] = cellfun(@(x) ttest(RM_change{end}, x), RM_change);
+% test normality
+[~, p1] = cellfun(@swtest, RM_changeP1);
+[~, p2] = cellfun(@swtest, RM_changeP1);
+if all(p1 < alphaVal & p2 < alphaVal)
+    statFcn = @(x, y) obtainArgoutN(@ttest, 2, x, y);
+else
+    statFcn = @signrank;
+end
+
+p_RM_changeP1_vs_base     = cellfun(@(x, y) statFcn(x, y), RM_base, RM_changeP1);
+p_RM_changeP1_vs_control1 = cellfun(@(x)    statFcn(RM_changeP1{1}, x), RM_changeP1);
+p_RM_changeP1_vs_control2 = cellfun(@(x)    statFcn(RM_changeP1{end}, x), RM_changeP1);
+
+p_RM_changeN2_vs_base     = cellfun(@(x, y) statFcn(x, y), RM_base, RM_changeN2);
+p_RM_changeN2_vs_control1 = cellfun(@(x)    statFcn(RM_changeN2{1}, x), RM_changeN2);
+p_RM_changeN2_vs_control2 = cellfun(@(x)    statFcn(RM_changeN2{end}, x), RM_changeN2);
 
 %% Tunning plot
 insertN(isnan(insertN)) = inf;
 
 FigTuning = figure;
-mSubplot(1, 1, 1, "shape", "square-min");
-X = (1:length(insertN));
-Y = cellfun(@mean, RM_delta_change);
-E = cellfun(@SE, RM_delta_change);
-errorbar(X, Y, E, "Color", "r", "LineWidth", 2);
+mSubplot(1, 2, 1, "shape", "square-min");
 hold on;
-scatter(X(p_RM_changePeak_vs_control1 < alphaVal), Y(p_RM_changePeak_vs_control1 < alphaVal) - E(p_RM_changePeak_vs_control1 < alphaVal) - 0.03, 80, "Marker", "*", "MarkerEdgeColor", "k");
-scatter(X(p_RM_changePeak_vs_control2 < alphaVal), Y(p_RM_changePeak_vs_control2 < alphaVal) + E(p_RM_changePeak_vs_control2 < alphaVal) + 0.03, 80, "Marker", "o", "MarkerEdgeColor", "k");
+X = (1:length(insertN)) - 0.05;
+Y = cellfun(@mean, RM_delta_changeP1);
+E = cellfun(@SE, RM_delta_changeP1);
+errorbar(X, Y, E, "Color", "r", "LineWidth", 2);
+scatter(X(p_RM_changeP1_vs_control1 < alphaVal), Y(p_RM_changeP1_vs_control1 < alphaVal) - E(p_RM_changeP1_vs_control1 < alphaVal) - 0.03, 80, "Marker", "*", "MarkerEdgeColor", "k");
+scatter(X(p_RM_changeP1_vs_control2 < alphaVal), Y(p_RM_changeP1_vs_control2 < alphaVal) + E(p_RM_changeP1_vs_control2 < alphaVal) + 0.03, 80, "Marker", "o", "MarkerEdgeColor", "k");
 xticks(1:length(insertN));
 xlim([0, length(insertN)] + 0.5);
 xticklabels(num2str(insertN));
 xlabel("Insert ICI number");
 ylabel("\DeltaGFP (\muV)");
-title("Tuning of GFP_{change}");
+title("Tuning of GFP_{P1}");
+
+mSubplot(1, 2, 2, "shape", "square-min");
+hold on;
+X = (1:length(insertN)) + 0.05;
+Y = cellfun(@mean, RM_delta_changeN2);
+E = cellfun(@SE, RM_delta_changeN2);
+errorbar(X, Y, E, "Color", "b", "LineWidth", 2);
+scatter(X(p_RM_changeN2_vs_control1 < alphaVal), Y(p_RM_changeN2_vs_control1 < alphaVal) - E(p_RM_changeN2_vs_control1 < alphaVal) - 0.03, 80, "Marker", "*", "MarkerEdgeColor", "k");
+scatter(X(p_RM_changeN2_vs_control2 < alphaVal), Y(p_RM_changeN2_vs_control2 < alphaVal) + E(p_RM_changeN2_vs_control2 < alphaVal) + 0.03, 80, "Marker", "o", "MarkerEdgeColor", "k");
+xticks(1:length(insertN));
+xlim([0, length(insertN)] + 0.5);
+xticklabels(num2str(insertN));
+xlabel("Insert ICI number");
+ylabel("\DeltaGFP (\muV)");
+title("Tuning of GFP_{N2}");
