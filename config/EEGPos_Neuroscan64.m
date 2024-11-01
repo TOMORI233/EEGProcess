@@ -1,4 +1,7 @@
 function EEGPos = EEGPos_Neuroscan64()
+% channels vector
+EEGPos.channels = 1:64;
+
 % channels not to plot
 EEGPos.ignore = [33, 43, 60, 64];
 

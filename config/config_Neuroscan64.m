@@ -14,3 +14,5 @@ chs2Avg = unique(chs2Avg);
 % Exclude A1,A2,CB1,CB2 from analysis
 chsIgnore = [33, 43, 60, 64];
 chs2Avg(ismember(chs2Avg, chsIgnore)) = [];
+
+EEGPos = EEGPos_Neuroscan64;

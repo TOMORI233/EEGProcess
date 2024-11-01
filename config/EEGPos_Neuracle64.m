@@ -1,6 +1,9 @@
 function EEGPos = EEGPos_Neuracle64()
+% channels vector
+EEGPos.channels = 1:64;
+
 % channels not to plot
-EEGPos.ignore = [60:64];
+EEGPos.ignore = 60:64;
 
 %% Actual location
 % locs file (highest priority, plot in actual location)

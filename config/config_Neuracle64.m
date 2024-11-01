@@ -12,3 +12,5 @@ chs2Avg = unique(chs2Avg);
 
 % Exclude A1,A2 and channels not connected from analysis
 chs2Avg(ismember(chs2Avg, [60:64])) = [];
+
+EEGPos = EEGPos_Neuracle64;
