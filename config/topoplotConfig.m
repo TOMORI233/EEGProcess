@@ -16,15 +16,31 @@ function params = topoplotConfig(EEGPos, chsMark, size0, sizeMark)
     
     chs2Plot = EEGPos.channels(~ismember(EEGPos.channels, EEGPos.ignore))';
     
-    params0 = [...
-               {'plotchans'}, {chs2Plot}                           , ... % indices of channels to plot
-               {'plotrad'  }, {0.36}                               , ... % plot radius
-               {'headrad'  }, {max([EEGPos.locs(chs2Plot).radius])}, ... % head radius
-               {'intrad'   }, {0.4}                                , ... % interpolate radius
-               {'conv'     }, {'on'}                               , ... % plot radius just covers maximum channel radius
-               {'colormap' }, {'jet'}                              , ... % colormap
-               {'emarker'  }, {{'o', 'k', size0, 1}}               , ... % {MarkerType, Color, Size, LineWidth}
-              ];           
+    if EEGPos.name == "Neuroscan64"
+        params0 = [...
+                   {'plotchans'}, {chs2Plot}                           , ... % indices of channels to plot
+                   {'plotrad'  }, {0.36}                               , ... % plot radius
+                   {'headrad'  }, {max([EEGPos.locs(chs2Plot).radius])}, ... % head radius
+                   {'intrad'   }, {0.4}                                , ... % interpolate radius
+                   {'conv'     }, {'on'}                               , ... % plot radius just covers maximum channel radius
+                   {'colormap' }, {'jet'}                              , ... % colormap
+                   {'emarker'  }, {{'o', 'k', size0, 1}}               , ... % {MarkerType, Color, Size, LineWidth}
+                  ];
+    elseif EEGPos.name == "Neuracle64"
+        % reset location
+        EEGPos.locs = readlocs('Neuracle_chan64.loc');
+        params0 = [...
+                   {'plotchans'}, {chs2Plot}                           , ... % indices of channels to plot
+                   {'plotrad'  }, {0.64}                               , ... % plot radius
+                   {'headrad'  }, {0.58}                               , ... % head radius
+                   {'intrad'   }, {0.64}                                , ... % interpolate radius
+                   {'conv'     }, {'on'}                               , ... % plot radius just covers maximum channel radius
+                   {'colormap' }, {'jet'}                              , ... % colormap
+                   {'emarker'  }, {{'o', 'k', size0, 1}}               , ... % {MarkerType, Color, Size, LineWidth}
+                  ];
+    else
+        error("Unsupported configuration");
+    end
     
     if ~isempty(chsMark)
         params = [params0, ...

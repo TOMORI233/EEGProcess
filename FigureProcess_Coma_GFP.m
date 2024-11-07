@@ -10,11 +10,12 @@ MATPATHsHealthy = arrayfun(@(x) fullfile(x.folder, x.name), MATPATHsHealthy, "Un
 colors = {'k', 'b', 'r'};
 
 interval = 0;
-run(fullfile(pwd, "config\plotConfig.m"));
-run(fullfile(pwd, "config\avgConfig_Neuracle64.m"));
+run(fullfile(pwd, "config\config_plot.m"));
+run(fullfile(pwd, "config\config_Neuracle64.m"));
 
-windowOnset = [50, 250];
-windowChange = [1080, 1280];
+fs = 1e3;
+
+windowOnset = [0, 250];
 windowBase0 = [-500, -300];
 windowBase = [800, 1000];
 
@@ -40,6 +41,12 @@ dataHealthy = cellfun(@(x) load(x).chData, MATPATHsHealthy, "UniformOutput", fal
 
 dataComa = cellfun(@(x) x([1, 3]), dataComa, "UniformOutput", false);
 dataHealthy = cellfun(@(x) x([1, 2]), dataHealthy, "UniformOutput", false);
+
+% Normalize
+for index = 1:2
+    dataComa{index} = addfield(dataComa{index}, "chMean", arrayfun(@(x) x.chMean ./ std(x.chMean, [], 2), dataComa{index}, "UniformOutput", false));
+    dataHealthy{index} = addfield(dataHealthy{index}, "chMean", arrayfun(@(x) x.chMean ./ std(x.chMean, [], 2), dataHealthy{index}, "UniformOutput", false));
+end
 
 idxOnset = ismember(subjectIDsComa, cellstr(readlines("subjects.txt")));
 t = linspace(window(1), window(2), size(dataComa{1}(1).chMean, 2));
@@ -108,26 +115,30 @@ for index = 1:length(gfpHealthy)
 end
 addLines2Axes(struct("X", {0; 1000; 2000}));
 
-%% 
+%% Determine window of change response by GFP
 % permute at sample level
 temp1 = cell2mat(cellfun(@(x) x(1, :), gfpHealthy, "UniformOutput", false)); % subject_sample
 temp2 = cell2mat(cellfun(@(x) x(2, :), gfpHealthy, "UniformOutput", false));
-% temp1 = cell2mat(cellfun(@(x) x(1, :), gfpComa(~idxOnset), "UniformOutput", false)); % subject_sample
-% temp2 = cell2mat(cellfun(@(x) x(2, :), gfpComa(~idxOnset), "UniformOutput", false));
-p = wavePermTest(temp1, temp2, nperm, "Tail", "right", "Type", "GFP", "chs2Ignore", chs2Ignore);
-h = fdr_bh(p, alphaVal, 'dep');
-h = double(h);
-h(h == 0) = nan;
-h(h == 1) = 0;
+p = wavePermTest(temp1, temp2, nperm, "Tail", "left", "Type", "ERP");
 
 figure;
 plot(t, mean(temp1, 1)', "Color", "k", "LineWidth", 2);
 hold on;
 plot(t, mean(temp2, 1)', "Color", "r", "LineWidth", 2);
-scatter(t, h', 50, "yellow", "filled");
+yRange = get(gca, "YLim");
+idx = p < alphaVal;
+c = "r";
+h = bar(t(idx), ones(sum(idx), 1) * yRange(2), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
+setLegendOff(h);
 addLines2Axes(gca, struct("X", {0; 1000; 2000}));
 
 %% RM computation
+windowChange = [min(t(p < alphaVal & t(:)' > 1000)), ...
+                max(t(p < alphaVal & t(:)' > 1000 & t(:)' < 1500))];
+disp(['Time window for change response determined by GFP: from ', num2str(windowChange(1)), ...
+      ' to ', num2str(windowChange(2)), ' ms']);
+windowChange = [0, 300] + 1000 + 5;
+
 tIdxBase0 = t >= windowBase0(1) & t <= windowBase0(2);
 tIdxBase = t >= windowBase(1) & t <= windowBase(2);
 tIdxOnset = t >= windowOnset(1) & t <= windowOnset(2);
@@ -276,8 +287,34 @@ cb.Label.VerticalAlignment = "baseline";
 exampleID = "2024040801";
 idx = strcmp(exampleID, subjectIDsComa);
 
-t1 = (t' - 1000) / 1000;
+windowPlot = [-300, 2500]; % ms
 
+plotRawWaveEEG(dataComa{idx}(end).chMean, [], window, [], EEGPos_Neuracle64);
+scaleAxes("x", windowPlot);
+yRange = scaleAxes("y", "on", "symOpt", "max");
+addLines2Axes(struct("X", {0; 1000 + 5; 2000}, ...
+                     "color", [255 128 0] / 255, ...
+                     "width", 1.5), ...
+                     "Layer", "bottom");
+addLines2Axes(struct("Y", 0, ...
+                     "color", "k", ...
+                     "style", "-", ...
+                     "width", 0.5), ...
+                     "Layer", "bottom");
+addScaleEEG(gcf, EEGPos_Neuracle64);
+allAxes = findobj(gcf, "Type", "axes");
+for aIndex = 1:length(allAxes)
+    allAxes(aIndex).TickLength = [0, 0];
+    allAxes(aIndex).Title.FontSize = 12;
+    allAxes(aIndex).XAxis.Visible = "off";
+    allAxes(aIndex).YAxis.Visible = "off";
+end
+print(gcf, fullfile('D:\Education\Lab\Projects\EEG\Figures\coma\example.jpg'), "-djpeg", "-r900");
+
+
+t1 = (t' - 1000) / 1000;
+res_example_channel_REG4_4 = dataComa{idx}(1).chMean(find(upper(EEGPos.channelNames) == "PO5"), :)';
+res_example_channel_REG4_5 = dataComa{idx}(end).chMean(find(upper(EEGPos.channelNames) == "PO5"), :)';
 res_example_coma_GFP_REG4_4 = gfpComa{idx}(1, :)';
 res_example_coma_GFP_REG4_5 = gfpComa{idx}(2, :)';
 
@@ -309,3 +346,19 @@ resComa = [t(:) / 1000 - 1, calchMean(cellfun(@(x) x(1, :), gfpComa, "UniformOut
                             calchMean(cellfun(@(x) x(2, :), gfpComa, "UniformOutput", false))'];
 resHealthy = [t(:) / 1000 - 1, calchMean(cellfun(@(x) x(1, :), gfpHealthy, "UniformOutput", false))', ...
                                calchMean(cellfun(@(x) x(2, :), gfpHealthy, "UniformOutput", false))'];
+
+%% Results of figures
+% Figure 6
+% a
+t = linspace(window(1), window(2), length(p))' - 1000 - 5;
+[t(:), calchMean(cellfun(@(x) x(end, :), gfpHealthy, "UniformOutput", false))', ...
+       calchMean(cellfun(@(x) x(end, :), gfpComa, "UniformOutput", false))'];
+% b
+[RM_delta_onset_healthy{end}, RM_delta_change_healthy{end}];
+[RM_delta_onset_coma{end}, RM_delta_change_coma{end}];
+
+% SFigure 6
+% a
+[scoreTotal, RM_delta_onset_coma{end}];
+% b
+[scoreTotal, RM_delta_change_coma{end}];

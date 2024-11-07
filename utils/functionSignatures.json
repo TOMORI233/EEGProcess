@@ -7,7 +7,7 @@
             {"name": "fs", "kind": "required", "type": ["numeric", "positive", "numel=1"], "purpose": "sample rate"},
             {"name": "windowICA", "kind": "required", "type": ["numeric", "numel=2"]},
             {"name": "chs2doICA", "kind": "namevalue"},
-            {"name": "EEGPos", "kind": "namevalue", "type": ["struct"]}
+            {"name": "EEGPos", "kind": "namevalue", "type": ["struct", "scalar"]}
         ]
     },
 
@@ -26,7 +26,8 @@
             {"name": "nperm", "kind": "ordered", "type": ["numeric", "scalar"]},
             {"name": "Tail", "kind": "namevalue", "type": ["choices = {'both', 'left', 'right'}"]},
             {"name": "Type", "kind": "namevalue", "type": ["choices = {'ERP', 'GFP'}"]},
-            {"name": "chs2Ignore", "kind": "namevalue", "type": ["numeric", "positive"]}
+            {"name": "chs2Ignore", "kind": "namevalue", "type": ["numeric", "positive"]},
+            {"name": "EEGPos", "kind": "namevalue", "type": ["struct", "scalar"]}
         ]
     }
 

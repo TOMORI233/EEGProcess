@@ -10,7 +10,8 @@ chs2Avg = [[24, 25, 33, 34, 41, 42], 35:56, 50:59];
 % Remove duplicated channels
 chs2Avg = unique(chs2Avg);
 
-% Exclude A1,A2 and channels not connected from analysis
-chs2Avg(ismember(chs2Avg, [60:64])) = [];
+% Exclude channels not connected from analysis
+chsIgnore = 60:64;
+chs2Avg(ismember(chs2Avg, chsIgnore)) = [];
 
 EEGPos = EEGPos_Neuracle64;

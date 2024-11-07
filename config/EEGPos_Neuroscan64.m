@@ -1,4 +1,7 @@
 function EEGPos = EEGPos_Neuroscan64()
+%% Basic info
+EEGPos.name = "Neuroscan64";
+
 % channels vector
 EEGPos.channels = 1:64;
 

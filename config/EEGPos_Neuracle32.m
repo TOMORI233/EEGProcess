@@ -1,4 +1,10 @@
 function EEGPos = EEGPos_Neuracle32()
+%% Basic info
+EEGPos.name = "Neuracle64";
+
+% channels vector
+EEGPos.channels = 1:32;
+
 % channels not to plot
 EEGPos.ignore = [];
 

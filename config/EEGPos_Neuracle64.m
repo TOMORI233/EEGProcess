@@ -1,4 +1,7 @@
 function EEGPos = EEGPos_Neuracle64()
+%% Basic info
+EEGPos.name = "Neuracle64";
+
 % channels vector
 EEGPos.channels = 1:64;
 

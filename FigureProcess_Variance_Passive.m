@@ -17,13 +17,16 @@ FIGUREPATH = getAbsPath("..\Figures\healthy\population\Variance Passive");
 colors = flip(cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false));
 
 interval = 0;
-run(fullfile(pwd, "config\plotConfig.m"));
-run(fullfile(pwd, "config\avgConfig_Neuracle64.m"));
+run(fullfile(pwd, "config\config_plot.m"));
+run(fullfile(pwd, "config\config_Neuracle64.m"));
+
+alphaVal = 0.05;
 
 %% Load
 window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
+load("windowChange.mat", "windowChange");
 
 %% Wave plot
 variance = unique([data{1}.var])';
@@ -33,12 +36,26 @@ for index = 1:length(variance)
     if isnan(variance(index))
         temp = cellfun(@(x) x(isnan([x.var])).chMean, data, "UniformOutput", false);
         chDataAll(index, 1).legend = 'REG 4-4.06';
+        gfpData(index, 1).legend = 'REG 4-4.06';
+
     else
         temp = cellfun(@(x) x([x.var] == variance(index)).chMean, data, "UniformOutput", false);
         chDataAll(index, 1).legend = ['\sigma=\mu/', num2str(variance(index))];
+        gfpData(index, 1).legend = ['\sigma=\mu/', num2str(variance(index))];
     end
+
+    % Normalize
+    temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
+
     chDataAll(index, 1).chMean = calchMean(temp);
+    chDataAll(index, 1).chErr = calchErr(temp);
     chDataAll(index, 1).color = colors{index};
+
+    gfp{index} = calGFP(temp, EEGPos.ignore);
+    gfp{index} = cat(1, gfp{index}{:});
+    gfpData(index, 1).chMean = mean(gfp{index}, 1);
+    gfpData(index, 1).chErr = SE(gfp{index}, 1);
+    gfpData(index, 1).color = colors{index};
 end
 
 plotRawWaveMultiEEG(chDataAll, window, [], EEGPos_Neuracle64);
@@ -46,68 +63,66 @@ scaleAxes("x", [1000 + 4, 1500]);
 scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", {0; 1000; 2000}));
 
-chMean = arrayfun(@(x) mean(x.chMean(chs2Avg, :), 1), chDataAll, "UniformOutput", false);
-chErr = arrayfun(@(x) SE(x.chMean(chs2Avg, :), 1), chDataAll, "UniformOutput", false);
-t = linspace(window(1), window(2), length(chMean{1}))';
-chData = addfield(chDataAll, "chMean", chMean);
-chData = addfield(chData, "chErr", chErr);
-FigGrandAvg = plotRawWaveMulti(chData, window, ['Grand-averaged wave in ', char(area)]);
-xlabel('Time (ms)');
-ylabel('Response (\muV)');
-scaleAxes("x", [1000 + 4, 1500]);
-scaleAxes("y", "on", "symOpt", "max");
-addLines2Axes(struct("X", {0; 1000; 2000}));
-mPrint(FigGrandAvg, fullfile(FIGUREPATH, ['Grand average wave (', char(area), ').png']), "-dpng", "-r300");
-
-%% Window config for RM
-tIdx = t >= 1000 & t <= 1300;
-
-[~, peakTime] = arrayfun(@(x) maxt(x.chMean(tIdx), t(tIdx)), chData);
-windowChangePeak = peakTime + windowBand;
-[~, troughTime] = arrayfun(@(x, y) mint(x.chMean(tIdx & t > y), t(tIdx & t > y)), chData, peakTime);
-windowChangeTrough = troughTime + windowBand;
-
 %% RM computation
-RM_base = cell(length(variance), 1);
-RM_changePeak = cell(length(variance), 1);
-RM_changeTrough = cell(length(variance), 1);
+[RM_channels_base, ...
+ RM_channels_change] = deal(cell(length(variance), 1));
 for index = 1:length(variance)
     if isnan(variance(index))
         temp = cellfun(@(x) x(isnan([x.var])).chMean, data, "UniformOutput", false);
     else
         temp = cellfun(@(x) x([x.var] == variance(index)).chMean, data, "UniformOutput", false);
     end
+
+    % Normalize
+    temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
     
-    temp = cellfun(@(x) x(chs2Avg, :), temp, "UniformOutput", false);
-    temp1 = cutData(temp, window, windowBase);
-    RM_base{index} = cellfun(@(x) rmfcn(mean(x, 1)), temp1);
-    temp2 = cutData(temp, window, windowChangePeak(index, :));
-    RM_changePeak{index} = cellfun(@(x) rmfcn(mean(x, 1)), temp2);
-    temp3 = cutData(temp, window, windowChangeTrough(index, :));
-    RM_changeTrough{index} = cellfun(@(x) rmfcn(mean(x, 1)), temp3);
+    RM_channels_base{index}   = calRM(temp, window, windowBase, @(x) rmfcn(x, 2));
+    RM_channels_change{index} = calRM(temp, window, windowChange, @(x) rmfcn(x, 2));
+
+    % convert to channel-by-subject matrix
+    RM_channels_base  {index} = cat(2, RM_channels_base  {index}{:});
+    RM_channels_change{index} = cat(2, RM_channels_change{index}{:});
 end
 
-RM_delta_changePeak = cellfun(@(x, y) x - y, RM_changePeak, RM_base, "UniformOutput", false);
-RM_delta_changeTrough = cellfun(@(x, y) x - y, RM_changeTrough, RM_base, "UniformOutput", false);
+RM_channels_delta_change = cellfun(@(x, y) x - y, RM_channels_change, RM_channels_base, "UniformOutput", false);
+
+% compute averaged RM across all channels
+idx = ~ismember(EEGPos.channels, EEGPos.ignore);
+RM_base   = cellfun(@(x) mean(x(idx, :), 1), RM_channels_base,   "UniformOutput", false);
+RM_change = cellfun(@(x) mean(x(idx, :), 1), RM_channels_change, "UniformOutput", false);
+RM_delta_change = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_change, "UniformOutput", false);
 
 %% Statistics
-[~, p_RM_changePeak_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_base, RM_changePeak);
-[~, p_RM_changePeak_vs_control] = cellfun(@(x) ttest(RM_changePeak{1}, x), RM_changePeak);
-[~, p_RM_changePeak_vs_mu_2] = cellfun(@(x) ttest(RM_changePeak{end}, x), RM_changePeak);
-[~, p_RM_changeTrough_vs_base] = cellfun(@(x, y) ttest2(x, y), RM_base, RM_changeTrough);
-[~, p_RM_changeTrough_vs_control] = cellfun(@(x) ttest(RM_changeTrough{1}, x), RM_changeTrough);
+% test normality
+[~, p] = cellfun(@swtest, RM_change);
+if all(p < alphaVal)
+    statFcn = @(x, y) obtainArgoutN(@ttest, 2, x', y', "Tail", "left");
+else
+    statFcn = @(x, y) rowFcn(@(x1, y1) signrank(x1, y1, "tail", "left"), x, y);
+end
 
-[~, p_temp] = ttest(RM_changePeak{end - 1}, RM_changePeak{end});
+p_RM_channels_change_vs_base     = cellfun(@(x, y) statFcn(x, y), RM_channels_base, RM_channels_change, "UniformOutput", false);
+p_RM_channels_change_vs_control1 = cellfun(@(x)    statFcn(x, RM_channels_change{1}), RM_channels_change, "UniformOutput", false);
+
+[~, ~, p_RM_channels_change_vs_base   ]  = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_change_vs_base    , "UniformOutput", false);
+[~, ~, p_RM_channels_change_vs_control1] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_change_vs_control1, "UniformOutput", false);
+
+% averaged
+p_RM_change_vs_base     = cellfun(@(x, y) statFcn(x, y), RM_base, RM_change);
+p_RM_change_vs_control1 = cellfun(@(x) statFcn(x, RM_delta_change{1}), RM_delta_change);
 
 %% Tunning plot
 variance(isnan(variance)) = 0;
 
 FigTuning = figure;
 mSubplot(1, 1, 1, "shape", "square-min");
-errorbar((1:length(variance)) - 0.05, cellfun(@mean, RM_delta_changePeak), cellfun(@SE, RM_delta_changePeak), "Color", "r", "LineWidth", 2, "DisplayName", "Peak");
+X = 1:length(variance);
+Y = cellfun(@mean, RM_delta_change);
+E = cellfun(@SE, RM_delta_change);
+errorbar(X, Y, E, "Color", "r", "LineWidth", 2);
 hold on;
-errorbar((1:length(variance)) + 0.05, cellfun(@mean, RM_delta_changeTrough), cellfun(@SE, RM_delta_changeTrough), "Color", "b", "LineWidth", 2, "DisplayName", "Trough");
-legend("Location", "northwest");
+scatter(X(p_RM_change_vs_base < alphaVal), Y(p_RM_change_vs_base < alphaVal) - E(p_RM_change_vs_base < alphaVal) - 0.02, 80, "Marker", "*", "MarkerEdgeColor", "k");
+scatter(X(p_RM_change_vs_control1 < alphaVal), Y(p_RM_change_vs_control1 < alphaVal) + E(p_RM_change_vs_control1 < alphaVal) + 0.02, 60, "Marker", "o", "MarkerEdgeColor", "k");
 xticks(1:length(variance));
 xlim([0, length(variance)] + 0.5);
 temp = arrayfun(@(x) ['\mu/', num2str(x)], variance, "UniformOutput", false);
@@ -119,6 +134,55 @@ title("Tuning of RM_{change}");
 
 mPrint(FigTuning, fullfile(FIGUREPATH, ['RM tuning (', char(area), ').png']), "-dpng", "-r300");
 
+%% Topoplot of RM for all conditions
+figure;
+for index = 1:length(variance)
+    mSubplot(2, 5, index, "shape", "square-min");
+    params = topoplotConfig(EEGPos, find(p_RM_channels_change_vs_base{index} < alphaVal), 6, 24);
+    topoplot(mean(RM_channels_delta_change{index}, 2), EEGPos.locs, params{:});
+
+    if index == length(variance)
+        pos = tightPosition(gca, "IncludeLabels", true);
+        cb = colorbar("Position", [pos(1) + pos(3) - 0.01, pos(2), 0.01, pos(4)]);
+        cb.FontSize = 14;
+        cb.FontWeight = "bold";
+    end
+    
+    mSubplot(2, 5, index + 5, "shape", "square-min");
+    params = topoplotConfig(EEGPos, find(p_RM_channels_change_vs_control1{index} < alphaVal), 6, 24);
+    topoplot(mean(RM_channels_delta_change{index}, 2), EEGPos.locs, params{:});
+
+    if index == length(variance)
+        pos = tightPosition(gca, "IncludeLabels", true);
+        cb = colorbar("Position", [pos(1) + pos(3) - 0.01, pos(2), 0.01, pos(4)]);
+        cb.FontSize = 14;
+        cb.FontWeight = "bold";
+    end
+
+end
+scaleAxes("c", "symOpt", "max", "ignoreInvisible", false);
+% print(gcf, fullfile(FIGUREPATH, 'topo.jpg'), '-djpeg', '-r900');
+
+%% Example channel
+run(fullfile(pwd, "config\config_plot.m"));
+
+exampleChannel = "POZ";
+idx = find(upper(EEGPos.channelNames) == exampleChannel);
+
+chData = chDataAll;
+chData = addfield(chData, "chMean", arrayfun(@(x) x.chMean(idx, :), chDataAll, "UniformOutput", false)');
+chData = addfield(chData, "chErr", arrayfun(@(x) x.chErr(idx, :), chDataAll, "UniformOutput", false)');
+plotRawWaveMulti(chData, window - 1000 - 4);
+xlabel("Time from change (ms)");
+ylabel("Normalized response (\muV)");
+title(['Grand-averaged wave in ', char(exampleChannel)]);
+addLines2Axes(struct("X", {- 1000 - 4; 0;  1000 - 4}));
+scaleAxes("x", [-100, 600]);
+yRange = scaleAxes("y", "on", "symOpt", "max");
+
+t = linspace(window(1), window(2), length(chData(1).chMean))';
+t = t - 1000 - 4;
+
 %% save
 params = [fieldnames(getVarsFromWorkspace('RM_\W*')); ...
           fieldnames(getVarsFromWorkspace('p_\W*')); ...
@@ -128,3 +192,11 @@ save(['..\DATA\MAT DATA\figure\Res variance (', char(area), ').mat'], ...
      "variance", ...
      "chs2Avg", ...
      params{:});
+
+%% Results of figures
+% Figure 3
+% h
+[t, cat(1, chData(end:-1:1).chMean)'];
+
+% i
+[Y(:), E(:)];

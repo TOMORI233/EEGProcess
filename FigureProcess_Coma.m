@@ -10,16 +10,17 @@ MATPATHsHealthy = arrayfun(@(x) fullfile(x.folder, x.name), MATPATHsHealthy, "Un
 colors = {'k', 'r'};
 
 interval = 0;
-run(fullfile(pwd, "config\plotConfig.m"));
-run(fullfile(pwd, "config\avgConfig_Neuracle64.m"));
+run(fullfile(pwd, "config\config_plot.m"));
+run(fullfile(pwd, "config\config_Neuracle64.m"));
 
-windowOnset = [0, 300];
-windowChange = [1000, 1300];
+windowOnset = [0, 250];
 windowBase0 = [-500, -300];
 windowBase = [800, 1000];
 
 nperm = 1e3;
-alphaVal = 0.01;
+alphaVal = 0.05;
+
+fs = 1e3;
 
 % rmfcn = path2func(fullfile(matlabroot, "toolbox/signal/signal/rms.m"));
 
@@ -37,178 +38,283 @@ dataHealthy = cellfun(@(x) x([1, 2]), dataHealthy, "UniformOutput", false);
 
 %% 
 idxOnset = ismember(subjectIDsComa, cellstr(readlines("subjects.txt")));
+subjectIDsComa(idxOnset) = strcat(subjectIDsComa(idxOnset), '*');
 
-%% 
+%% Coma
 temp = cellfun(@(x) x([x.ICI] == 4).chMean, dataComa, "UniformOutput", false);
-chDataComaWithOnsetAll(1).chMean = calchMean(temp);
-chDataComaWithOnsetAll(1).chErr  = calchErr(temp);
-chDataComaWithOnsetAll(1).color  = colors{1};
-chDataComaWithOnsetAll(1).legend = "REG 4-4";
+% Normalize
+temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
+chDataComaAll(1).chMean = calchMean(temp);
+chDataComaAll(1).chErr  = calchErr(temp);
+chDataComaAll(1).color  = colors{1};
+chDataComaAll(1).legend = "REG 4-4";
+gfpComa{1, 1} = calGFP(temp, EEGPos.ignore);
+gfpComa{1, 1} = cat(1, gfpComa{1}{:});
 
 temp = cellfun(@(x) x([x.ICI] == 5).chMean, dataComa, "UniformOutput", false);
-chDataComaWithOnsetAll(2).chMean = calchMean(temp);
-chDataComaWithOnsetAll(2).chErr  = calchErr(temp);
-chDataComaWithOnsetAll(2).color  = colors{2};
-chDataComaWithOnsetAll(2).legend = "REG 4-5";
+% Normalize
+temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
+chDataComaAll(2).chMean = calchMean(temp);
+chDataComaAll(2).chErr  = calchErr(temp);
+chDataComaAll(2).color  = colors{2};
+chDataComaAll(2).legend = "REG 4-5";
+gfpComa{2, 1} = calGFP(temp, EEGPos.ignore);
+gfpComa{2, 1} = cat(1, gfpComa{2}{:});
 
-plotRawWaveMultiEEG(chDataComaWithOnsetAll, window, [], EEGPos_Neuracle64);
+plotRawWaveMultiEEG(chDataComaAll, window, [], EEGPos_Neuracle64);
 addLines2Axes(struct("X", {0; 1000; 2000}));
 
-chMean = arrayfun(@(x) mean(x.chMean(chs2Avg, :), 1), chDataComaWithOnsetAll, "UniformOutput", false);
-t = linspace(window(1), window(2), length(chMean{1}))';
-chDataComaWithOnset = addfield(chDataComaWithOnsetAll, "chMean", chMean);
-chDataComaWithOnset = rmfield(chDataComaWithOnset, "chErr");
-plotRawWaveMulti(chDataComaWithOnset, window);
-title(['Grand-average wave across ', char(area), ' areas | Subjects with impaired consciousness']);
-addLines2Axes(struct("X", {0; 1000; 2000}));
-hold on;
-p = wavePermTest(cell2mat(cellfun(@(x) mean(x(1).chMean(chs2Avg, :), 1), dataComa, "UniformOutput", false)), ...
-                 cell2mat(cellfun(@(x) mean(x(2).chMean(chs2Avg, :), 1), dataComa, "UniformOutput", false)), ...
-                 nperm, "Tail", "both");
-h = fdr_bh(p, alphaVal, 'pdep');
-h = double(h);
-h(h == 0) = nan;
-h(h == 1) = 0;
-h1 = scatter(t, h, 50, "yellow", "filled");
-setLegendOff(h1);
+gfpDataComa = chDataComaAll;
+gfpDataComa = addfield(gfpDataComa, "chMean", cellfun(@(x) mean(x, 1), gfpComa, "UniformOutput", false));
+gfpDataComa = addfield(gfpDataComa, "chErr", cellfun(@(x) SE(x, 1), gfpComa, "UniformOutput", false));
+plotRawWaveMulti(gfpDataComa, window);
 
-%% 
+%% Healthy
 temp = cellfun(@(x) x([x.ICI] == 4).chMean, dataHealthy, "UniformOutput", false);
+% Normalize
+temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
 chDataHealthyAll(1).chMean = calchMean(temp);
 chDataHealthyAll(1).chErr  = calchErr(temp);
 chDataHealthyAll(1).color  = colors{1};
 chDataHealthyAll(1).legend = "REG 4-4";
+gfpHealthy{1, 1} = calGFP(temp, EEGPos.ignore);
+gfpHealthy{1, 1} = cat(1, gfpHealthy{1}{:});
 
 temp = cellfun(@(x) x([x.ICI] == 5).chMean, dataHealthy, "UniformOutput", false);
+% Normalize
+temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
 chDataHealthyAll(2).chMean = calchMean(temp);
 chDataHealthyAll(2).chErr  = calchErr(temp);
 chDataHealthyAll(2).color  = colors{2};
 chDataHealthyAll(2).legend = "REG 4-5";
+gfpHealthy{2, 1} = calGFP(temp, EEGPos.ignore);
+gfpHealthy{2, 1} = cat(1, gfpHealthy{2}{:});
 
 plotRawWaveMultiEEG(chDataHealthyAll, window, [], EEGPos_Neuracle64);
 addLines2Axes(struct("X", {0; 1000; 2000}));
 
-chMean = arrayfun(@(x) mean(x.chMean(chs2Avg, :), 1), chDataHealthyAll, "UniformOutput", false);
-chDataHealthy = addfield(chDataHealthyAll, "chMean", chMean);
-chDataHealthy = rmfield(chDataHealthy, "chErr");
-plotRawWaveMulti(chDataHealthy, window);
-title(['Grand-average wave across ', char(area), ' areas | Healthy subjects | N=', num2str(length(dataHealthy))]);
-addLines2Axes(struct("X", {0; 1000; 2000}));
-hold on;
-p = wavePermTest(cell2mat(cellfun(@(x) mean(x(1).chMean(chs2Avg, :), 1), dataHealthy, "UniformOutput", false)), ...
-                 cell2mat(cellfun(@(x) mean(x(2).chMean(chs2Avg, :), 1), dataHealthy, "UniformOutput", false)), ...
-                 nperm, "Tail", "both");
-h = fdr_bh(p, alphaVal, 'pdep');
-h = double(h);
-h(h == 0) = nan;
-h(h == 1) = 0;
-h1 = scatter(t, h, 50, "yellow", "filled");
-setLegendOff(h1);
+gfpDataHealthy = chDataHealthyAll;
+gfpDataHealthy = addfield(gfpDataHealthy, "chMean", cellfun(@(x) mean(x, 1), gfpHealthy, "UniformOutput", false));
+gfpDataHealthy = addfield(gfpDataHealthy, "chErr", cellfun(@(x) SE(x, 1), gfpHealthy, "UniformOutput", false));
+
+p_gfp = wavePermTest(gfpHealthy{1}, gfpHealthy{2}, nperm, "Type", "ERP", "Tail", "left");
+plotRawWaveMulti(gfpDataHealthy, window);
+xlabel("Time from onset (ms)");
+ylabel("GFP (\muV)");
+scaleAxes("x", [1000, 1600]);
+yRange = scaleAxes("y", "on");
+addLines2Axes(struct("X", {0; 1000 + 4; 2000}));
+t = linspace(window(1), window(2), length(p_gfp))';
+h = bar(t(p_gfp < alphaVal), ones(sum(p_gfp < alphaVal), 1) * yRange(2), 1000 / fs, "EdgeColor", "none", "FaceColor", "y", "FaceAlpha", 0.1);
+setLegendOff(h);
 
 %% RM computation
-tIdxBase0 = t >= windowBase0(1) & t <= windowBase0(2);
-tIdxBase = t >= windowBase(1) & t <= windowBase(2);
-tIdxOnset = t >= windowOnset(1) & t <= windowOnset(2);
-tIdxChange = t >= windowChange(1) & t <= windowChange(2);
+windowChange = [min(t(p_gfp < alphaVal & t(:)' > 1000)), ...
+                max(t(p_gfp < alphaVal & t(:)' > 1000 & t(:)' < 1500))];
+disp(['Time window for change response determined by GFP: from ', num2str(windowChange(1)), ...
+      ' to ', num2str(windowChange(2)), ' ms']);
 
-[~, temp] = maxt(chDataComaWithOnset(2).chMean(tIdxOnset), t(tIdxOnset));
-tIdxOnsetComa = t >= temp + windowBand(1) & t <= temp + windowBand(2);
+% Coma
+temp = cellfun(@(x) x([x.ICI] == 4).chMean, dataComa, "UniformOutput", false);
+temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
+RM_channels_base0Coma {1, 1} = calRM(temp, window, windowBase0 , @(x) rmfcn(x, 2));
+RM_channels_onsetComa {1, 1} = calRM(temp, window, windowOnset , @(x) rmfcn(x, 2));
+RM_channels_baseComa  {1, 1} = calRM(temp, window, windowBase  , @(x) rmfcn(x, 2));
+RM_channels_changeComa{1, 1} = calRM(temp, window, windowChange, @(x) rmfcn(x, 2));
 
-[~, temp] = maxt(chDataHealthy(2).chMean(tIdxOnset), t(tIdxOnset));
-tIdxOnsetHealthy = t >= temp + windowBand(1) & t <= temp + windowBand(2);
-
-[~, temp] = maxt(chDataHealthy(2).chMean(tIdxChange), t(tIdxChange));
-tIdxChangeHealthy = t >= temp + windowBand(1) & t <= temp + windowBand(2);
-
-RM_base0_coma = cellfun(@(x) arrayfun(@(y) rmfcn(mean(y.chMean(chs2Avg, tIdxBase0), 1)), x), dataComa, "UniformOutput", false);
-RM_base0_healthy = cellfun(@(x) arrayfun(@(y) rmfcn(mean(y.chMean(chs2Avg, tIdxBase0), 1)), x), dataHealthy, "UniformOutput", false);
-
-RM_base_coma = cellfun(@(x) arrayfun(@(y) rmfcn(mean(y.chMean(chs2Avg, tIdxBase), 1)), x), dataComa, "UniformOutput", false);
-RM_base_healthy = cellfun(@(x) arrayfun(@(y) rmfcn(mean(y.chMean(chs2Avg, tIdxBase), 1)), x), dataHealthy, "UniformOutput", false);
-
-RM_onset_coma = cellfun(@(x) arrayfun(@(y) rmfcn(mean(y.chMean(chs2Avg, tIdxOnsetComa), 1)), x), dataComa, "UniformOutput", false);
-RM_onset_healthy = cellfun(@(x) arrayfun(@(y) rmfcn(mean(y.chMean(chs2Avg, tIdxOnsetComa), 1)), x), dataHealthy, "UniformOutput", false);
-
-RM_change_coma = cellfun(@(x) arrayfun(@(y) rmfcn(mean(y.chMean(chs2Avg, tIdxChangeHealthy), 1)), x), dataComa, "UniformOutput", false);
-RM_change_healthy = cellfun(@(x) arrayfun(@(y) rmfcn(mean(y.chMean(chs2Avg, tIdxChangeHealthy), 1)), x), dataHealthy, "UniformOutput", false);
-
-RM_delta_onset_coma = cellfun(@(x, y) x - y, RM_onset_coma, RM_base0_coma, "UniformOutput", false);
-RM_delta_onset_healthy = cellfun(@(x, y) x - y, RM_onset_healthy, RM_base0_healthy, "UniformOutput", false);
-
-RM_delta_change_coma = cellfun(@(x, y) x - y, RM_change_coma, RM_base_coma, "UniformOutput", false);
-RM_delta_change_healthy = cellfun(@(x, y) x - y, RM_change_healthy, RM_base_healthy, "UniformOutput", false);
-
-figure;
-mSubplot(1, 2, 1, "shape", "square-min");
-hold on;
-X = cellfun(@(x) x(2), RM_delta_onset_coma(idxOnset));
-Y = cellfun(@(x) x(2), RM_delta_change_coma(idxOnset));
-[~, p_coma_withOnset] = ttest(X, Y);
-scatter(X, Y, 100, "blue", "filled", "DisplayName", "Impaired consciousness (with onset response)");
-X = cellfun(@(x) x(2), RM_delta_onset_coma(~idxOnset));
-Y = cellfun(@(x) x(2), RM_delta_change_coma(~idxOnset));
-[~, p_coma_withoutOnset] = ttest(X, Y);
-scatter(X, Y, 100, "blue", "DisplayName", "Impaired consciousness (without onset response)");
-X = cellfun(@(x) x(2), RM_delta_onset_healthy);
-Y = cellfun(@(x) x(2), RM_delta_change_healthy);
-[~, p_healthy] = ttest(X, Y);
-scatter(X, Y, 100, "red", "filled", "DisplayName", "Healthy");
-syncXY;
-addLines2Axes(gca);
-addLines2Axes(gca, struct("X", 0));
-addLines2Axes(gca, struct("Y", 0));
-xlabel("RM_{onset} of REG 4-5");
-ylabel("RM_{change} of REG 4-5");
-legend;
-
-mSubplot(2, 2, 2);
-temp = {cellfun(@(x) x(2), RM_delta_change_coma(idxOnset));
-        cellfun(@(x) x(2), RM_delta_change_coma(~idxOnset));
-        cellfun(@(x) x(2), RM_delta_change_healthy)};
-mHistogram(temp, "DisplayName", {'Impaired consciousness (with onset response)', ...
-                                 'Impaired consciousness (without onset response)', ...
-                                 'Healthy'}, ...
-                 "FaceColor", {'b', 'none', 'r'}, ...
-                 "EdgeColor", {'b', 'b', 'r'}, ...
-                 "LineWidth", 1);
-[~, p_comaWithOnset_vs_healthy] = ttest2(cat(1, temp{1:2}), temp{3});
-xlabel("RM_{change}");
-ylabel("Counts");
-title(['Two-sample T-test p=', num2str(p_comaWithOnset_vs_healthy)]);
-
-%% 
-resComa = [(t(:) - 1000) / 1000, chDataComaWithOnset(1).chMean(:), chDataComaWithOnset(2).chMean(:)];
-resHealthy = [(t(:) - 1000) / 1000, chDataHealthy(1).chMean(:), chDataHealthy(2).chMean(:)];
-
-res_scatter_X_onset_coma = cellfun(@(x) x(2), RM_delta_onset_coma);
-res_scatter_Y_change_coma = cellfun(@(x) x(2), RM_delta_change_coma);
-res_scatter_X_onset_healthy = cellfun(@(x) x(2), RM_delta_onset_healthy);
-res_scatter_Y_change_healthy = cellfun(@(x) x(2), RM_delta_change_healthy);
-
-%% example
-EEGPos = EEGPos_Neuracle64;
-channelNames = EEGPos.channelNames;
 temp = cellfun(@(x) x([x.ICI] == 5).chMean, dataComa, "UniformOutput", false);
-chMean = temp{subjectIDsComa == "2024040801"};
-channels = 1:size(chMean, 1);
-Fig = plotRawWaveEEG(chMean, [], window, [], EEGPos);
-scaleAxes(Fig, "x", [-300, 2500]);
-yRange = scaleAxes(Fig, "y", "on", "symOpt", "max");
-addLines2Axes(Fig, struct("X", {0; 1000 + 5; 2000}, "color", [255 128 0] / 255, "width", 1.5));
-allAxes = findobj(Fig, "Type", "axes");
-for aIndex = 1:length(allAxes)
-    allAxes(aIndex).TickLength = [0, 0];
-    allAxes(aIndex).Title.FontSize = 10;
-    if any(contains(channelNames(ismember(channels, chs2Avg)), allAxes(aIndex).Title.String))
-        allAxes(aIndex).Box = "on";
-        allAxes(aIndex).XAxis.LineWidth = 2;
-        allAxes(aIndex).YAxis.LineWidth = 2;
-        allAxes(aIndex).XTickLabel = '';
-        allAxes(aIndex).YTickLabel = '';
-    else
-        allAxes(aIndex).XAxis.Visible = "off";
-        allAxes(aIndex).YAxis.Visible = "off";
+temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
+RM_channels_base0Coma {2, 1} = calRM(temp, window, windowBase0 , @(x) rmfcn(x, 2));
+RM_channels_onsetComa {2, 1} = calRM(temp, window, windowOnset , @(x) rmfcn(x, 2));
+RM_channels_baseComa  {2, 1} = calRM(temp, window, windowBase  , @(x) rmfcn(x, 2));
+RM_channels_changeComa{2, 1} = calRM(temp, window, windowChange, @(x) rmfcn(x, 2));
+
+RM_channels_base0Coma  = cellfun(@(x) cat(2, x{:}), RM_channels_base0Coma , "UniformOutput", false);
+RM_channels_onsetComa  = cellfun(@(x) cat(2, x{:}), RM_channels_onsetComa , "UniformOutput", false);
+RM_channels_baseComa   = cellfun(@(x) cat(2, x{:}), RM_channels_baseComa  , "UniformOutput", false);
+RM_channels_changeComa = cellfun(@(x) cat(2, x{:}), RM_channels_changeComa, "UniformOutput", false);
+
+% Healthy
+temp = cellfun(@(x) x([x.ICI] == 4).chMean, dataHealthy, "UniformOutput", false);
+temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
+RM_channels_base0Healthy {1, 1} = calRM(temp, window, windowBase0 , @(x) rmfcn(x, 2));
+RM_channels_onsetHealthy {1, 1} = calRM(temp, window, windowOnset , @(x) rmfcn(x, 2));
+RM_channels_baseHealthy  {1, 1} = calRM(temp, window, windowBase  , @(x) rmfcn(x, 2));
+RM_channels_changeHealthy{1, 1} = calRM(temp, window, windowChange, @(x) rmfcn(x, 2));
+
+temp = cellfun(@(x) x([x.ICI] == 5).chMean, dataHealthy, "UniformOutput", false);
+temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
+RM_channels_base0Healthy {2, 1} = calRM(temp, window, windowBase0 , @(x) rmfcn(x, 2));
+RM_channels_onsetHealthy {2, 1} = calRM(temp, window, windowOnset , @(x) rmfcn(x, 2));
+RM_channels_baseHealthy  {2, 1} = calRM(temp, window, windowBase  , @(x) rmfcn(x, 2));
+RM_channels_changeHealthy{2, 1} = calRM(temp, window, windowChange, @(x) rmfcn(x, 2));
+
+RM_channels_base0Healthy  = cellfun(@(x) cat(2, x{:}), RM_channels_base0Healthy , "UniformOutput", false);
+RM_channels_onsetHealthy  = cellfun(@(x) cat(2, x{:}), RM_channels_onsetHealthy , "UniformOutput", false);
+RM_channels_baseHealthy   = cellfun(@(x) cat(2, x{:}), RM_channels_baseHealthy  , "UniformOutput", false);
+RM_channels_changeHealthy = cellfun(@(x) cat(2, x{:}), RM_channels_changeHealthy, "UniformOutput", false);
+
+% diff
+RM_channels_delta_onsetComa     = cellfun(@(x, y) x - y, RM_channels_onsetComa    , RM_channels_base0Coma   , "UniformOutput", false);
+RM_channels_delta_onsetHealthy  = cellfun(@(x, y) x - y, RM_channels_onsetHealthy , RM_channels_base0Healthy, "UniformOutput", false);
+RM_channels_delta_changeComa    = cellfun(@(x, y) x - y, RM_channels_changeComa   , RM_channels_baseComa    , "UniformOutput", false);
+RM_channels_delta_changeHealthy = cellfun(@(x, y) x - y, RM_channels_changeHealthy, RM_channels_baseHealthy , "UniformOutput", false);
+
+% compute averaged RM across all channels
+idx = ~ismember(EEGPos.channels, EEGPos.ignore);
+RM_baseComa      = cellfun(@(x) mean(x(idx, :), 1), RM_channels_baseComa     , "UniformOutput", false);
+RM_baseHealthy   = cellfun(@(x) mean(x(idx, :), 1), RM_channels_baseHealthy  , "UniformOutput", false);
+RM_base0Coma     = cellfun(@(x) mean(x(idx, :), 1), RM_channels_base0Coma    , "UniformOutput", false);
+RM_base0Healthy  = cellfun(@(x) mean(x(idx, :), 1), RM_channels_base0Healthy , "UniformOutput", false);
+RM_changeComa    = cellfun(@(x) mean(x(idx, :), 1), RM_channels_changeComa   , "UniformOutput", false);
+RM_changeHealthy = cellfun(@(x) mean(x(idx, :), 1), RM_channels_changeHealthy, "UniformOutput", false);
+
+RM_delta_onsetComa     = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_onsetComa    , "UniformOutput", false);
+RM_delta_onsetHealthy  = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_onsetHealthy , "UniformOutput", false);
+RM_delta_changeComa    = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_changeComa   , "UniformOutput", false);
+RM_delta_changeHealthy = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_changeHealthy, "UniformOutput", false);
+
+%% Statistics
+Tail = "left"; % alternative hypothesis: x < y
+statFcn = @(x, y) rowFcn(@(x1, y1) signrank(x1, y1, "tail", Tail), x, y, "ErrorHandler", @mErrorFcn);
+
+% channels
+% onset
+p_RM_channels_onsetComa_vs_base    = cellfun(@(x, y) statFcn(x, y), RM_channels_base0Coma   , RM_channels_onsetComa   , "UniformOutput", false);
+p_RM_channels_onsetHealthy_vs_base = cellfun(@(x, y) statFcn(x, y), RM_channels_base0Healthy, RM_channels_onsetHealthy, "UniformOutput", false);
+% change
+p_RM_channels_changeComa_vs_base    = cellfun(@(x, y) statFcn(x, y), RM_channels_baseComa, RM_channels_changeComa, "UniformOutput", false);
+p_RM_channels_changeComa_vs_control = cellfun(@(x) statFcn(RM_channels_delta_changeComa{1}, x), RM_channels_delta_changeComa, "UniformOutput", false);
+p_RM_channels_changeHealthy_vs_base    = cellfun(@(x, y) statFcn(x, y), RM_channels_baseHealthy, RM_channels_changeHealthy, "UniformOutput", false);
+p_RM_channels_changeHealthy_vs_control = cellfun(@(x) statFcn(RM_channels_delta_changeHealthy{1}, x), RM_channels_delta_changeHealthy, "UniformOutput", false);
+p_RM_channels_delta_change_Coma_vs_Healthy = rowFcn(@(x, y) ranksum(x, y, "Tail", Tail), RM_channels_delta_changeHealthy{end}, RM_channels_delta_changeComa{end}, "ErrorHandler", @mErrorFcn);
+% fdr
+[~, ~, p_RM_channels_onsetComa_vs_base           ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_onsetComa_vs_base      , "UniformOutput", false);
+[~, ~, p_RM_channels_onsetHealthy_vs_base        ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_onsetHealthy_vs_base   , "UniformOutput", false);
+[~, ~, p_RM_channels_changeComa_vs_base          ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeComa_vs_base      , "UniformOutput", false);
+[~, ~, p_RM_channels_changeComa_vs_control       ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeComa_vs_control   , "UniformOutput", false);
+[~, ~, p_RM_channels_changeHealthy_vs_base       ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeHealthy_vs_base   , "UniformOutput", false);
+[~, ~, p_RM_channels_changeHealthy_vs_control    ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeHealthy_vs_control, "UniformOutput", false);
+[~, ~, p_RM_channels_delta_change_Coma_vs_Healthy] = fdr_bh(p_RM_channels_delta_change_Coma_vs_Healthy, 0.05, 'dep');
+
+% averaged
+p_RM_changeComa_vs_base       = cellfun(@(x, y) statFcn(x, y), RM_baseComa, RM_changeComa);
+p_RM_changeComa_vs_control    = cellfun(@(x) statFcn(RM_delta_changeComa{1}, x), RM_delta_changeComa);
+p_RM_changeHealthy_vs_base    = cellfun(@(x, y) statFcn(x, y), RM_baseHealthy, RM_changeHealthy);
+p_RM_changeHealthy_vs_control = cellfun(@(x) statFcn(RM_delta_changeHealthy{1}, x), RM_delta_changeHealthy);
+
+%% Topoplot of RM for all conditions
+% change
+figure;
+clearvars ax
+for index = 1:2
+    ax(index) = mSubplot(2, 5, index, "shape", "square-min");
+    params = topoplotConfig(EEGPos, find(p_RM_channels_changeComa_vs_base{index} < alphaVal), 6, 24);
+    topoplot(mean(RM_channels_delta_changeComa{index}, 2), EEGPos.locs, params{:});
+    if index == 2
+        pos = tightPosition(gca, "IncludeLabels", true);
+        cb = colorbar("Position", [pos(1) + pos(3) - 0.01, pos(2), 0.01, pos(4)]);
+        cb.FontSize = 14;
+        cb.FontWeight = "bold";
     end
 end
-mPrint(Fig, "D:\Education\Lab\Projects\EEG\temp\example_2024080401_REG4-5", "-djpeg", "-r1200");
 
+for index = 1:2
+    ax(2 + index) = mSubplot(2, 5, 5 + index, "shape", "square-min");
+    params = topoplotConfig(EEGPos, find(p_RM_channels_changeHealthy_vs_base{index} < alphaVal), 6, 24);
+    topoplot(mean(RM_channels_delta_changeHealthy{index}, 2), EEGPos.locs, params{:});
+    if index == 2
+        pos = tightPosition(gca, "IncludeLabels", true);
+        cb = colorbar("Position", [pos(1) + pos(3) - 0.01, pos(2), 0.01, pos(4)]);
+        cb.FontSize = 14;
+        cb.FontWeight = "bold";
+    end
+end
+
+scaleAxes(ax, "c", "symOpt", "max", "ignoreInvisible", false);
+
+% onset
+figure;
+clearvars ax
+for index = 1:2
+    ax(index) = mSubplot(2, 5, index, "shape", "square-min");
+    params = topoplotConfig(EEGPos, find(p_RM_channels_onsetComa_vs_base{index} < alphaVal), 6, 24);
+    topoplot(mean(RM_channels_delta_onsetComa{index}, 2), EEGPos.locs, params{:});
+    if index == 2
+        pos = tightPosition(gca, "IncludeLabels", true);
+        cb = colorbar("Position", [pos(1) + pos(3) - 0.01, pos(2), 0.01, pos(4)]);
+        cb.FontSize = 14;
+        cb.FontWeight = "bold";
+    end
+end
+
+for index = 1:2
+    ax(2 + index) = mSubplot(2, 5, 5 + index, "shape", "square-min");
+    params = topoplotConfig(EEGPos, find(p_RM_channels_onsetHealthy_vs_base{index} < alphaVal), 6, 24);
+    topoplot(mean(RM_channels_delta_onsetHealthy{index}, 2), EEGPos.locs, params{:});
+    if index == 2
+        pos = tightPosition(gca, "IncludeLabels", true);
+        cb = colorbar("Position", [pos(1) + pos(3) - 0.01, pos(2), 0.01, pos(4)]);
+        cb.FontSize = 14;
+        cb.FontWeight = "bold";
+    end
+end
+
+scaleAxes(ax, "c", "symOpt", "max", "ignoreInvisible", false);
+
+%% Scatter plot
+figure;
+mSubplot(1, 3, 2, "shape", "square-min");
+X_coma = RM_delta_onsetComa{end}(:);
+Y_coma = RM_delta_changeComa{end}(:);
+
+X_healthy = RM_delta_onsetHealthy{end}(:);
+Y_healthy = RM_delta_changeHealthy{end}(:);
+
+s = scatter(X_coma, Y_coma, 100, "blue", "filled", "DisplayName", "Coma");
+s.DataTipTemplate.DataTipRows(end + 1) = dataTipTextRow("S", string(subjectIDsComa));
+hold on;
+scatter(X_healthy, Y_healthy, 100, "red", "filled", "DisplayName", "Healthy");
+xlabel("RM_{onset} (\muV)");
+ylabel("RM_{change} (\muV)");
+xlim([-1, 1.5]);
+ylim([-0.5, 1.5]);
+
+pos = tightPosition(gca, "IncludeLabels", false);
+axes("Position", [pos(1), pos(2) + pos(4), pos(3), 0.1]);
+mHistogram({X_coma; X_healthy}, "FaceColor", {'b', 'r'});
+xlim([-1, 1.5]);
+set(gca, "Visible", "off");
+
+axes("Position", [pos(1) + pos(3), pos(2), 0.05, pos(4)]);
+mHistogram({Y_coma; Y_healthy}, "FaceColor", {'b', 'r'});
+xlim([-0.5, 1.5]);
+set(gca, "View", [90, 90]);
+set(gca, "XDir", "reverse");
+set(gca, "Visible", "off");
+
+p_onset = ranksum(X_coma, X_healthy, "tail", "both");
+p_change = ranksum(Y_coma, Y_healthy, "tail", "both");
+
+%% Example channel
+run(fullfile(pwd, "config\config_plot.m"));
+
+exampleChannel = "POZ";
+idx = find(upper(EEGPos.channelNames) == exampleChannel);
+
+chData = [chDataComaAll(end); chDataHealthyAll(end)];
+chData = addfield(chData, "chMean", arrayfun(@(x) x.chMean(idx, :), chData, "UniformOutput", false));
+chData = addfield(chData, "chErr", arrayfun(@(x) x.chErr(idx, :), chData, "UniformOutput", false));
+chData = addfield(chData, "color", {'b'; 'r'});
+chData = addfield(chData, "legend", {'Coma'; 'Healthy'});
+plotRawWaveMulti(chData, window - 1000 - 5);
+addLines2Axes(gca, struct("X", {-1000 - 5; 0; 1000 - 5}));
+
+%% Results of figures
+% SFigure 5
+% a
+[t(:) - 1000 - 5, cat(1, chData(end:-1:1).chMean)']; % wave
+
+% b
+[X_healthy(:), Y_healthy(:)];
+[X_coma(:), Y_coma(:)];

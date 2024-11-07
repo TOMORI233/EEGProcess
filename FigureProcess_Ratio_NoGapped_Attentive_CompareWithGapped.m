@@ -11,7 +11,7 @@ SUBJECTs = strrep(DATAPATHs, ROOTPATH, '');
 SUBJECTs = strrep(SUBJECTs, 'active1\chMeanAll.mat', '');
 SUBJECTs = strrep(SUBJECTs, '\', '');
 
-FIGUREPATH = getAbsPath("..\Figures\healthy\population\Ratio No-Gapped Attentive (Independent)");
+FIGUREPATH = getAbsPath("..\Figures\healthy\population\Ratio No-Gapped Attentive (Comparison with Gapped)");
 
 %% Params
 colors = cellfun(@(x) x / 255, {[200 200 200], [0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false);
@@ -28,9 +28,10 @@ window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
 
-% Independent
+% For A1&A2 comparison
 load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
-data = data(subjectIdxA1); % all
+load("..\DATA\MAT DATA\figure\subjectIdx_A2.mat", "subjectIdxA2");
+data = data(subjectIdxA1 & subjectIdxA2);
 
 %% Wave plot
 % REG
@@ -453,30 +454,10 @@ h1 = bar(t(idx), ones(sum(idx), 1) * yRange(1), 1000 / fs, "FaceColor", c, "Face
 h2 = bar(t(idx), ones(sum(idx), 1) * yRange(2), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
 setLegendOff([h1, h2]);
 
-%% save
-params = [fieldnames(getVarsFromWorkspace('RM_\W*')); ...
-          fieldnames(getVarsFromWorkspace('p_\W*')); ...
-          fieldnames(getVarsFromWorkspace('window\W*'))];
-save(['..\DATA\MAT DATA\figure\Res A1 (', char(area), ').mat'], ...
-     "fs", ...
-     "ICIsREG", ...
-     "ICIsIRREG", ...
-     "chDataREG", ...
-     "chDataIRREG", ...
-     params{:});
-
 %% Results of figures
-% Figure 4
-% f
-[t(:), cat(1, chData(2).chMean, chData(4).chMean)']; % wave
-[t(p12 < alphaVal), 2 * ones(sum(p12 < alphaVal), 1)]; % bar
+% Figure 5
+% d
+[t(:), cat(1, chDataREG.chMean)'];
 
-% g
-[t(:), cat(1, chData(2).chMean, chData(6).chMean)']; % wave
-[t(p13 < alphaVal), 2 * ones(sum(p13 < alphaVal), 1)]; % bar
-
-% h
-[RM_delta_changeIRREG{end}(:), RM_delta_changeREG{end}(:)];
-
-% i
-[RM_delta_changePT{end}(:), RM_delta_changeREG{end}(:)];
+% f,g
+[cellfun(@mean, RM_delta_changeREG), cellfun(@SE, RM_delta_changeREG)];

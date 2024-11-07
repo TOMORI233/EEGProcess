@@ -1,5 +1,5 @@
-function varargout = plotScatterEEG(xdata, ydata, EEGPos, statFcn)
-narginchk(3, 4);
+function varargout = plotScatterEEG(xdata, ydata, EEGPos, statFcn, fdrOpt)
+narginchk(3, 5);
 
 channels = EEGPos.channels;
 chsIgnore = EEGPos.ignore;
@@ -10,9 +10,12 @@ locs = EEGPos.locs;
 if size(xdata, 1) ~= numel(channels) | ...
    size(ydata, 1) ~= numel(channels) | ...
    size(xdata, 2) ~= size(ydata, 2)
-    
     error("Input size not valid");
 end
+
+% remove NAN
+xdata(isnan(xdata)) = 0;
+ydata(isnan(ydata)) = 0;
 
 % statistics: two-sided paired test
 if nargin < 4
@@ -24,11 +27,20 @@ if nargin < 4
         % non-parametric
         statFcn = @(x, y) signrank(x, y);
     end
+
 end
 
 if ~isempty(statFcn)
     p = rowFcn(@(x, y) statFcn(x, y), xdata, ydata, "ErrorHandler", @mErrorFcn);
-    [~, ~, p] = fdr_bh(p, 0.05, 'dep');
+
+    if nargin < 5
+        fdrOpt = true;
+    end
+
+    if fdrOpt
+        [~, ~, p] = fdr_bh(p, 0.05, 'dep');
+    end
+
 else
     p = ones(numel(channels), 1);
 end

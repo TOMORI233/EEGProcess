@@ -10,7 +10,9 @@ if exist("interval", "var")
 end
 
 windowBase0  = [-500, -300]; % ms, onset baseline
-windowOnset  = [50, 250]; % ms
+windowOnset  = [0, 250]; % ms
+
+windowBand = [-25, 25]; % ms
 
 %% RM computation
 % rmfcn = @mean;

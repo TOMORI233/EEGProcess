@@ -62,8 +62,7 @@ else
     channels = 1:length(locs);
 
     % flip
-    X = zeros(length(channels), 1);
-    Y = zeros(length(channels), 1);
+    [X, Y] = deal(zeros(length(channels), 1));
     idx = ~ismember(channels, chsIgnore);
     X(idx) = mapminmax(YTemp(idx), 0.2, 0.8);
     Y(idx) = mapminmax(XTemp(idx), 0.05, 0.92);

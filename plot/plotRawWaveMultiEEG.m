@@ -65,13 +65,11 @@ if isempty(locs)
 
     end
 
-    scaleAxes(Fig, "y", "on");
-
 else
     [~, ~, Th, Rd, ~] = readlocs(locs);
     Th = pi / 180 * Th; % convert degrees to radians
     [XTemp, YTemp] = pol2cart(Th, Rd); % transform electrode locations from polar to cartesian coordinates
-    channels = 1:length(locs);
+    channels = EEGPos.channels;
 
     % flip
     X = zeros(length(channels), 1);
@@ -113,13 +111,11 @@ else
             title(['CH ', num2str(chNum), titleStr]);
         end
 
-        yticks([]);
-        yticklabels('');
-        xticklabels('');
     end
 
-    scaleAxes(Fig, "y", "on");
 end
+
+scaleAxes(Fig, "y", "on");
 
 return;
 end
