@@ -43,11 +43,11 @@ fs = load(MATPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, MATPATHs, "UniformOutput", false);
 
 %% 
-temp = cellfun(@(x) mean(cat(3, x([x.type] == "REG").chMean), 3), data, "UniformOutput", false);
+temp = cellfun(@(x) mean(cat(3, x([x.type] == "PT").chMean), 3), data, "UniformOutput", false);
 RM_base0 = cellfun(@(x) rms(x, 2), cutData(temp, window, windowBase0), "UniformOutput", false);
 RM_onset = cellfun(@(x) rms(x, 2), cutData(temp, window, windowOnset), "UniformOutput", false);
 
-temp = cellfun(@(x) mean(cat(3, x([x.type] == "REG" & [x.ICI] == 4.06).chMean), 3), data, "UniformOutput", false);
+temp = cellfun(@(x) mean(cat(3, x([x.type] == "PT" & [x.freq] ~= 250).chMean), 3), data, "UniformOutput", false);
 RM_base   = cellfun(@(x) rms(x, 2), cutData(temp, window, windowBase), "UniformOutput", false);
 RM_change = cellfun(@(x) rms(x, 2), cutData(temp, window, windowChange), "UniformOutput", false);
 

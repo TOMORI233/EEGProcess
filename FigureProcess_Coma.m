@@ -262,7 +262,7 @@ end
 
 scaleAxes(ax, "c", "symOpt", "max", "ignoreInvisible", false);
 
-%% Scatter plot
+%% Scatter plot of average RM across all channels
 figure;
 mSubplot(1, 3, 2, "shape", "square-min");
 X_coma = RM_delta_onsetComa{end}(:);
@@ -299,12 +299,12 @@ p_change = ranksum(Y_coma, Y_healthy, "tail", "both");
 %% Example channel
 run(fullfile(pwd, "config\config_plot.m"));
 
-exampleChannel = "POZ";
-idx = find(upper(EEGPos.channelNames) == exampleChannel);
+exampleChannel = "O1";
+chIdx = find(upper(EEGPos.channelNames) == exampleChannel);
 
 chData = [chDataComaAll(end); chDataHealthyAll(end)];
-chData = addfield(chData, "chMean", arrayfun(@(x) x.chMean(idx, :), chData, "UniformOutput", false));
-chData = addfield(chData, "chErr", arrayfun(@(x) x.chErr(idx, :), chData, "UniformOutput", false));
+chData = addfield(chData, "chMean", arrayfun(@(x) x.chMean(chIdx, :), chData, "UniformOutput", false));
+chData = addfield(chData, "chErr", arrayfun(@(x) x.chErr(chIdx, :), chData, "UniformOutput", false));
 chData = addfield(chData, "color", {'b'; 'r'});
 chData = addfield(chData, "legend", {'Coma'; 'Healthy'});
 plotRawWaveMulti(chData, window - 1000 - 5);

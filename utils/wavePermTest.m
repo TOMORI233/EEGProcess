@@ -107,6 +107,7 @@ if iscell(data1) && iscell(data2)
         if ~isempty(EEGPos)
             labels = EEGPos.channelNames;
             cfg.neighbours = EEGPos.neighbours;
+            % cfg.minnbchan = 1; % set 1 to enable ChannelxSample clustering
         else
             labels = arrayfun(@num2str, channels(:), "UniformOutput", false);
         end
@@ -172,6 +173,10 @@ switch Tail
     case "right"
         p = pRight;
 end
+
+% cluster correction
+[clus, ~] = spm_bwlabel(double(p < 0.05), 6);
+p = p(clus ~= 0);
 
 return;
 end

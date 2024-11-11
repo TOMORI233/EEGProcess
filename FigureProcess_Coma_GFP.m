@@ -16,7 +16,7 @@ run(fullfile(pwd, "config\config_Neuracle64.m"));
 fs = 1e3;
 
 windowOnset = [0, 250];
-windowBase0 = [-500, -300];
+windowBase0 = [-200, 0];
 windowBase = [800, 1000];
 
 nperm = 1e3;
@@ -309,7 +309,7 @@ for aIndex = 1:length(allAxes)
     allAxes(aIndex).XAxis.Visible = "off";
     allAxes(aIndex).YAxis.Visible = "off";
 end
-print(gcf, fullfile('D:\Education\Lab\Projects\EEG\Figures\coma\example.jpg'), "-djpeg", "-r900");
+mPrint(gcf, fullfile('D:\Education\Lab\Projects\EEG\Figures\coma\example.jpg'), "-djpeg", "-r900");
 
 
 t1 = (t' - 1000) / 1000;
@@ -356,6 +356,8 @@ t = linspace(window(1), window(2), length(p))' - 1000 - 5;
 % b
 [RM_delta_onset_healthy{end}, RM_delta_change_healthy{end}];
 [RM_delta_onset_coma{end}, RM_delta_change_coma{end}];
+[RM_delta_onset_coma{end}(11), RM_delta_change_coma{end}(11); ... % coma
+ RM_delta_onset_coma{end}(22), RM_delta_change_coma{end}(22)];    % recovered
 
 % SFigure 6
 % a

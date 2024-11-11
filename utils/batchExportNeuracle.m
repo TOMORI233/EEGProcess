@@ -127,6 +127,8 @@ for index = 1:length(DATAPATHs)
     disp(['Current folder: ', DATAPATHs{index}]);
     [trialsEEG, trialAll, fs, comp] = EEGPreprocessNeuracle(DATAPATHs{index}, opts);
 
+    parseStruct(opts, "window", "badChs");
+
     % Save
     save(fullfile(SAVEPATHs{index}, "ICA res.mat"), "comp");
     save(fullfile(SAVEPATHs{index}, "data.mat"), "trialAll", "trialsEEG", "window", "badChs", "fs");

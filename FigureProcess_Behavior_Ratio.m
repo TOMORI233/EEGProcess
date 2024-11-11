@@ -15,7 +15,7 @@ thL = 0.3;
 thH = 0.6;
 thBeh = 0.6;
 
-run("config\plotConfig.m");
+run(fullfile(pwd, "config\config_plot.m"));
 
 %% Load - A1
 DATAPATHs = dir(fullfile(ROOTPATH, '**\active1\behavior.mat'));

@@ -11,8 +11,14 @@ data2_raw = load("..\DATA\MAT DATA - coma\pre\2024053101\151\data.mat"); % ding
 % data2 = load("..\DATA\MAT DATA - coma\temp\2024053102\151\chMean.mat"); % liu
 
 %% 
+windowBase0 = [-200, 0];
+windowOnset = [0, 250];
+windowBase = [800, 1000];
+windowChange = [1000, 1300];
+
 nperm = 1e3;
 alphaVal = 0.01;
+fs = 1e3;
 
 %% 
 chData(1).chMean = data1.chData(3).chMean;
@@ -39,34 +45,27 @@ for aIndex = 1:length(allAxes)
 end
 addScaleEEG(Fig1, EEGPos_Neuracle64);
 addScaleEEG(Fig2, EEGPos_Neuracle64);
-print(Fig1, '..\temp\example_coma.jpg', '-djpeg', '-r900');
-print(Fig2, '..\temp\example_recover.jpg', '-djpeg', '-r900');
+mPrint(Fig1, '..\temp\example_coma.jpg', '-djpeg', '-r900');
+mPrint(Fig2, '..\temp\example_recover.jpg', '-djpeg', '-r900');
 
 chData(2).color = "r";
 plotRawWaveMulti(chData, data1.window);
 addLines2Axes(struct("X", {0; 1000; 2000}, "color", [255 128 0] / 255, "width", 2));
 
-%% 
 chs2Ignore = 60:64;
 GFP = calGFP({chData.chMean}', chs2Ignore);
-trialsEEG1 = cutData(data1_raw.trialsEEG([data1_raw.trialAll.ICI2] == 5), data1_raw.window, data1.window);
-trialsEEG2 = cutData(data2_raw.trialsEEG([data2_raw.trialAll.ICI2] == 5), data2_raw.window, data2.window);
-p = wavePermTest(trialsEEG1, trialsEEG2, nperm, "Tail", "both", "Type", "GFP", "chs2Ignore", chs2Ignore);
-h = fdr_bh(p, alphaVal, 'dep');
-h = double(h);
-h(h == 0) = nan;
-h(h == 1) = 0;
-figure("WindowState", "maximized");
-mSubplot(1, 1, 1);
 t = linspace(data1.window(1), data1.window(2), length(GFP{1}));
-plot(t, GFP{1}, "Color", "k", "LineWidth", 2, "DisplayName", "Before");
-hold on;
-plot(t, GFP{2}, "Color", "r", "LineWidth", 2, "DisplayName", "After");
-scatter(t, h, 50, "yellow", "filled");
-legend;
-addLines2Axes(struct("X", {0; 1000; 2000}, "color", [255 128 0] / 255, "width", 2));
 
-%% 
+%% RM change
+RM_base = cellfun(@(x) mean(x(t >= windowBase(1) & t <= windowBase(2))), GFP);
+RM_change = cellfun(@(x) max(x(t >= windowChange(1) & t <= windowChange(2))), GFP);
+RM_delta_change = RM_change - RM_base;
+
+RM_base0 = cellfun(@(x) mean(x(t >= windowBase0(1) & t <= windowBase0(2))), GFP);
+RM_onset = cellfun(@(x) max(x(t >= windowOnset(1) & t <= windowOnset(2))), GFP);
+RM_delta_onset = RM_onset - RM_base0;
+
+%% Example channel
 figure("WindowState", "maximized");
 mSubplot(1, 1, 1);
 plot(t, chData(1).chMean(58, :)', "Color", "k", "LineWidth", 2, "DisplayName", "Before");
@@ -75,3 +74,25 @@ plot(t, chData(2).chMean(58, :)', "Color", "r", "LineWidth", 2, "DisplayName", "
 legend;
 title("O1");
 addLines2Axes(struct("X", {0; 1000; 2000}, "color", [255 128 0] / 255, "width", 2));
+
+%% 
+% trialsEEG1 = cutData(data1_raw.trialsEEG([data1_raw.trialAll.ICI2] == 5), data1_raw.window, data1.window);
+% trialsEEG2 = cutData(data2_raw.trialsEEG([data2_raw.trialAll.ICI2] == 5), data2_raw.window, data2.window);
+% p = wavePermTest(trialsEEG1, trialsEEG2, nperm, "Tail", "both", "Type", "GFP", "chs2Ignore", chs2Ignore);
+% h = fdr_bh(p, alphaVal, 'dep');
+% h = double(h);
+% h(h == 0) = nan;
+% h(h == 1) = 0;
+figure("WindowState", "maximized");
+mSubplot(1, 1, 1);
+plot(t, GFP{1}, "Color", "k", "LineWidth", 2, "DisplayName", "Before");
+hold on;
+plot(t, GFP{2}, "Color", "r", "LineWidth", 2, "DisplayName", "After");
+% scatter(t, h, 50, "yellow", "filled");
+legend;
+addLines2Axes(struct("X", {0; 1000; 2000}, "color", [255 128 0] / 255, "width", 2));
+
+%% Figure results
+[t(:) - 1000 - 5, chData(1).chMean(58, :)', chData(2).chMean(58, :)'];
+
+[t(:) - 1000 - 5, GFP{1}(:), GFP{2}(:)];
