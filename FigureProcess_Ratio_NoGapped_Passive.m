@@ -363,7 +363,7 @@ addScaleEEG(gcf, EEGPos);
 %% Example channel
 run(fullfile(pwd, "config\config_plot.m"));
 
-exampleChannel = "POZ";
+exampleChannel = "PO5";
 idx = find(EEGPos.channelNames == exampleChannel);
 
 temp10 = cellfun(@(x) x([x.ICI] == ICIsREG  (1)   & [x.type] == "REG"  ).chMean(idx, :), data, "UniformOutput", false);

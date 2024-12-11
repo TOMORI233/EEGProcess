@@ -30,6 +30,7 @@ if numel(temp) > 1
     error("More than 1 MAT data found in your directory.");
 elseif isempty(temp)
     warning("No MAT data found in your directory.");
+    disp('Proceed without MAT data.');
 else
     load(fullfile(temp.folder, temp.name), "rules", "trialsData");
     if ~exist("rules", "var") || ~exist("trialsData", "var")
@@ -50,6 +51,7 @@ if exist("rules", "var")
     exIdx = isnan(codes) | ~ismember(codes, rules.code) | latency > size(EEG.data, 2) - fix(window(2) / 1000 * fs);
     latency(exIdx) = [];
 end
+latency = latency(find(arrayfun(@(x) str2double(x.type), EEG.event) == 1, 1):end);
 
 % filter
 EEG.data = ECOGFilter(EEG.data, fhp, flp, fs, "Notch", "on");
@@ -128,7 +130,7 @@ else
     trialAll = struct("trialNum", num2cell((1:length(trialsEEG))'));
 end
 
-% convert latency to tim, unit: sec
+% convert latency to time, unit: sec
 latency = latency / fs;
 trialAll = addfield(trialAll, "latency", latency);
 

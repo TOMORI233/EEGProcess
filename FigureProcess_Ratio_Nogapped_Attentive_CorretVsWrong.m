@@ -179,17 +179,17 @@ print(gcf, fullfile(FIGUREPATH, 'topo (C vs W).jpg'), "-djpeg", "-r900");
 %% Example channel
 run(fullfile(pwd, "config\config_plot.m"));
 
-exampleChannel = "PO5";
-idx = find(upper(EEGPos.channelNames) == exampleChannel);
+exampleChannel = "PO3";
+chIdx = find(upper(EEGPos.channelNames) == exampleChannel);
 
 % CBPT
-p12 = wavePermTest(cellfun(@(x) x(idx, :), dataC1(subjectIdx0 & subjectIdx1), "UniformOutput", false), ...
-                   cellfun(@(x) x(idx, :), dataW1(subjectIdx0 & subjectIdx1), "UniformOutput", false), ...
+p12 = wavePermTest(cellfun(@(x) x(chIdx, :), dataC1(subjectIdx0 & subjectIdx1), "UniformOutput", false), ...
+                   cellfun(@(x) x(chIdx, :), dataW1(subjectIdx0 & subjectIdx1), "UniformOutput", false), ...
                    nperm, "Type", "ERP", "Tail", "both");
 
 tempData = chData;
-tempData = addfield(tempData, "chMean", arrayfun(@(x) x.chMean(idx, :), chData, "UniformOutput", false)');
-tempData = addfield(tempData, "chErr", arrayfun(@(x) x.chErr(idx, :), chData, "UniformOutput", false)');
+tempData = addfield(tempData, "chMean", arrayfun(@(x) x.chMean(chIdx, :), chData, "UniformOutput", false)');
+tempData = addfield(tempData, "chErr", arrayfun(@(x) x.chErr(chIdx, :), chData, "UniformOutput", false)');
 plotRawWaveMulti(tempData, window - 1000 - 4);
 xlabel("Time from change (ms)");
 ylabel("Normalized response (\muV)");

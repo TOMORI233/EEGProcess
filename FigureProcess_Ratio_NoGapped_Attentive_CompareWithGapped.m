@@ -23,6 +23,14 @@ interval = 0;
 run(fullfile(pwd, "config\config_plot.m"));
 run(fullfile(pwd, "config\config_Neuroscan64.m"));
 
+% P1
+% windowChangeCT = 119 + [-25, 25] + 1000 + interval; % peak
+% rmfcn = @mean;
+
+% N2
+windowChangeCT = 250 + [-25, 25] + 1000 + interval; % trough
+rmfcn = @mean;
+
 %% Load
 window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
@@ -60,6 +68,11 @@ plotRawWaveMultiEEG(chDataREG_All, window, [], EEGPos_Neuroscan64);
 scaleAxes("x", [1000 + ICIsREG(1), 1500]);
 scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", {0; 1000 + ICIsREG(1); 2000}));
+
+plotRawWaveMulti(gfpDataREG, window);
+scaleAxes("x", [1000, 1600] + interval);
+scaleAxes("y", "on");
+addLines2Axes(struct("X", {0; 1000; 1000 + interval; 2000 + interval}));
 
 % IRREG
 ICIsIRREG = unique([data{1}([data{1}.type] == "IRREG").ICI])';
@@ -112,40 +125,40 @@ scaleAxes("y", "on", "symOpt", "max");
 addLines2Axes(struct("X", {0; 1000; 2000}));
 
 %% Determine window for change response by GFP
-p_gfp_REG4o06_vs_REG4 = wavePermTest(gfpREG{1}, gfpREG{end}, "Tail", "left");
-t = linspace(window(1), window(2), length(p_gfp_REG4o06_vs_REG4))';
-plotRawWaveMulti(gfpDataREG([1, end]), window);
-xlabel("Time from onset (ms)");
-ylabel("GFP (\muV)");
-scaleAxes("x", [1000, 1600]);
-scaleAxes("y", "on");
-addLines2Axes(struct("X", {0; 1000 + ICIsREG(1); 2000}));
-yRange = get(gca, "YLim");
-h = bar(t(p_gfp_REG4o06_vs_REG4 < alphaVal), ones(sum(p_gfp_REG4o06_vs_REG4 < alphaVal), 1) * yRange(2), 1000 / fs, "EdgeColor", "none", "FaceColor", "y", "FaceAlpha", 0.1);
-setLegendOff(h);
-
-p_gfp_PT250_vs_PT246 = wavePermTest(gfpPT{1}, gfpPT{end}, "Tail", "left");
-plotRawWaveMulti(gfpDataPT, window);
-xlabel("Time from onset (ms)");
-ylabel("GFP (\muV)");
-scaleAxes("x", [1000, 1600]);
-scaleAxes("y", "on");
-addLines2Axes(struct("X", {0; 1000; 2000}));
-yRange = get(gca, "YLim");
-h = bar(t(p_gfp_PT250_vs_PT246 < alphaVal), ones(sum(p_gfp_PT250_vs_PT246 < alphaVal), 1) * yRange(2), 1000 / fs, "EdgeColor", "none", "FaceColor", "y", "FaceAlpha", 0.1);
-setLegendOff(h);
+% p_gfp_REG4o06_vs_REG4 = wavePermTest(gfpREG{1}, gfpREG{end}, "Tail", "left");
+% t = linspace(window(1), window(2), length(p_gfp_REG4o06_vs_REG4))';
+% plotRawWaveMulti(gfpDataREG([1, end]), window);
+% xlabel("Time from onset (ms)");
+% ylabel("GFP (\muV)");
+% scaleAxes("x", [1000, 1600]);
+% scaleAxes("y", "on");
+% addLines2Axes(struct("X", {0; 1000 + ICIsREG(1); 2000}));
+% yRange = get(gca, "YLim");
+% h = bar(t(p_gfp_REG4o06_vs_REG4 < alphaVal), ones(sum(p_gfp_REG4o06_vs_REG4 < alphaVal), 1) * yRange(2), 1000 / fs, "EdgeColor", "none", "FaceColor", "y", "FaceAlpha", 0.1);
+% setLegendOff(h);
+% 
+% p_gfp_PT250_vs_PT246 = wavePermTest(gfpPT{1}, gfpPT{end}, "Tail", "left");
+% plotRawWaveMulti(gfpDataPT, window);
+% xlabel("Time from onset (ms)");
+% ylabel("GFP (\muV)");
+% scaleAxes("x", [1000, 1600]);
+% scaleAxes("y", "on");
+% addLines2Axes(struct("X", {0; 1000; 2000}));
+% yRange = get(gca, "YLim");
+% h = bar(t(p_gfp_PT250_vs_PT246 < alphaVal), ones(sum(p_gfp_PT250_vs_PT246 < alphaVal), 1) * yRange(2), 1000 / fs, "EdgeColor", "none", "FaceColor", "y", "FaceAlpha", 0.1);
+% setLegendOff(h);
 
 %% RM computation
-clc;
-try
-    load("windowChangeAttentive.mat", "windowChangeCT");
-catch ME
-    windowChangeCT = [min(t(p_gfp_REG4o06_vs_REG4 < alphaVal & t(:)' > 1000)), ...
-                      max(t(p_gfp_REG4o06_vs_REG4 < alphaVal & t(:)' > 1000 & t(:)' < 1500))];
-    save("windowChangeAttentive.mat", "windowChangeCT");
-end
-disp(['Time window for change response determined by GFP: from ', num2str(windowChangeCT(1)), ...
-      ' to ', num2str(windowChangeCT(2)), ' ms']);
+% clc;
+% try
+%     load("windowChangeAttentive.mat", "windowChangeCT");
+% catch ME
+%     windowChangeCT = [min(t(p_gfp_REG4o06_vs_REG4 < alphaVal & t(:)' > 1000)), ...
+%                       max(t(p_gfp_REG4o06_vs_REG4 < alphaVal & t(:)' > 1000 & t(:)' < 1500))];
+%     save("windowChangeAttentive.mat", "windowChangeCT");
+% end
+% disp(['Time window for change response determined by GFP: from ', num2str(windowChangeCT(1)), ...
+%       ' to ', num2str(windowChangeCT(2)), ' ms']);
 
 % REG
 [RM_channels_baseREG, ...

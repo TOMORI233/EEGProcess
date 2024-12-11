@@ -123,17 +123,9 @@ if iscell(data1) && iscell(data2)
         data2 = cellfun(@(x) x(~idx, :), data2, "UniformOutput", false);
         data2 = cellfun(@(x) insertRows(x, find(idx)), data2, "UniformOutput", false);
 
-        data(1).time = t(:)';
-        data(1).label = labels;
-        data(1).trial = cell2mat(cellfun(@(x) permute(x, [3, 1, 2]), data1, "UniformOutput", false));
-        data(1).trialinfo = ones(length(data1), 1);
-        data(2).time = t(:)';
-        data(2).label = labels;
-        data(2).trial = cell2mat(cellfun(@(x) permute(x, [3, 1, 2]), data2, "UniformOutput", false));
-        data(2).trialinfo = 2 * ones(length(data2), 1);
-
-        stat = CBPT(data, cfg);
+        stat = CBPT(cfg, data1, data2);
         p = stat.prob;
+        stat.labels = labels;
         return;
 
     elseif strcmpi(Type, "GFP")

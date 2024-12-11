@@ -27,16 +27,16 @@ run(fullfile(pwd, "config\config_Neuroscan64.m"));
 % windowChange = windowOnset + 1000 + interval; % overall
 
 % P1
-% windowChange = 100 + [-25, 25] +  + 1000 + interval; % peak
+% windowChange = 95 + [-25, 25] + 1000 + interval; % peak
 % rmfcn = @mean;
 
 % N2
-% windowChange = 160 + [-25, 25] +  + 1000 + interval; % trough
-% rmfcn = @mean;
+windowChange = 158 + [-25, 25] + 1000 + interval; % trough
+rmfcn = @mean;
 
 % N2a(P3?) component for MMN
-windowChange = 360 + 1000 + interval + [-25, 25];
-rmfcn = @mean;
+% windowChange = 360 + 1000 + interval + [-25, 25];
+% rmfcn = @mean;
 
 %% Load
 window = load(DATAPATHs{1}).window;
@@ -74,6 +74,11 @@ end
 plotRawWaveMultiEEG(chDataREG_All, window, [], EEGPos_Neuroscan64);
 scaleAxes("x", [1000, 1600] + interval);
 scaleAxes("y", "on", "symOpt", "max");
+addLines2Axes(struct("X", {0; 1000; 1000 + interval; 2000 + interval}));
+
+plotRawWaveMulti(gfpDataREG, window);
+scaleAxes("x", [1000, 1600] + interval);
+scaleAxes("y", "on");
 addLines2Axes(struct("X", {0; 1000; 1000 + interval; 2000 + interval}));
 
 % IRREG

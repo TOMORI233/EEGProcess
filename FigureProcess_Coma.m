@@ -318,3 +318,5 @@ addLines2Axes(gca, struct("X", {-1000 - 5; 0; 1000 - 5}));
 % b
 [X_healthy(:), Y_healthy(:)];
 [X_coma(:), Y_coma(:)];
+[RM_delta_onsetComa{end}(11), RM_delta_changeComa{end}(11); ... % coma
+ RM_delta_onsetComa{end}(22), RM_delta_changeComa{end}(22)];    % recovered
