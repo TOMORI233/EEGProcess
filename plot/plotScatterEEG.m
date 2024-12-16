@@ -22,9 +22,11 @@ if nargin < 4
     % test normality
     if all(rowFcn(@(x) swtest(x, 0.05), xdata) & rowFcn(@(x) swtest(x, 0.05), ydata))
         % parametric
+        disp('Use t-test for statistical analysis');
         statFcn = @(x, y) obtainArgoutN(@ttest, 2, x, y);
     else
         % non-parametric
+        disp('Use signed rank test for statistical analysis');
         statFcn = @(x, y) signrank(x, y);
     end
 

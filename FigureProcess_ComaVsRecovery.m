@@ -43,10 +43,10 @@ for aIndex = 1:length(allAxes)
     allAxes(aIndex).XAxis.Visible = "off";
     allAxes(aIndex).YAxis.Visible = "off";
 end
-addScaleEEG(Fig1, EEGPos_Neuracle64);
-addScaleEEG(Fig2, EEGPos_Neuracle64);
-mPrint(Fig1, '..\temp\example_coma.jpg', '-djpeg', '-r900');
-mPrint(Fig2, '..\temp\example_recover.jpg', '-djpeg', '-r900');
+addScaleEEG(Fig1, EEGPos_Neuracle64, ' ms', ' \muV');
+addScaleEEG(Fig2, EEGPos_Neuracle64, ' ms', ' \muV');
+print(Fig1, '..\temp\example_coma.jpg', '-djpeg', '-r900');
+print(Fig2, '..\temp\example_recover.jpg', '-djpeg', '-r900');
 
 chData(2).color = "r";
 plotRawWaveMulti(chData, data1.window);

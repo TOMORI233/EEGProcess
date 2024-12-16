@@ -301,7 +301,7 @@ addLines2Axes(struct("Y", 0, ...
                      "style", "-", ...
                      "width", 0.5), ...
                      "Layer", "bottom");
-addScaleEEG(gcf, EEGPos_Neuracle64);
+addScaleEEG(gcf, EEGPos_Neuracle64, ' ms', ' \muV');
 allAxes = findobj(gcf, "Type", "axes");
 for aIndex = 1:length(allAxes)
     allAxes(aIndex).TickLength = [0, 0];
@@ -309,8 +309,7 @@ for aIndex = 1:length(allAxes)
     allAxes(aIndex).XAxis.Visible = "off";
     allAxes(aIndex).YAxis.Visible = "off";
 end
-mPrint(gcf, fullfile('D:\Education\Lab\Projects\EEG\Figures\coma\example.jpg'), "-djpeg", "-r900");
-
+print(gcf, fullfile('D:\Education\Lab\Projects\EEG\Figures\coma\example.jpg'), "-djpeg", "-r900");
 
 t1 = (t' - 1000) / 1000;
 res_example_channel_REG4_4 = dataComa{idx}(1).chMean(find(upper(EEGPos.channelNames) == "PO5"), :)';

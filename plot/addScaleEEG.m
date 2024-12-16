@@ -1,4 +1,14 @@
-function addScaleEEG(Fig, EEGPos)
+function addScaleEEG(Fig, EEGPos, unitX, unitY)
+narginchk(2, 4);
+
+if nargin < 3
+    unitX = [];
+end
+
+if nargin < 4
+    unitY = [];
+end
+
 % load
 locs = EEGPos.locs;
 channels = EEGPos.channels;
@@ -35,8 +45,20 @@ ylim(ax, yRange);
 xticks(ax, tempX);
 yticks(ax, tempY);
 ax.Visible = "off";
-text(ax, diff(tempX) / 2, 0, num2str(tempX(2)), "HorizontalAlignment", "center", "VerticalAlignment", "top", "FontSize", 12, "FontWeight", "bold");
-text(ax, 0, diff(tempY) / 2, num2str(tempY(2)), "HorizontalAlignment", "center", "VerticalAlignment", "bottom", "FontSize", 12, "FontWeight", "bold", "Rotation", 90);
+
+strX = num2str(tempX(2));
+strY = num2str(tempY(2));
+
+if ~isempty(unitX)
+    strX = [strX, char(unitX)];
+end
+
+if ~isempty(unitY)
+    strY = [strY, char(unitY)];
+end
+
+text(ax, diff(tempX), 0, strX, "HorizontalAlignment", "left", "VerticalAlignment", "middle", "FontSize", 14, "FontWeight", "bold");
+text(ax, 0, diff(tempY), strY, "HorizontalAlignment", "center", "VerticalAlignment", "bottom", "FontSize", 14, "FontWeight", "bold");
 
 return;
 end

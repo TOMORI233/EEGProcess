@@ -55,17 +55,17 @@ if isa(data1, "double") && isa(data2, "double")
         error("data1 and data2 should be of the same sample number");
     end
 
-    [nSubjects, nSample] = size(data1);
+    nSample = size(data1, 2);
+    A = size(data1, 1);
+    B = size(data2, 1);
 
     if strcmpi(Type, "ERP")
         % use CBPT
-        data1 = mat2cell(data1, ones(nSubjects, 1));
-        data2 = mat2cell(data2, ones(nSubjects, 1));
+        data1 = mat2cell(data1, ones(A, 1));
+        data2 = mat2cell(data2, ones(B, 1));
         Type = "ERP";
     elseif strcmpi(Type, "GFP")
         temp = [data1; data2];
-        A = length(data1);
-        B = length(data2);
         [resPerm1, resPerm2] = deal(zeros(nperm, nSample));
 
         dispstat('', 'init');

@@ -151,6 +151,7 @@ topoplot(mean(RM_delta_changeC - RM_delta_changeW, 2), EEGPos.locs, params{:});
 cb = colorbar;
 cb.FontSize = 14;
 cb.FontWeight = "bold";
+cb.Color = [0, 0, 0];
 
 print(Fig, fullfile(FIGUREPATH, 'scatter (C vs W).jpg'), "-djpeg", "-r900");
 

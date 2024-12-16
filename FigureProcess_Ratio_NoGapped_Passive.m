@@ -166,7 +166,8 @@ RM_delta_changeREG   = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_change
 RM_delta_changeIRREG = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_changeIRREG, "UniformOutput", false);
 
 %% Statistics
-Tail = "both"; % alternative hypothesis: x < y
+Tail = "left"; % alternative hypothesis: x < y
+
 [~, p_RM_channels_changeREG_vs_base]    = cellfun(@(x, y) ttest(x', y', "Tail", Tail), RM_channels_baseREG, RM_channels_changeREG, "UniformOutput", false);
 [~, p_RM_channels_changeREG_vs_control] = cellfun(@(x) ttest(RM_channels_delta_changeREG{1}', x', "Tail", "right"), RM_channels_delta_changeREG, "UniformOutput", false);
 
@@ -255,7 +256,7 @@ addLines2Axes(FigREG, struct("Y", 0, ...
                              "style", "-", ...
                              "width", 0.5), ...
                              "Layer", "bottom");
-addScaleEEG(FigREG, EEGPos);
+addScaleEEG(FigREG, EEGPos, ' ms', ' \muV');
 allAxes = findobj(FigREG, "Type", "axes");
 for aIndex = 1:length(allAxes)
     allAxes(aIndex).TickLength = [0, 0];
@@ -280,8 +281,9 @@ topoplot(mean(RM_channels_delta_changeREG{end}, 2), EEGPos.locs, params{:});
 cb = colorbar;
 cb.FontSize = 14;
 cb.FontWeight = "bold";
+cb.Color = [0, 0, 0];
 cRange = scaleAxes(ax, "c", "on", "symOpt", "max", "ignoreInvisible", false);
-mPrint(FigREG, fullfile(FIGUREPATH, 'REG 4-4.06.jpg'), "-djpeg", "-r900");
+print(FigREG, fullfile(FIGUREPATH, 'REG 4-4.06.jpg'), "-djpeg", "-r900");
 
 FigIRREG = plotRawWaveEEG(chDataIRREG_All(end).chMean, [], window, [], EEGPos_Neuroscan64);
 scaleAxes(FigIRREG, "x", windowPlot, "ignoreInvisible", false);
@@ -295,7 +297,7 @@ addLines2Axes(FigIRREG, struct("Y", 0, ...
                              "style", "-", ...
                              "width", 0.5), ...
                              "Layer", "bottom");
-addScaleEEG(FigIRREG, EEGPos);
+addScaleEEG(FigIRREG, EEGPos, ' ms', ' \muV');
 allAxes = findobj(FigIRREG, "Type", "axes");
 for aIndex = 1:length(allAxes)
     allAxes(aIndex).TickLength = [0, 0];
@@ -320,8 +322,9 @@ topoplot(mean(RM_channels_delta_changeIRREG{end}, 2), EEGPos.locs, params{:});
 cb = colorbar;
 cb.FontSize = 14;
 cb.FontWeight = "bold";
+cb.Color = [0, 0, 0];
 scaleAxes(ax, "c", cRange, "ignoreInvisible", false);
-mPrint(FigIRREG, fullfile(FIGUREPATH, 'IRREG 4-4.06.jpg'), "-djpeg", "-r900");
+print(FigIRREG, fullfile(FIGUREPATH, 'IRREG 4-4.06.jpg'), "-djpeg", "-r900");
 
 %% Scatter plot
 % All channels

@@ -25,6 +25,8 @@ windowNew = [-500, 1000]; % ms
 nperm = 1e3;
 alphaVal = 0.05;
 
+% rmfcn = @mean;
+
 %% Load
 window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
@@ -57,9 +59,17 @@ for dIndex = 1:length(ICIsREG)
 end
 
 plotRawWaveMultiEEG(chDataREG_All, windowNew, [], EEGPos_Neuroscan64);
-scaleAxes("x", [-100, 500]);
+scaleAxes("x", [0, 500]);
 scaleAxes("y", "on", "symOpt", "max");
-addLines2Axes(struct("X", 0));
+allAxes = findobj(gcf, "Type", "axes");
+for aIndex = 1:length(allAxes)
+    allAxes(aIndex).TickLength = [0, 0];
+    allAxes(aIndex).Title.FontSize = 12;
+    allAxes(aIndex).XAxis.Visible = "off";
+    allAxes(aIndex).YAxis.Visible = "off";
+end
+addScaleEEG(gcf, EEGPos, ' ms', ' \muV');
+mPrint(gcf, fullfile(FIGUREPATH, 'grand-average wave.jpg'), '-djpeg', '-r900');
 
 %% Determine window for RM computation based on GFP
 % repeat [-100, 0] for permutation test
@@ -72,13 +82,18 @@ addLines2Axes(struct("X", 0));
 % scaleAxes("x", [-100, 500]);
 % addLines2Axes(struct("X", 0));
 % 
-% t = linspace(0, 500, 501)';
+% t = linspace(0, 500, length(p_gfp_REG_vs_base{1}))';
 % for dIndex = 1:length(ICIsREG)
 %     scatter(t(p_gfp_REG_vs_base{dIndex} < alphaVal), (1.5 + 0.1 * (dIndex - 1)) * ones(sum(p_gfp_REG_vs_base{dIndex} < alphaVal), 1), ...
 %             "MarkerFaceColor", chDataREG_All(dIndex).color, "MarkerEdgeColor", "none", "Marker", "square");
 % end
+% 
+% % find cP1 time
+% [~, peakTime] = arrayfun(@(x) maxt(cutData(x.chMean, windowNew, [50, 300]), linspace(50, 300, 251)), gfpDataREG);
+% windowChange = arrayfun(@(x) x + [-25, 25], peakTime, "UniformOutput", false);
 
-windowChange = windowChange - 1000 - roundn(ICIsREG(1), 0);
+% windowChange = repmat({windowChange - 1000 - roundn(ICIsREG(1), 0)}, [4, 1]);
+windowChange = repmat({[85, 285]}, [4, 1]);
 
 %% RM computation
 [RM_channels_baseREG, ...
@@ -94,7 +109,7 @@ for dIndex = 1:length(ICIsREG)
     temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
 
     RM_channels_baseREG{dIndex}   = calRM(temp, windowNew, windowBase - timeShift, @(x) rmfcn(x, 2));
-    RM_channels_changeREG{dIndex} = calRM(temp, windowNew, windowChange, @(x) rmfcn(x, 2));
+    RM_channels_changeREG{dIndex} = calRM(temp, windowNew, windowChange{dIndex}, @(x) rmfcn(x, 2));
 
     % convert to channel-by-subject matrix
     RM_channels_baseREG  {dIndex} = cat(2, RM_channels_baseREG  {dIndex}{:});
@@ -114,10 +129,19 @@ statFcn = @(x, y) obtainArgoutN(@ttest, 2, x', y', "Tail", "left");
 
 p_RM_channels_changeREG_vs_base = cellfun(@(x, y) statFcn(x, y), RM_channels_baseREG, RM_channels_changeREG, "UniformOutput", false);
 
-[~, ~, p_RM_channels_changeREG_vs_base] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeREG_vs_base, "UniformOutput", false);
+% [~, ~, p_RM_channels_changeREG_vs_base] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeREG_vs_base, "UniformOutput", false);
 
 % averaged
 p_RM_changeREG_vs_base = cellfun(@(x, y) statFcn(x, y), RM_baseREG, RM_changeREG);
+
+%% 
+plotScatterEEG(RM_channels_baseREG{1}, RM_channels_changeREG{1}, EEGPos);
+plotScatterEEG(RM_channels_baseREG{3}, RM_channels_changeREG{3}, EEGPos);
+
+params = topoplotConfig(EEGPos);
+figure;
+mSubplot(1, 1, 1);
+topoplot(-log(p_RM_channels_changeREG_vs_base{3}), EEGPos.locs, params{:});
 
 %% Topoplot of RM for all conditions
 % REG
@@ -134,7 +158,7 @@ for index = 1:length(ICIsREG)
     end
 end
 scaleAxes("c", "on", "symOpt", "max", "ignoreInvisible", false);
-print(gcf, fullfile(FIGUREPATH, 'topo.jpg'), '-djpeg', '-r900');
+mPrint(gcf, fullfile(FIGUREPATH, 'topo.jpg'), '-djpeg', '-r900');
 
 %% Tunning plot
 FigTuning = figure;
@@ -166,8 +190,8 @@ save(['..\DATA\MAT DATA\figure\Res P1 (', char(area), ').mat'], ...
 %% Example channels
 run(fullfile(pwd, "config\config_plot.m"));
 
-exampleChannel = "POZ";
-idx = find(upper(EEGPos.channelNames) == exampleChannel);
+exampleChannel = "POz";
+idx = find(EEGPos.channelNames == exampleChannel);
 
 chDataREG = chDataREG_All;
 chDataREG = addfield(chDataREG, "chMean", arrayfun(@(x) x.chMean(idx, :), chDataREG_All, "UniformOutput", false)');
