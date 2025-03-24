@@ -33,7 +33,7 @@ function params = topoplotConfig(EEGPos, chsMark, size0, sizeMark)
                    {'plotchans'}, {chs2Plot}                           , ... % indices of channels to plot
                    {'plotrad'  }, {0.64}                               , ... % plot radius
                    {'headrad'  }, {0.58}                               , ... % head radius
-                   {'intrad'   }, {0.64}                                , ... % interpolate radius
+                   {'intrad'   }, {0.64}                               , ... % interpolate radius
                    {'conv'     }, {'on'}                               , ... % plot radius just covers maximum channel radius
                    {'colormap' }, {'jet'}                              , ... % colormap
                    {'emarker'  }, {{'o', 'k', size0, 1}}               , ... % {MarkerType, Color, Size, LineWidth}

@@ -99,6 +99,12 @@ for dIndex = 1:length(DAYPATHs)
                     channels = comp.channels;
                     ICs = comp.ICs;
                     badChs = comp.badChs;
+
+                    % Re-reference
+                    if strcmpi(opts.reref, "CAR")
+                        trialsEEG = cellfun(@(x) x - mean(x(channels, :), 1), trialsEEG, "UniformOutput", false);
+                    end
+
                 else
                     disp('ICA result does not exist. Performing ICA on data...');
                     channels = 1:size(trialsEEG{1}, 1);
@@ -115,6 +121,11 @@ for dIndex = 1:length(DAYPATHs)
                     if ~isempty(badChs)
                         disp(['Channel ', num2str(badChs(:)'), ' are excluded from analysis.']);
                         channels(badChs) = [];
+                    end
+
+                    % Re-reference
+                    if strcmpi(opts.reref, "CAR")
+                        trialsEEG = cellfun(@(x) x - mean(x(channels, :), 1), trialsEEG, "UniformOutput", false);
                     end
 
                     if isempty(nMaxIcaTrial)

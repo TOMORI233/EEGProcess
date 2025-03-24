@@ -77,24 +77,21 @@ end
 p_gfp_REG4o06_vs_REG4 = wavePermTest(gfpREG{1}, gfpREG{end}, "Tail", "left");
 t = linspace(window(1), window(2), length(p_gfp_REG4o06_vs_REG4))';
 plotRawWaveMulti(gfpDataREG([1, end]), window);
+addLines2Axes(struct("X", {0; 1000 + ICIsREG(1); 2000}));
 xlabel("Time from onset (ms)");
 ylabel("GFP (\muV)");
-scaleAxes("x", [1000, 1600]);
-scaleAxes("y", "on");
-addLines2Axes(struct("X", {0; 1000 + ICIsREG(1); 2000}));
-yRange = get(gca, "YLim");
-h = bar(t(p_gfp_REG4o06_vs_REG4 < alphaVal), ones(sum(p_gfp_REG4o06_vs_REG4 < alphaVal), 1) * yRange(2), 1000 / fs, "EdgeColor", "none", "FaceColor", "y", "FaceAlpha", 0.1);
-setLegendOff(h);
+xlim([1000, 1600]);
+yRange = scaleAxes("y", "on");
+addBars2Axes(t(p_gfp_REG4o06_vs_REG4 < alphaVal), "y");
 
 p_gfp_IRREG4o06_vs_IRREG4 = wavePermTest(gfpIRREG{1}, gfpIRREG{end}, "Tail", "left");
 plotRawWaveMulti(gfpDataIRREG, window);
+addLines2Axes(struct("X", {0; 1000 + ICIsREG(1); 2000}));
 xlabel("Time from onset (ms)");
 ylabel("GFP (\muV)");
 scaleAxes("x", [1000, 1600]);
 scaleAxes("y", yRange);
-addLines2Axes(struct("X", {0; 1000 + ICIsREG(1); 2000}));
-h = bar(t(p_gfp_IRREG4o06_vs_IRREG4 < alphaVal), ones(sum(p_gfp_IRREG4o06_vs_IRREG4 < alphaVal), 1) * yRange(2), 1000 / fs, "EdgeColor", "none", "FaceColor", "y", "FaceAlpha", 0.1);
-setLegendOff(h);
+addBars2Axes(t(p_gfp_IRREG4o06_vs_IRREG4 < alphaVal), "y");
 
 p_gfp_REG4o06_vs_IRREG4o06 = wavePermTest(gfpIRREG{end}, gfpREG{end}, "Tail", "left");
 plotRawWaveMulti([gfpDataREG(end); gfpDataIRREG(end)], window);
@@ -103,8 +100,7 @@ ylabel("GFP (\muV)");
 scaleAxes("x", [1000, 1600]);
 scaleAxes("y", yRange);
 addLines2Axes(struct("X", {0; 1000 + ICIsREG(1); 2000}));
-h = bar(t(p_gfp_REG4o06_vs_IRREG4o06 < alphaVal), ones(sum(p_gfp_REG4o06_vs_IRREG4o06 < alphaVal), 1) * yRange(2), 1000 / fs, "EdgeColor", "none", "FaceColor", "y", "FaceAlpha", 0.1);
-setLegendOff(h);
+addBars2Axes(t(p_gfp_REG4o06_vs_IRREG4o06 < alphaVal), "y");
 
 %% RM computation
 clc;

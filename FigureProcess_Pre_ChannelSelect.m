@@ -9,13 +9,13 @@ for index = 1:2
     if index == 1
         %%%% Neuroscan %%%%
         EEGPos = EEGPos_Neuroscan64;
-        run(fullfile(pwd, "config/avgConfig_Neuroscan64.m"));
+        run(fullfile(pwd, "config/config_Neuroscan64.m"));
         FILENAME = fullfile(FIGUREPATH, 'Neuroscan 64.png');
         SYSTEM = 'Neuroscan channel-64';
     else
         %%%% Neuracle %%%%
         EEGPos = EEGPos_Neuracle64;
-        run(fullfile(pwd, "config/avgConfig_Neuracle64.m"));
+        run(fullfile(pwd, "config/config_Neuracle64.m"));
         FILENAME = fullfile(FIGUREPATH, 'Neuracle 64.png');
         SYSTEM = 'Neuracle channel-64';
     end
