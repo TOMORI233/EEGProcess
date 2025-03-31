@@ -11,9 +11,11 @@ ft_setPath2Top;
 
 %% 
 % 导入电极位置信息
-elec = ft_read_sens('C:\Users\TOMORI\AppData\Roaming\MathWorks\MATLAB Add-Ons\Collections\EEGLAB\functions\supportfiles\Standard-10-5-Cap385.sfp');
+% elec = ft_read_sens('C:\Users\TOMORI\AppData\Roaming\MathWorks\MATLAB Add-Ons\Collections\EEGLAB\functions\supportfiles\Standard-10-5-Cap385.sfp');
+load("D:\Education\Lab\Projects\EEG\Docs\Manuscript\Communications Biology\Revision 1\Neuroscan quick-cap electrode info.mat");
+
 EEGPos = EEGPos_Neuroscan64;
-idx = ismember(elec.label, EEGPos.channelNames);
+idx = ismember(upper(elec.label), upper(EEGPos.channelNames));
 elec.chanpos = elec.chanpos(idx, :);
 elec.chantype = elec.chantype(idx, :);
 elec.chanunit = elec.chanunit(idx, :);
@@ -32,6 +34,28 @@ cfg.elec = elec;
 leadfield = ft_prepare_leadfield(cfg);
 
 % 检查网格是否与头模型匹配
+figure;
+ft_plot_mesh(leadfield.pos(leadfield.inside, :));
+hold on;
+ft_plot_sens(elec, 'style', 'r.');
+title('Leadfield 检查');
+view(90, 0);
+
+%% adjust
+cfg = [];
+cfg.method = 'interactive';
+cfg.headshape = vol.bnd(1);
+cfg.elec = elec;
+elec = ft_electroderealign(cfg);
+
+cfg = [];
+cfg.grid.resolution = 10; % 网格点10mm分辨率
+cfg.grid.unit = 'mm';
+cfg.headmodel = vol;
+cfg.elec = elec;
+
+leadfield = ft_prepare_leadfield(cfg);
+
 figure;
 ft_plot_mesh(leadfield.pos(leadfield.inside, :));
 hold on;

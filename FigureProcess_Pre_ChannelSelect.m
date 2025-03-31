@@ -38,21 +38,24 @@ for index = 1:2
     Y = mapminmax(XTemp, -1, 1);
 
     %% Plot
+    chs2Avg = [];
+
     figure("WindowState", "maximized");
-    mSubplot(1, 2, 1, "shape", "square-min");
+    ax1 = mSubplot(1, 2, 1, "shape", "square-min");
     scatter(X(ismember(channels, chs2Avg)), Y(ismember(channels, chs2Avg)), 700, "red", "filled");
     hold on;
-    scatter(X(~ismember(channels, chs2Avg)), Y(~ismember(channels, chs2Avg)), 700, "red", "LineWidth", 1);
-    arrayfun(@(x, y, z) text(gca, x, y, upper(z.labels), "HorizontalAlignment", "center", "FontWeight", "bold", "FontSize", 12), X, Y, locs(idx));
+    scatter(X(~ismember(channels, chs2Avg)), Y(~ismember(channels, chs2Avg)), 700, "black", "LineWidth", 1);
+    arrayfun(@(x, y, z) text(gca, x, y, z.labels, "HorizontalAlignment", "center", "FontWeight", "bold", "FontSize", 12), X, Y, locs(idx));
     set(gca, "Visible", "off");
 
-    mSubplot(1, 2, 2, "shape", "square-min");
+    ax2 = mSubplot(1, 2, 2, "shape", "square-min");
     scatter(X(ismember(channels, chs2Avg)), Y(ismember(channels, chs2Avg)), 700, "red", "filled");
     hold on;
-    scatter(X(~ismember(channels, chs2Avg)), Y(~ismember(channels, chs2Avg)), 700, "red", "LineWidth", 1);
+    scatter(X(~ismember(channels, chs2Avg)), Y(~ismember(channels, chs2Avg)), 700, "black", "LineWidth", 1);
     arrayfun(@(x, y, z) text(gca, x, y, num2str(z), "HorizontalAlignment", "center", "FontWeight", "bold", "FontSize", 12), X, Y, channels);
     set(gca, "Visible", "off");
 
     addTitle2Fig(gcf, SYSTEM, "FontWeight", "bold");
-    print(gcf, FILENAME, "-dpng", "-r300");
+    % print(gcf, FILENAME, "-dpng", "-r300");
+    exportgraphics(ax1, FILENAME, "Resolution", 600);
 end

@@ -10,8 +10,8 @@ opts.EEGPos = [];
 opts.window = [-1000, 3000]; % ms
 
 % for re-reference
-opts.reref = "CAR"; % common average reference
-% opts.reref = "none"; % no re-reference
+% opts.reref = "CAR"; % common average reference
+opts.reref = "none"; % no re-reference
 
 % for baseline correction
 opts.windowBase = [-300, 0]; % ms

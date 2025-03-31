@@ -216,7 +216,7 @@ RM_delta_changePT    = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_change
 
 %% Statistics
 Tail = "left"; % alternative hypothesis: x < y
-% Tail = "both"; % alternative hypothesis: x < y
+% Tail = "both";
 
 [~, p_RM_channels_changeREG_vs_base]    = cellfun(@(x, y) ttest(x', y', "Tail", Tail), RM_channels_baseREG, RM_channels_changeREG, "UniformOutput", false);
 [~, p_RM_channels_changeREG_vs_control] = cellfun(@(x) ttest(RM_channels_delta_changeREG{1}', x', "Tail", "right"), RM_channels_delta_changeREG, "UniformOutput", false);

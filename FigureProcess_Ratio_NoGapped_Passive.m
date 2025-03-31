@@ -164,31 +164,32 @@ RM_delta_changeIRREG = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_change
 %% Statistics
 Tail = "left"; % alternative hypothesis: x < y
 
-[~, p_RM_channels_changeREG_vs_base]    = cellfun(@(x, y) ttest(x', y', "Tail", Tail), RM_channels_baseREG, RM_channels_changeREG, "UniformOutput", false);
+[~, p_RM_channels_changeREG_vs_base   ] = cellfun(@(x, y) ttest(x', y', "Tail", Tail), RM_channels_baseREG, RM_channels_changeREG, "UniformOutput", false);
 [~, p_RM_channels_changeREG_vs_control] = cellfun(@(x) ttest(RM_channels_delta_changeREG{1}', x', "Tail", "right"), RM_channels_delta_changeREG, "UniformOutput", false);
 
-[~, p_RM_channels_changeIRREG_vs_base]    = cellfun(@(x, y) ttest(x', y', "Tail", Tail), RM_channels_baseIRREG, RM_channels_changeIRREG, "UniformOutput", false);
+[~, p_RM_channels_changeIRREG_vs_base   ] = cellfun(@(x, y) ttest(x', y', "Tail", Tail), RM_channels_baseIRREG, RM_channels_changeIRREG, "UniformOutput", false);
 [~, p_RM_channels_changeIRREG_vs_control] = cellfun(@(x) ttest(RM_channels_delta_changeIRREG{1}', x', "Tail", Tail), RM_channels_delta_changeIRREG, "UniformOutput", false);
 
 [~, p_RM_channels_delta_change_REG_vs_IRREG] = ttest(RM_channels_delta_changeIRREG{end}', RM_channels_delta_changeREG{end}', "Tail", Tail);
 
-[~, ~, p_RM_channels_changeREG_vs_base        ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeREG_vs_base        , "UniformOutput", false);
-[~, ~, p_RM_channels_changeREG_vs_control     ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeREG_vs_control     , "UniformOutput", false);
-[~, ~, p_RM_channels_changeIRREG_vs_base      ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeIRREG_vs_base      , "UniformOutput", false);
-[~, ~, p_RM_channels_changeIRREG_vs_control   ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeIRREG_vs_control   , "UniformOutput", false);
+[~, ~, p_RM_channels_changeREG_vs_base        ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeREG_vs_base     , "UniformOutput", false);
+[~, ~, p_RM_channels_changeREG_vs_control     ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeREG_vs_control  , "UniformOutput", false);
+[~, ~, p_RM_channels_changeIRREG_vs_base      ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeIRREG_vs_base   , "UniformOutput", false);
+[~, ~, p_RM_channels_changeIRREG_vs_control   ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeIRREG_vs_control, "UniformOutput", false);
 [~, ~, p_RM_channels_delta_change_REG_vs_IRREG] = fdr_bh(p_RM_channels_delta_change_REG_vs_IRREG, 0.05, 'dep');
 
 % averaged
-[~, p_RM_baseREG_vs_control]   = cellfun(@(x) ttest(RM_baseREG{1}, x, "Tail", "both"), RM_baseREG);
-[~, p_RM_changeREG_vs_base]    = cellfun(@(x, y) ttest(x, y, "Tail", Tail), RM_baseREG, RM_changeREG);
-[~, p_RM_changeREG_vs_control] = cellfun(@(x) ttest(RM_delta_changeREG{1}, x, "Tail", Tail), RM_delta_changeREG);
+[~, p_RM_baseREG_vs_control] = cellfun(@(x) ttest(RM_baseREG{1}, x, "Tail", "both"), RM_baseREG);
+[~, p_RM_changeREG_vs_base   , ~, stats_RM_changeREG_vs_base   ] = cellfun(@(x, y) ttest(x, y, "Tail", Tail), RM_baseREG, RM_changeREG, "UniformOutput", false);
+[~, p_RM_changeREG_vs_control, ~, stats_RM_changeREG_vs_control] = cellfun(@(x) ttest(RM_delta_changeREG{1}, x, "Tail", Tail), RM_delta_changeREG, "UniformOutput", false);
 
-[~, p_RM_baseIRREG_vs_control]       = cellfun(@(x) ttest(RM_baseIRREG{1}, x, "Tail", "both"), RM_baseIRREG);
-[~, p_RM_changeIRREG_vs_base]        = cellfun(@(x, y) ttest(x, y, "Tail", Tail), RM_baseIRREG, RM_changeIRREG);
-[~, p_RM_changeIRREG_vs_control]     = cellfun(@(x) ttest(RM_delta_changeIRREG{1}, x, "Tail", Tail), RM_delta_changeIRREG);
+[~, p_RM_baseIRREG_vs_control] = cellfun(@(x) ttest(RM_baseIRREG{1}, x, "Tail", "both"), RM_baseIRREG);
+[~, p_RM_changeIRREG_vs_base       , ~, stats_RM_changeIRREG_vs_base   ] = cellfun(@(x, y) ttest(x, y, "Tail", Tail), RM_baseIRREG, RM_changeIRREG, "UniformOutput", false);
+[~, p_RM_changeIRREG_vs_control    , ~, stats_RM_changeIRREG_vs_control] = cellfun(@(x) ttest(RM_delta_changeIRREG{1}, x, "Tail", Tail), RM_delta_changeIRREG, "UniformOutput", false);
 [~, p_RM_changeIRREG_vs_control_raw] = cellfun(@(x) ttest(RM_changeIRREG{1}, x, "Tail", "both"), RM_changeIRREG);
 
-[~, p_RM_delta_change_REG_vs_IRREG] = ttest(RM_delta_changeIRREG{end}, RM_delta_changeREG{end}, "Tail", "both");
+[~, p_RM_delta_change_REG_vs_IRREG, ~, stats_RM_delta_change_REG_vs_IRREG] = ttest(RM_delta_changeIRREG{end}, RM_delta_changeREG{end}, "Tail", "both");
+d_RM_delta_change_REG_vs_IRREG = cohensD(RM_delta_changeIRREG{end}, RM_delta_changeREG{end});
 
 %% Tunning plot
 % compute averaged RM across all channels

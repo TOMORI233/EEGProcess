@@ -252,7 +252,7 @@ mPrint(FigTuning, fullfile(FIGUREPATH, ['RM tuning (', char(area), ').png']), "-
 %% Example channel
 run(fullfile(pwd, "config\config_plot.m"));
 
-exampleChannel = "POZ";
+exampleChannel = "POz";
 idx = find(EEGPos.channelNames == exampleChannel);
 
 temp10 = cellfun(@(x) x([x.ICI] == ICIsREG  (1)   & [x.type] == "REG"  ).chMean(idx, :), data, "UniformOutput", false);
