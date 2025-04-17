@@ -40,7 +40,7 @@ if ~isempty(statFcn)
     end
 
     if fdrOpt
-        [~, ~, p] = fdr_bh(p, 0.05, 'dep');
+        [~, ~, ~, p] = fdr_bh(p, 0.05, 'dep');
     end
 
 else

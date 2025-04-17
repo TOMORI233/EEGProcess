@@ -28,6 +28,12 @@ fs = 1e3;
 [~, temp] = cellfun(@(x) getLastDirPath(x, 2), MATPATHsComa, "UniformOutput", false);
 subjectIDsComa = cellfun(@(x) x{1}, temp, "UniformOutput", false);
 
+% remove recovered data
+subjectRecovered = '2024053101';
+idx = ismember(subjectIDsComa, subjectRecovered);
+subjectIDsComa(idx) = [];
+MATPATHsComa(idx) = [];
+
 %%
 window = load(MATPATHsComa{1}).window;
 dataComa = cellfun(@(x) load(x).chData, MATPATHsComa, "UniformOutput", false);
@@ -175,7 +181,8 @@ RM_delta_changeComa    = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_chan
 RM_delta_changeHealthy = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_changeHealthy, "UniformOutput", false);
 
 %% Statistics
-Tail = "left"; % alternative hypothesis: x < y
+% Tail = "left"; % alternative hypothesis: x < y
+Tail = "both";
 statFcn = @(x, y) rowFcn(@(x1, y1) signrank(x1, y1, "tail", Tail), x, y, "ErrorHandler", @mErrorFcn);
 
 % channels
@@ -189,13 +196,13 @@ p_RM_channels_changeHealthy_vs_base    = cellfun(@(x, y) statFcn(x, y), RM_chann
 p_RM_channels_changeHealthy_vs_control = cellfun(@(x) statFcn(RM_channels_delta_changeHealthy{1}, x), RM_channels_delta_changeHealthy, "UniformOutput", false);
 p_RM_channels_delta_change_Coma_vs_Healthy = rowFcn(@(x, y) ranksum(x, y, "Tail", Tail), RM_channels_delta_changeHealthy{end}, RM_channels_delta_changeComa{end}, "ErrorHandler", @mErrorFcn);
 % fdr
-[~, ~, p_RM_channels_onsetComa_vs_base           ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_onsetComa_vs_base      , "UniformOutput", false);
-[~, ~, p_RM_channels_onsetHealthy_vs_base        ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_onsetHealthy_vs_base   , "UniformOutput", false);
-[~, ~, p_RM_channels_changeComa_vs_base          ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeComa_vs_base      , "UniformOutput", false);
-[~, ~, p_RM_channels_changeComa_vs_control       ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeComa_vs_control   , "UniformOutput", false);
-[~, ~, p_RM_channels_changeHealthy_vs_base       ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeHealthy_vs_base   , "UniformOutput", false);
-[~, ~, p_RM_channels_changeHealthy_vs_control    ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeHealthy_vs_control, "UniformOutput", false);
-[~, ~, p_RM_channels_delta_change_Coma_vs_Healthy] = fdr_bh(p_RM_channels_delta_change_Coma_vs_Healthy, 0.05, 'dep');
+[~, ~, ~, p_RM_channels_onsetComa_vs_base           ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_onsetComa_vs_base      , "UniformOutput", false);
+[~, ~, ~, p_RM_channels_onsetHealthy_vs_base        ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_onsetHealthy_vs_base   , "UniformOutput", false);
+[~, ~, ~, p_RM_channels_changeComa_vs_base          ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeComa_vs_base      , "UniformOutput", false);
+[~, ~, ~, p_RM_channels_changeComa_vs_control       ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeComa_vs_control   , "UniformOutput", false);
+[~, ~, ~, p_RM_channels_changeHealthy_vs_base       ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeHealthy_vs_base   , "UniformOutput", false);
+[~, ~, ~, p_RM_channels_changeHealthy_vs_control    ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeHealthy_vs_control, "UniformOutput", false);
+[~, ~, ~, p_RM_channels_delta_change_Coma_vs_Healthy] = fdr_bh(p_RM_channels_delta_change_Coma_vs_Healthy, 0.05, 'dep');
 
 % averaged
 p_RM_changeComa_vs_base       = cellfun(@(x, y) statFcn(x, y), RM_baseComa, RM_changeComa);
@@ -299,7 +306,7 @@ p_change = ranksum(Y_coma, Y_healthy, "tail", "both");
 %% Example channel
 run(fullfile(pwd, "config\config_plot.m"));
 
-exampleChannel = "O1";
+exampleChannel = "POZ";
 chIdx = find(upper(EEGPos.channelNames) == exampleChannel);
 
 chData = [chDataComaAll(end); chDataHealthyAll(end)];
@@ -313,7 +320,7 @@ addLines2Axes(gca, struct("X", {-1000 - 5; 0; 1000 - 5}));
 %% Results of figures
 % SFigure 5
 % a
-[t(:) - 1000 - 5, cat(1, chData(end:-1:1).chMean)']; % wave
+[t(:) - 1000 - 5, chData(1).chMean(:), chData(1).chErr(:), chData(2).chMean(:), chData(2).chErr(:)]; % wave
 
 % b
 [X_healthy(:), Y_healthy(:)];

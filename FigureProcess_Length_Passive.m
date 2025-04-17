@@ -61,6 +61,15 @@ end
 plotRawWaveMultiEEG(chDataREG_All, windowNew, [], EEGPos_Neuroscan64);
 scaleAxes("x", [0, 500]);
 scaleAxes("y", "on", "symOpt", "max");
+addLines2Axes(struct("X", 0, ...
+                     "color", [255 128 0] / 255, ...
+                     "width", 1.5), ...
+                     "Layer", "bottom");
+addLines2Axes(struct("Y", 0, ...
+                     "color", "k", ...
+                     "style", "-", ...
+                     "width", 0.5), ...
+                     "Layer", "bottom");
 allAxes = findobj(gcf, "Type", "axes");
 for aIndex = 1:length(allAxes)
     allAxes(aIndex).TickLength = [0, 0];
@@ -69,7 +78,7 @@ for aIndex = 1:length(allAxes)
     allAxes(aIndex).YAxis.Visible = "off";
 end
 addScaleEEG(gcf, EEGPos, ' ms', ' \muV');
-mPrint(gcf, fullfile(FIGUREPATH, 'grand-average wave.jpg'), '-djpeg', '-r900');
+exportgraphics(gcf, fullfile(FIGUREPATH, 'grand-average wave.jpg'), "Resolution", 900);
 
 %% Determine window for RM computation based on GFP
 % repeat [-100, 0] for permutation test
@@ -125,40 +134,31 @@ RM_changeREG = cellfun(@(x) mean(x(idx, :), 1), RM_channels_changeREG, "UniformO
 RM_delta_changeREG = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_changeREG, "UniformOutput", false);
 
 %% Statistics
-statFcn = @(x, y) obtainArgoutN(@ttest, 2, x', y', "Tail", "left");
+statFcn = @(x, y) obtainArgoutN(@ttest, [2, 4], x', y', "Tail", "both");
 
 p_RM_channels_changeREG_vs_base = cellfun(@(x, y) statFcn(x, y), RM_channels_baseREG, RM_channels_changeREG, "UniformOutput", false);
 
-% [~, ~, p_RM_channels_changeREG_vs_base] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeREG_vs_base, "UniformOutput", false);
+[~, ~, ~, p_RM_channels_changeREG_vs_base] = cellfun(@(x) fdr_bh(x, alphaVal, 'dep'), p_RM_channels_changeREG_vs_base, "UniformOutput", false);
 
 % averaged
-p_RM_changeREG_vs_base = cellfun(@(x, y) statFcn(x, y), RM_baseREG, RM_changeREG);
+[p_RM_changeREG_vs_base, stats_RM_changeREG_vs_base] = cellfun(@(x, y) statFcn(x, y), RM_baseREG, RM_changeREG);
 
-%% 
-plotScatterEEG(RM_channels_baseREG{1}, RM_channels_changeREG{1}, EEGPos);
-plotScatterEEG(RM_channels_baseREG{3}, RM_channels_changeREG{3}, EEGPos);
-
-params = topoplotConfig(EEGPos);
-figure;
-mSubplot(1, 1, 1);
-topoplot(-log(p_RM_channels_changeREG_vs_base{3}), EEGPos.locs, params{:});
+d_RM_changeREG_vs_base = cellfun(@(x, y) cohensD(x, y), RM_baseREG, RM_changeREG);
 
 %% Topoplot of RM for all conditions
 % REG
-figure;
+FigTopo = figure;
 for index = 1:length(ICIsREG)
     mSubplot(2, 5, index, "shape", "square-min");
     params = topoplotConfig(EEGPos, find(p_RM_channels_changeREG_vs_base{index} < alphaVal), 6, 24);
     topoplot(mean(RM_channels_delta_changeREG{index}, 2), EEGPos.locs, params{:});
-    if index == length(ICIsREG)
-        pos = tightPosition(gca, "IncludeLabels", true);
-        cb = colorbar("Position", [pos(1) + pos(3) - 0.01, pos(2), 0.01, pos(4)]);
-        cb.FontSize = 14;
-        cb.FontWeight = "bold";
-    end
 end
-scaleAxes("c", "on", "symOpt", "max", "ignoreInvisible", false);
-mPrint(gcf, fullfile(FIGUREPATH, 'topo.jpg'), '-djpeg', '-r900');
+cRange = scaleAxes("c", "symOpt", "max", "ignoreInvisible", false);
+set(findobj(FigTopo, "Type", "Patch"), "FaceColor", "w");
+set(FigTopo, "Color", "w");
+temp = floor(max(cRange) * 100) / 100;
+exportgraphics(FigTopo, fullfile(FIGUREPATH, 'topo.jpg'), "Resolution", 900);
+exportcolorbar([-temp, temp], fullfile(FIGUREPATH, 'topo colorbar.jpg'));
 
 %% Tunning plot
 FigTuning = figure;
@@ -173,8 +173,6 @@ xticklabels(num2str(ICIsREG));
 xlabel("T2 ICI (ms)");
 ylabel("\DeltaRM (\muV)");
 title("Tuning of RM_{change}");
-
-mPrint(FigTuning, fullfile(FIGUREPATH, ['RM tuning (', char(area), ').png']), "-dpng", "-r300");
 
 %% save
 params = [fieldnames(getVarsFromWorkspace('RM_\W*')); ...
@@ -208,7 +206,8 @@ yRange = scaleAxes("y", "on");
 % Figure 3
 % b
 t = linspace(windowNew(1), windowNew(2), length(chDataREG(1).chMean))';
-[t, cat(1, chDataREG.chMean)'];
+temp = arrayfun(@(x) [x.chMean(:), x.chErr(:)], chDataREG, "UniformOutput", false);
+[t, cat(2, temp{:})];
 
 % c
 [Y(:), E(:)];

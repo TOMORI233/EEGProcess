@@ -140,8 +140,12 @@ RM_delta_changeW = RM_changeW - RM_baseW;
 statFcn = @(x, y) signrank(x, y, "tail", "both");
 p_change_C_vs_base = rowFcn(@(x, y) statFcn(x, y), RM_baseC, RM_changeC, "ErrorHandler", @mErrorFcn);
 p_change_W_vs_base = rowFcn(@(x, y) statFcn(x, y), RM_baseW, RM_changeW, "ErrorHandler", @mErrorFcn);
-p_change_C_vs_W = rowFcn(@(x, y) statFcn(x, y), RM_delta_changeW, RM_delta_changeC, "ErrorHandler", @mErrorFcn);
-p_base_C_vs_W = rowFcn(@(x, y) statFcn(x, y), RM_baseW, RM_baseC, "ErrorHandler", @mErrorFcn);
+p_change_C_vs_W    = rowFcn(@(x, y) statFcn(x, y), RM_delta_changeW, RM_delta_changeC, "ErrorHandler", @mErrorFcn);
+p_base_C_vs_W      = rowFcn(@(x, y) statFcn(x, y), RM_baseW, RM_baseC, "ErrorHandler", @mErrorFcn);
+
+r_change_C_vs_base = rowFcn(@(x, y) rbcc(x, y), RM_baseC, RM_changeC, "ErrorHandler", @mErrorFcn);
+r_change_W_vs_base = rowFcn(@(x, y) rbcc(x, y), RM_baseW, RM_changeW, "ErrorHandler", @mErrorFcn);
+r_change_C_vs_W    = rowFcn(@(x, y) rbcc(x, y), RM_delta_changeW, RM_delta_changeC, "ErrorHandler", @mErrorFcn);
 
 %% Scatter plot of all channels
 Fig = plotScatterEEG(RM_delta_changeW, RM_delta_changeC, EEGPos, statFcn, false);
@@ -153,7 +157,7 @@ cb.FontSize = 14;
 cb.FontWeight = "bold";
 cb.Color = [0, 0, 0];
 
-print(Fig, fullfile(FIGUREPATH, 'scatter (C vs W).jpg'), "-djpeg", "-r900");
+exportgraphics(Fig, fullfile(FIGUREPATH, 'scatter (C vs W).jpg'), "Resolution", 900);
 
 %% Topoplot
 figure;
@@ -169,13 +173,12 @@ mSubplot(2, 5, 3, "shape", "square-min");
 params = topoplotConfig(EEGPos, find(p_change_C_vs_W < alphaVal), 6, 24);
 topoplot(mean(RM_delta_changeC - RM_delta_changeW, 2), EEGPos.locs, params{:});
 
-pos = tightPosition(gca, "IncludeLabels", true);
-cb = colorbar("Position", [pos(1) + pos(3) - 0.01, pos(2), 0.01, pos(4)]);
-cb.FontSize = 14;
-cb.FontWeight = "bold";
-
-scaleAxes("c", "on", "symOpt", "max", "ignoreInvisible", false);
-print(gcf, fullfile(FIGUREPATH, 'topo (C vs W).jpg'), "-djpeg", "-r900");
+cRange = scaleAxes("c", "symOpt", "max", "ignoreInvisible", false);
+set(findobj(gcf, "Type", "Patch"), "FaceColor", "w");
+set(gcf, "Color", "w");
+temp = floor(max(cRange) * 100) / 100;
+exportgraphics(gcf, fullfile(FIGUREPATH, 'topo (C vs W).jpg'), "Resolution", 900);
+exportcolorbar([-temp, temp], fullfile(FIGUREPATH, 'topo colorbar (C vs W).jpg'));
 
 %% Example channel
 run(fullfile(pwd, "config\config_plot.m"));
@@ -211,4 +214,5 @@ setLegendOff([h1, h2]);
 %% Results of figures
 % Sfigure 3
 % a
-[t(:), cat(1, tempData.chMean)']; % wave
+[t(:), tempData(1).chMean(:), tempData(1).chErr(:), tempData(2).chMean(:), tempData(2).chErr(:)]; % wave
+

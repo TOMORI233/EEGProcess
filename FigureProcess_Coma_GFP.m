@@ -34,6 +34,14 @@ scoreAuditory = tb.a_score;
 [~, temp] = cellfun(@(x) getLastDirPath(x, 2), MATPATHsComa, "UniformOutput", false);
 subjectIDsComa = cellfun(@(x) x{1}, temp, "UniformOutput", false);
 
+% remove recovered data
+subjectRecovered = '2024053101';
+idx = ismember(subjectIDsComa, subjectRecovered);
+subjectIDsComa(idx) = [];
+MATPATHsComa(idx) = [];
+scoreTotal(idx) = [];
+scoreAuditory(idx) = [];
+
 %%
 window = load(MATPATHsComa{1}).window;
 dataComa = cellfun(@(x) load(x).chData, MATPATHsComa, "UniformOutput", false);
@@ -309,13 +317,17 @@ for aIndex = 1:length(allAxes)
     allAxes(aIndex).XAxis.Visible = "off";
     allAxes(aIndex).YAxis.Visible = "off";
 end
-print(gcf, fullfile('D:\Education\Lab\Projects\EEG\Figures\coma\example.jpg'), "-djpeg", "-r900");
+exportgraphics(gcf, fullfile('D:\Education\Lab\Projects\EEG\Figures\coma\example.jpg'), "Resolution", 900);
 
-t1 = (t' - 1000) / 1000;
-res_example_channel_REG4_4 = dataComa{idx}(1).chMean(find(upper(EEGPos.channelNames) == "PO5"), :)';
-res_example_channel_REG4_5 = dataComa{idx}(end).chMean(find(upper(EEGPos.channelNames) == "PO5"), :)';
-res_example_coma_GFP_REG4_4 = gfpComa{idx}(1, :)';
-res_example_coma_GFP_REG4_5 = gfpComa{idx}(2, :)';
+chIdx = find(upper(EEGPos.channelNames) == "PO5");
+[t(:) - 1000, ...
+ dataComa{idx}(1).chMean(chIdx, :)', ...
+ dataComa{idx}(1).chErr(chIdx, :)', ...
+ dataComa{idx}(end).chMean(chIdx, :)', ...
+ dataComa{idx}(end).chErr(chIdx, :)'];
+[t(:) - 1000, ...
+ gfpComa{idx}(1, :)', ...
+ gfpComa{idx}(2, :)'];
 
 figure;
 mSubplot(1, 2, 1, "shape", "square-min");
@@ -351,7 +363,9 @@ resHealthy = [t(:) / 1000 - 1, calchMean(cellfun(@(x) x(1, :), gfpHealthy, "Unif
 % a
 t = linspace(window(1), window(2), length(p))' - 1000 - 5;
 [t(:), calchMean(cellfun(@(x) x(end, :), gfpHealthy, "UniformOutput", false))', ...
-       calchMean(cellfun(@(x) x(end, :), gfpComa, "UniformOutput", false))'];
+       calchErr(cellfun(@(x) x(end, :), gfpHealthy, "UniformOutput", false))', ...
+       calchMean(cellfun(@(x) x(end, :), gfpComa, "UniformOutput", false))', ...
+       calchErr(cellfun(@(x) x(end, :), gfpComa, "UniformOutput", false))'];
 % b
 [RM_delta_onset_healthy{end}, RM_delta_change_healthy{end}];
 [RM_delta_onset_coma{end}, RM_delta_change_coma{end}];

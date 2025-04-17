@@ -91,7 +91,6 @@ if iscell(data1) && iscell(data2)
 
     if strcmpi(Type, "ERP")
         channels = 1:size(data1{1}, 1);
-        t = linspace(0, 1, size(data1{1}, 2)); % normalized
 
         cfg = [];
         cfg.numrandomization = nperm;

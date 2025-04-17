@@ -1,31 +1,51 @@
-function data = prepareFieldtripData(trialsData, window, fs, channelNames)
-    narginchk(3, 4);
+function [data, data_erp, data_cov] = prepareFieldtripData(trialsData, window, fs, channelNames)
+% This function converts cell data to fieldtrip format.
+% For EEG data with electrode labels, specify channel names.
 
-    t = linspace(window(1), window(2), size(trialsData{1}, 2));
-    channels = (1:size(trialsData{1}, 1))';
+narginchk(3, 4);
 
-    if nargin < 4
-        channelNames = arrayfun(@num2str, channels, "UniformOutput", false);
-    else
+if isa(trialsData, "double") % single trial / ERP
+    trialsData = {trialsData};
+end
 
-        if numel(channelNames) ~= numel(channels)
-            error("The number of channel labels does not match the number of channels");
-        end
+t = linspace(window(1), window(2), size(trialsData{1}, 2));
+channels = (1:size(trialsData{1}, 1))';
 
+if nargin < 4
+    channelNames = arrayfun(@num2str, channels, "UniformOutput", false);
+else
+
+    if numel(channelNames) ~= numel(channels)
+        error("The number of channel labels does not match the number of channels");
     end
 
-    cfg = [];
-    cfg.reref = 'yes';              % 启用重新参考
-    cfg.refmethod = 'average';       % 设置参考方法为“average reference”
-    cfg.refchannel = 'all';          % 选择所有通道作为参考
-    cfg.trials = 'all';
-    
-    data.trial = trialsData(:)';
-    data.time = repmat({t}, 1, length(trialsData));
-    data.label = channelNames;
-    data.fsample = fs;
-    data.trialinfo = ones(length(trialsData), 1);
-    data = ft_selectdata(cfg, data);
+end
 
-    return;
+% trial data
+cfg = [];
+% cfg.reref = 'yes';               % use re-reference
+% cfg.refmethod = 'average';       % CAR
+% cfg.refchannel = 'all';
+% cfg.trials = 'all';
+data.trial = trialsData(:)';
+data.time = repmat({t}, 1, length(trialsData));
+data.label = channelNames;
+data.fsample = fs;
+data.trialinfo = ones(length(trialsData), 1);
+data = ft_selectdata(cfg, data);
+cfg.keeptrials = 'yes';
+data = ft_timelockanalysis(cfg, data);
+
+% ERP
+cfg = [];
+cfg.trials = 'all';
+data_erp = ft_timelockanalysis(cfg, data);
+
+% Covariance
+cfg = [];
+cfg.covariance = 'yes';
+cfg.covariancewindow = 'all';
+data_cov = ft_timelockanalysis(cfg, data);
+
+return;
 end

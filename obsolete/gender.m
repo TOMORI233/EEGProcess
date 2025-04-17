@@ -1,6 +1,6 @@
 ccc;
 
-temp = dir("D:\Education\Lab\Projects\EEG\DATA\MAT DATA\pre");
+temp = dir("..\DATA\MAT DATA\pre");
 temp = temp(3:end);
 subjectIDs = {temp.name}';
 

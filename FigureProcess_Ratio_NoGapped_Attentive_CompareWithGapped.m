@@ -229,49 +229,47 @@ RM_delta_changeIRREG = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_change
 RM_delta_changePT    = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_changePT,    "UniformOutput", false);
 
 %% Statistics
-Tail = "left"; % alternative hypothesis: x < y
-% Tail = "both"; % alternative hypothesis: x < y
+statFcn = @(x, y) obtainArgoutN(@ttest, [2, 4], x', y', "Tail", "both");
+% Tail = "left"; % alternative hypothesis: x < y
+% Tail = "both";
 
-[~, p_RM_channels_changeREG_vs_base]    = cellfun(@(x, y) ttest(x', y', "Tail", Tail), RM_channels_baseREG, RM_channels_changeREG, "UniformOutput", false);
-[~, p_RM_channels_changeREG_vs_control] = cellfun(@(x) ttest(RM_channels_delta_changeREG{1}', x', "Tail", "right"), RM_channels_delta_changeREG, "UniformOutput", false);
+p_RM_channels_changeREG_vs_base    = cellfun(@(x, y) statFcn(x, y), RM_channels_baseREG, RM_channels_changeREG, "UniformOutput", false);
+p_RM_channels_changeREG_vs_control = cellfun(@(x) statFcn(RM_channels_delta_changeREG{1}, x), RM_channels_delta_changeREG, "UniformOutput", false);
 
-[~, p_RM_channels_changeIRREG_vs_base]    = cellfun(@(x, y) ttest(x', y', "Tail", Tail), RM_channels_baseIRREG, RM_channels_changeIRREG, "UniformOutput", false);
-[~, p_RM_channels_changeIRREG_vs_control] = cellfun(@(x) ttest(RM_channels_delta_changeIRREG{1}', x', "Tail", Tail), RM_channels_delta_changeIRREG, "UniformOutput", false);
+p_RM_channels_changeIRREG_vs_base    = cellfun(@(x, y) statFcn(x, y), RM_channels_baseIRREG, RM_channels_changeIRREG, "UniformOutput", false);
+p_RM_channels_changeIRREG_vs_control = cellfun(@(x) statFcn(RM_channels_delta_changeIRREG{1}, x), RM_channels_delta_changeIRREG, "UniformOutput", false);
 
-[~, p_RM_channels_changePT_vs_base]    = cellfun(@(x, y) ttest(x', y', "Tail", Tail), RM_channels_basePT, RM_channels_changePT, "UniformOutput", false);
-[~, p_RM_channels_changePT_vs_control] = cellfun(@(x) ttest(RM_channels_delta_changePT{1}', x', "Tail", Tail), RM_channels_delta_changePT, "UniformOutput", false);
+p_RM_channels_delta_change_REG_vs_IRREG = statFcn(RM_channels_delta_changeIRREG{end}, RM_channels_delta_changeREG{end});
 
-[~, p_RM_channels_delta_change_REG_vs_IRREG] = ttest(RM_channels_delta_changeIRREG{end}', RM_channels_delta_changeREG{end}', "Tail", Tail);
-[~, p_RM_channels_delta_change_REG_vs_PT]    = ttest(RM_channels_delta_changePT{end}', RM_channels_delta_changeREG{end}', "Tail", Tail);
+[~, ~, ~, p_RM_channels_changeREG_vs_base     ] = cellfun(@(x) fdr_bh(x, alphaVal, 'dep'), p_RM_channels_changeREG_vs_base     , "UniformOutput", false);
+[~, ~, ~, p_RM_channels_changeREG_vs_control  ] = cellfun(@(x) fdr_bh(x, alphaVal, 'dep'), p_RM_channels_changeREG_vs_control  , "UniformOutput", false);
+[~, ~, ~, p_RM_channels_changeIRREG_vs_base   ] = cellfun(@(x) fdr_bh(x, alphaVal, 'dep'), p_RM_channels_changeIRREG_vs_base   , "UniformOutput", false);
+[~, ~, ~, p_RM_channels_changeIRREG_vs_control] = cellfun(@(x) fdr_bh(x, alphaVal, 'dep'), p_RM_channels_changeIRREG_vs_control, "UniformOutput", false);
 
-[~, ~, p_RM_channels_changeREG_vs_base     ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeREG_vs_base     , "UniformOutput", false);
-[~, ~, p_RM_channels_changeREG_vs_control  ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeREG_vs_control  , "UniformOutput", false);
-[~, ~, p_RM_channels_changeIRREG_vs_base   ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeIRREG_vs_base   , "UniformOutput", false);
-[~, ~, p_RM_channels_changeIRREG_vs_control] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changeIRREG_vs_control, "UniformOutput", false);
-[~, ~, p_RM_channels_changePT_vs_base      ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changePT_vs_base      , "UniformOutput", false);
-[~, ~, p_RM_channels_changePT_vs_control   ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_changePT_vs_control   , "UniformOutput", false);
-
-[~, ~, p_RM_channels_delta_change_REG_vs_IRREG] = fdr_bh(p_RM_channels_delta_change_REG_vs_IRREG, 0.05, 'dep');
-[~, ~, p_RM_channels_delta_change_REG_vs_PT]    = fdr_bh(p_RM_channels_delta_change_REG_vs_PT   , 0.05, 'dep');
+[~, ~, ~, p_RM_channels_delta_change_REG_vs_IRREG] = fdr_bh(p_RM_channels_delta_change_REG_vs_IRREG, alphaVal, 'dep');
 
 % averaged
-[~, p_RM_baseREG_vs_control]   = cellfun(@(x) ttest(RM_baseREG{1}, x, "Tail", "both"), RM_baseREG);
-[~, p_RM_changeREG_vs_base]    = cellfun(@(x, y) ttest(x, y, "Tail", Tail), RM_baseREG, RM_changeREG);
-[~, p_RM_changeREG_vs_control] = cellfun(@(x) ttest(RM_delta_changeREG{1}, x, "Tail", Tail), RM_delta_changeREG);
+[p_RM_baseREG_vs_control  , stats_RM_baseREG_vs_control  ] = cellfun(@(x) statFcn(RM_baseREG{1}, x), RM_baseREG);
+[p_RM_changeREG_vs_base   , stats_RM_changeREG_vs_base   ] = cellfun(@(x, y) statFcn(x, y), RM_baseREG, RM_changeREG);
+[p_RM_changeREG_vs_control, stats_RM_changeREG_vs_control] = cellfun(@(x) statFcn(RM_delta_changeREG{1}, x), RM_delta_changeREG);
 
-[~, p_RM_baseIRREG_vs_control]       = cellfun(@(x) ttest(RM_baseIRREG{1}, x, "Tail", "both"), RM_baseIRREG);
-[~, p_RM_changeIRREG_vs_base]        = cellfun(@(x, y) ttest(x, y, "Tail", Tail), RM_baseIRREG, RM_changeIRREG);
-[~, p_RM_changeIRREG_vs_control]     = cellfun(@(x) ttest(RM_delta_changeIRREG{1}, x, "Tail", Tail), RM_delta_changeIRREG);
-[~, p_RM_changeIRREG_vs_control_raw] = cellfun(@(x) ttest(RM_changeIRREG{1}, x, "Tail", "both"), RM_changeIRREG);
+[p_RM_baseIRREG_vs_control  , stats_RM_baseIRREG_vs_control  ] = cellfun(@(x) statFcn(RM_baseIRREG{1}, x), RM_baseIRREG);
+[p_RM_changeIRREG_vs_base   , stats_RM_changeIRREG_vs_base   ] = cellfun(@(x, y) statFcn(x, y), RM_baseIRREG, RM_changeIRREG);
+[p_RM_changeIRREG_vs_control, stats_RM_changeIRREG_vs_control] = cellfun(@(x) statFcn(RM_delta_changeIRREG{1}, x), RM_delta_changeIRREG);
 
-[~, p_RM_basePT_vs_control]   = cellfun(@(x) ttest(RM_basePT{1}, x, "Tail", "both"), RM_basePT);
-[~, p_RM_changePT_vs_base]    = cellfun(@(x, y) ttest(x, y, "Tail", Tail), RM_basePT, RM_changePT);
-[~, p_RM_changePT_vs_control] = cellfun(@(x) ttest(RM_delta_changePT{1}, x, "Tail", Tail), RM_delta_changePT);
+[p_RM_delta_change_REG_vs_IRREG, stats_RM_delta_change_REG_vs_IRREG] = statFcn(RM_delta_changeIRREG{end}, RM_delta_changeREG{end});
 
-[~, p_RM_delta_change_REG_vs_IRREG] = ttest(RM_delta_changeIRREG{end}, RM_delta_changeREG{end}, "Tail", "both");
-[~, p_RM_delta_change_REG_vs_PT] = ttest(RM_delta_changePT{end}, RM_delta_changeREG{end}, "Tail", "both");
+[p_ANOVA_changeREG, tbl_tuning, stats_tuning] = anova1(cat(1, RM_changeREG{2:end})', [], "on");
 
-p_ANOVA_changeREG = anova1(cat(1, RM_changeREG{2:end})', [], "off");
+% Extract F-value, degrees of freedom, and p-value from the ANOVA table
+F_value = tbl_tuning{2,5};  % F-statistic
+df_between = tbl_tuning{2,3};  % Between-group degrees of freedom
+df_within = tbl_tuning{3,3};  % Within-group degrees of freedom
+
+% Calculate eta squared (η²) as effect size
+SS_between = tbl_tuning{2,2};  % Sum of squares between groups
+SS_total = tbl_tuning{4,2};    % Total sum of squares
+eta_squared = SS_between / SS_total;  % Eta squared (η²)
 
 %% Topoplot of RM for all conditions
 % REG vs IRREG
@@ -302,23 +300,6 @@ for index = 1:length(ICIsIRREG)
 end
 cRange = scaleAxes(ax, "c", "symOpt", "max", "ignoreInvisible", false);
 mPrint(gcf, fullfile(FIGUREPATH, 'topo (REG & IRREG).jpg'), "-djpeg", "-r900");
-
-% REG vs PT
-figure;
-for index = 1:length(freqs)
-    mSubplot(2, 5, 5 + index, "shape", "square-min");
-    params = topoplotConfig(EEGPos, find(p_RM_channels_changePT_vs_base{index} < alphaVal), 6, 24);
-    topoplot(mean(RM_channels_delta_changePT{index}, 2), EEGPos.locs, params{:});
-    if index == length(freqs)
-        pos = tightPosition(gca, "IncludeLabels", true);
-        cb = colorbar("Position", [pos(1) + pos(3) - 0.01, pos(2), 0.01, pos(4)]);
-        cb.FontSize = 14;
-        cb.FontWeight = "bold";
-    end
-end
-copyobj(ax(1:length(ICIsREG)), gcf);
-scaleAxes("c", cRange, "ignoreInvisible", false);
-mPrint(gcf, fullfile(FIGUREPATH, 'topo (PT).jpg'), "-djpeg", "-r900");
 
 %% Tunning plot
 FigTuning = figure;
@@ -351,46 +332,11 @@ addLines2Axes(gca);
 addLines2Axes(gca, struct("X", 0));
 addLines2Axes(gca, struct("Y", 0));
 
-mSubplot(1, 2, 2, "shape", "square-min", "margin_left", 0.15);
-X = RM_delta_changePT{end};
-Y = RM_delta_changeREG{end};
-scatter(X, Y, 50, "black");
-syncXY;
-xlabel("\DeltaRM_{PT} (\muV)");
-ylabel("\DeltaRM_{REG} (\muV)");
-title(['REG vs PT | Pairwise t-test p=', num2str(p_RM_delta_change_REG_vs_PT), ' | N=', num2str(length(X))]);
-addLines2Axes(gca);
-addLines2Axes(gca, struct("X", 0));
-addLines2Axes(gca, struct("Y", 0));
-
 %% Example channel
 run(fullfile(pwd, "config\config_plot.m"));
 
 exampleChannel = "POZ";
-idx = find(EEGPos.channelNames == exampleChannel);
-
-temp10 = cellfun(@(x) x([x.ICI] == ICIsREG  (1)   & [x.type] == "REG"  ).chMean(idx, :), data, "UniformOutput", false);
-temp20 = cellfun(@(x) x([x.ICI] == ICIsIRREG(1)   & [x.type] == "IRREG").chMean(idx, :), data, "UniformOutput", false);
-temp30 = cellfun(@(x) x([x.freq] == freqs(1)      & [x.type] == "PT")   .chMean(idx, :), data, "UniformOutput", false);
-temp1  = cellfun(@(x) x([x.ICI] == ICIsREG  (end) & [x.type] == "REG"  ).chMean(idx, :), data, "UniformOutput", false);
-temp2  = cellfun(@(x) x([x.ICI] == ICIsIRREG(end) & [x.type] == "IRREG").chMean(idx, :), data, "UniformOutput", false);
-temp3  = cellfun(@(x) x([x.freq] == freqs(end)    & [x.type] == "PT")   .chMean(idx, :), data, "UniformOutput", false);
-
-% normalize
-temp10 = cellfun(@(x) x ./ std(x, [], 2), temp10, "UniformOutput", false);
-temp20 = cellfun(@(x) x ./ std(x, [], 2), temp20, "UniformOutput", false);
-temp30 = cellfun(@(x) x ./ std(x, [], 2), temp30, "UniformOutput", false);
-temp1  = cellfun(@(x) x ./ std(x, [], 2), temp1,  "UniformOutput", false);
-temp2  = cellfun(@(x) x ./ std(x, [], 2), temp2,  "UniformOutput", false);
-temp3  = cellfun(@(x) x ./ std(x, [], 2), temp3,  "UniformOutput", false);
-
-p1020 = wavePermTest(temp10, temp20, nperm, "Type", "ERP", "Tail", "both");
-p1030 = wavePermTest(temp10, temp30, nperm, "Type", "ERP", "Tail", "both");
-p110 = wavePermTest(temp1,  temp10, nperm, "Type", "ERP", "Tail", "both");
-p220 = wavePermTest(temp2,  temp20, nperm, "Type", "ERP", "Tail", "both");
-p330 = wavePermTest(temp3,  temp30, nperm, "Type", "ERP", "Tail", "both");
-p12 = wavePermTest(temp1,  temp2,  nperm, "Type", "ERP", "Tail", "both");
-p13 = wavePermTest(temp1,  temp3,  nperm, "Type", "ERP", "Tail", "both");
+idx = find(upper(EEGPos.channelNames) == exampleChannel);
 
 chDataREG = chDataREG_All;
 chDataREG = addfield(chDataREG, "chMean", arrayfun(@(x) x.chMean(idx, :), chDataREG_All, "UniformOutput", false)');
@@ -414,63 +360,11 @@ addLines2Axes(struct("X", {- 1000 - ICIsREG(1); 0;  1000 - ICIsREG(1)}));
 scaleAxes("x", [-100, 600]);
 scaleAxes("y", yRange);
 
-chDataPT = chDataPT_All;
-chDataPT = addfield(chDataPT, "chMean", arrayfun(@(x) x.chMean(idx, :), chDataPT_All, "UniformOutput", false)');
-chDataPT = addfield(chDataPT, "chErr", arrayfun(@(x) x.chErr(idx, :), chDataPT_All, "UniformOutput", false)');
-plotRawWaveMulti(chDataPT, window - 1000 - ICIsREG(1));
-xlabel("Time from change (ms)");
-ylabel("Normalized response (\muV)");
-title(['Grand-averaged wave in ', char(exampleChannel)]);
-addLines2Axes(struct("X", {-1000; 0; 1000}));
-scaleAxes("x", [-100, 600]);
-scaleAxes("y", yRange);
-
-clearvars chData
-chData(1) = chDataREG(1);
-chData(2) = chDataREG(end);
-chData(3) = chDataIRREG(1);
-chData(4) = chDataIRREG(end);
-chData(5) = chDataPT(1);
-chData(6) = chDataPT(end);
-chData = addfield(chData, "color", {[1, 0.5, 0.5]; ...
-                                    [1, 0, 0]; ...
-                                    [0.5, 0.5, 1]; ...
-                                    [0, 0, 1]; ...
-                                    [0.75, 0.5, 1]; ...
-                                    [0.5, 0, 1]});
-t = linspace(window(1), window(2), length(chData(1).chMean))' - 1000 - ICIsREG(1);
-
-plotRawWaveMulti(chData, window - 1000 - ICIsREG(1));
-xlabel("Time from change (ms)");
-ylabel("Normalized response (\muV)");
-title(['Grand-averaged wave in ', char(exampleChannel)]);
-addLines2Axes(struct("X", {- 1000 - ICIsREG(1); 0; 1000 - ICIsREG(1)}));
-scaleAxes("x", [-100, 600]);
-scaleAxes("y", [-2, 2]);
-yRange = get(gca, "YLim");
-
-idx = p110 < alphaVal;
-c = mixColors(chData(1).color, chData(2).color);
-h1 = bar(t(idx), ones(sum(idx), 1) * yRange(1), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-h2 = bar(t(idx), ones(sum(idx), 1) * yRange(2), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-setLegendOff([h1, h2]);
-
-idx = p220 < alphaVal;
-c = mixColors(chData(3).color, chData(4).color);
-h1 = bar(t(idx), ones(sum(idx), 1) * yRange(1), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-h2 = bar(t(idx), ones(sum(idx), 1) * yRange(2), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-setLegendOff([h1, h2]);
-
-idx = p330 < alphaVal;
-c = mixColors(chData(5).color, chData(6).color);
-h1 = bar(t(idx), ones(sum(idx), 1) * yRange(1), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-h2 = bar(t(idx), ones(sum(idx), 1) * yRange(2), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-setLegendOff([h1, h2]);
-
 %% Results of figures
 % Figure 5
 % d
-[t(:), cat(1, chDataREG.chMean)'];
+temp = arrayfun(@(x) [x.chMean(:), x.chErr(:)], chDataREG, "UniformOutput", false);
+[t, cat(2, temp{:})];
 
 % f,g
 [cellfun(@mean, RM_delta_changeREG), cellfun(@SE, RM_delta_changeREG)];

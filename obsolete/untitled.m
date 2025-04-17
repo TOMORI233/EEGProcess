@@ -35,7 +35,6 @@ dataW = cellfun(@(x) load(x).chData, DATAPATHsW, "UniformOutput", false);
 rmfcn = @mean;
 rms = path2func(fullfile(matlabroot, "toolbox/matlab/datafun/rms.m"));
 
-%% Determine peak time of REG4-4.01
 ICI2 = 4;
 Type = "IRREG";
 

@@ -48,6 +48,7 @@ for index = 1:length(insertN)
     temp = cellfun(@(x) x ./ std(x, [], 2), temp, "UniformOutput", false);
 
     chDataAll(index, 1).chMean = calchMean(temp);
+    chDataAll(index, 1).chErr = calchErr(temp);
     chDataAll(index, 1).color = colors{index};
 
     gfp{index} = calGFP(temp, EEGPos.ignore);
@@ -93,25 +94,30 @@ RM_delta_change = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_change, "Un
 
 %% Statistics
 % test normality
-[~, p] = cellfun(@swtest, RM_change);
-if all(p < alphaVal)
-    statFcn = @(x, y) obtainArgoutN(@ttest, 2, x', y', "Tail", "both");
-else
-    statFcn = @(x, y) rowFcn(@(x1, y1) signrank(x1, y1, "tail", "both"), x, y);
-end
+% [~, p] = cellfun(@swtest, RM_change);
+% if all(p < alphaVal)
+%     statFcn = @(x, y) obtainArgoutN(@ttest, [2, 4], x', y', "Tail", "both");
+% else
+%     statFcn = @(x, y) obtainArgoutN(@mSignrank, [1, 3, 4], x, y, "tail", "both");
+% end
+statFcn = @(x, y) obtainArgoutN(@ttest, [2, 4], x', y', "Tail", "both");
 
 p_RM_channels_change_vs_base     = cellfun(@(x, y) statFcn(x, y), RM_channels_base, RM_channels_change, "UniformOutput", false);
 p_RM_channels_change_vs_control1 = cellfun(@(x)    statFcn(RM_channels_change{1}, x), RM_channels_change, "UniformOutput", false);
 p_RM_channels_change_vs_control2 = cellfun(@(x)    statFcn(x, RM_channels_change{end}), RM_channels_change, "UniformOutput", false);
 
-[~, ~, p_RM_channels_change_vs_base   ]  = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_change_vs_base    , "UniformOutput", false);
-[~, ~, p_RM_channels_change_vs_control1] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_change_vs_control1, "UniformOutput", false);
-[~, ~, p_RM_channels_change_vs_control2] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_change_vs_control2, "UniformOutput", false);
+[~, ~, ~, p_RM_channels_change_vs_base    ] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_change_vs_base    , "UniformOutput", false);
+[~, ~, ~, p_RM_channels_change_vs_control1] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_change_vs_control1, "UniformOutput", false);
+[~, ~, ~, p_RM_channels_change_vs_control2] = cellfun(@(x) fdr_bh(x, 0.05, 'dep'), p_RM_channels_change_vs_control2, "UniformOutput", false);
 
 % averaged
-p_RM_change_vs_base     = cellfun(@(x, y) statFcn(x, y), RM_base, RM_change);
-p_RM_change_vs_control1 = cellfun(@(x) statFcn(RM_delta_change{1}, x), RM_delta_change);
-p_RM_change_vs_control2 = cellfun(@(x) statFcn(x, RM_delta_change{end}), RM_delta_change);
+[p_RM_change_vs_base    , stats_RM_change_vs_base    ] = cellfun(@(x, y) statFcn(x, y), RM_base, RM_change);
+[p_RM_change_vs_control1, stats_RM_change_vs_control1] = cellfun(@(x) statFcn(RM_delta_change{1}, x), RM_delta_change);
+[p_RM_change_vs_control2, stats_RM_change_vs_control2] = cellfun(@(x) statFcn(x, RM_delta_change{end}), RM_delta_change);
+
+d_RM_change_vs_base = cellfun(@(x, y) cohensD(x, y), RM_base, RM_change);
+d_RM_change_vs_control1 = cellfun(@(x) cohensD(RM_delta_change{1}, x), RM_delta_change);
+d_RM_change_vs_control2 = cellfun(@(x) cohensD(RM_delta_change{end}, x), RM_delta_change);
 
 %% Tunning plot
 % compute averaged RM across all channels
@@ -134,36 +140,23 @@ xlabel("Insert click number");
 ylabel("\DeltaRM (\muV)");
 title("Tuning of RM_{change}");
 
-mPrint(FigTuning, fullfile(FIGUREPATH, 'RM tuning.png'), "-dpng", "-r300");
-
 %% Topoplot of RM for all conditions
-figure;
+FigTopo = figure;
 for index = 1:length(insertN)
     mSubplot(2, length(insertN), index, "shape", "square-min");
     params = topoplotConfig(EEGPos, find(p_RM_channels_change_vs_base{index} < alphaVal), 5, 20);
     topoplot(mean(RM_channels_delta_change{index}, 2), EEGPos.locs, params{:});
 
-    if index == length(insertN)
-        pos = tightPosition(gca, "IncludeLabels", true);
-        cb = colorbar("Position", [pos(1) + pos(3) - 0.01, pos(2), 0.01, pos(4)]);
-        cb.FontSize = 14;
-        cb.FontWeight = "bold";
-    end
-    
     mSubplot(2, length(insertN), index + length(insertN), "shape", "square-min");
     params = topoplotConfig(EEGPos, find(p_RM_channels_change_vs_control2{index} < alphaVal), 5, 20);
     topoplot(mean(RM_channels_delta_change{index}, 2), EEGPos.locs, params{:});
-
-    if index == length(insertN)
-        pos = tightPosition(gca, "IncludeLabels", true);
-        cb = colorbar("Position", [pos(1) + pos(3) - 0.01, pos(2), 0.01, pos(4)]);
-        cb.FontSize = 14;
-        cb.FontWeight = "bold";
-    end
-
 end
-scaleAxes("c", "symOpt", "max", "ignoreInvisible", false);
-print(gcf, fullfile(FIGUREPATH, 'topo.jpg'), "-djpeg", "-r900");
+cRange = scaleAxes("c", "symOpt", "max", "ignoreInvisible", false);
+set(findobj(gcf, "Type", "Patch"), "FaceColor", "w");
+set(FigTopo, "Color", "w");
+temp = floor(max(cRange) * 100) / 100;
+exportgraphics(gcf, fullfile(FIGUREPATH, 'topo.jpg'), "Resolution", 900);
+exportcolorbar([-temp, temp], fullfile(FIGUREPATH, 'topo colorbar.jpg'));
 
 %% Example channel
 run(fullfile(pwd, "config\config_plot.m"));
@@ -173,6 +166,7 @@ idx = find(upper(EEGPos.channelNames) == exampleChannel);
 
 chData = chDataAll;
 chData = addfield(chData, "chMean", arrayfun(@(x) x.chMean(idx, :), chDataAll, "UniformOutput", false)');
+chData = addfield(chData, "chErr", arrayfun(@(x) x.chErr(idx, :), chDataAll, "UniformOutput", false)');
 plotRawWaveMulti(chData, window - 1000 - 4);
 xlabel("Time from change (ms)");
 ylabel("Normalized response (\muV)");
@@ -196,4 +190,5 @@ save(['..\DATA\MAT DATA\figure\Res insert (', char(area), ').mat'], ...
 %% Results of figures
 % Figure 2
 % b
-[t, cat(1, chData.chMean)'];
+temp = arrayfun(@(x) [x.chMean(:), x.chErr(:)], chData, "UniformOutput", false);
+[t, cat(2, temp{:})];
