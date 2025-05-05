@@ -17,6 +17,7 @@ if ~strcmp(ROOTPATH(end), '\')
     ROOTPATH = [ROOTPATH, '\'];
 end
 
+
 % read from BDF data
 EEG = readbdfdata({'data.bdf', 'evt.bdf'}, ROOTPATH);
 if exist(fullfile(ROOTPATH, 'data.1.bdf'), 'file')
@@ -76,6 +77,7 @@ if strcmpi(icaOpt, "on") && nargout >= 4
         disp('ICA result does not exist. Performing ICA on data...');
         channels = 1:size(trialsEEG{1}, 1);
         plotRawWave(calchMean(trialsEEG), calchStd(trialsEEG), window);
+        scaleAxes("y", [-20,20], "symOpts", "max");
         bc = validateInput(['Input extra bad channels (besides ', num2str(badChs(:)'), '): '], @(x) isempty(x) || all(fix(x) == x & x > 0));
         badChs = [badChs(:); bc(:)]';
 

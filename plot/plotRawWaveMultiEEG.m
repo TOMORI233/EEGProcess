@@ -106,16 +106,18 @@ else
         xlim(window);
 
         if ~isempty(channelNames)
-            title([channelNames{chNum}, titleStr]);
+            title(channelNames{chNum}, titleStr);
         else
             title(['CH ', num2str(chNum), titleStr]);
         end
-
+        
     end
+    
 
 end
 
 scaleAxes(Fig, "y", "on");
+set(Fig,'Visible', 'off');
 
 return;
 end
