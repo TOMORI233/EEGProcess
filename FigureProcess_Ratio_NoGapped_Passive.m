@@ -213,13 +213,13 @@ FigTopo = figure;
 clearvars ax
 for index = 1:length(ICIsREG)
     ax(index) = mSubplot(2, 5, index, "shape", "square-min");
-    params = topoplotConfig(EEGPos, find(p_RM_channels_changeREG_vs_base{index} < alphaVal), 6, 24);
+    params = topoplotConfig(EEGPos, find(p_RM_channels_changeREG_vs_base{index} < alphaVal), 0, 24);
     topoplot(mean(RM_channels_delta_changeREG{index}, 2), EEGPos.locs, params{:});
 end
 
 for index = 1:length(ICIsIRREG)
     ax(length(ICIsREG) + index) = mSubplot(2, 5, 5 + find(ICIsREG == ICIsIRREG(index)), "shape", "square-min");
-    params = topoplotConfig(EEGPos, find(p_RM_channels_changeIRREG_vs_base{index} < alphaVal), 6, 24);
+    params = topoplotConfig(EEGPos, find(p_RM_channels_changeIRREG_vs_base{index} < alphaVal), 0, 24);
     topoplot(mean(RM_channels_delta_changeIRREG{index}, 2), EEGPos.locs, params{:});
 end
 cRange = scaleAxes(ax, "c", "symOpt", "max", "ignoreInvisible", false);
@@ -263,7 +263,7 @@ for aIndex = 1:length(allAxes)
     allAxes(aIndex).XAxis.Visible = "off";
     allAxes(aIndex).YAxis.Visible = "off";
 end
-params = topoplotConfig(EEGPos, find(p_RM_channels_changeREG_vs_base{end} < alphaVal), 4, 16);
+params = topoplotConfig(EEGPos, find(p_RM_channels_changeREG_vs_base{end} < alphaVal), 0, 16);
 ax = mSubplot(FigREG, 3, 4, 4, "shape", "square-min");
 topoplot(mean(RM_channels_delta_changeREG{end}, 2), EEGPos.locs, params{:});
 cRange = scaleAxes(ax, "c", "symOpt", "max", "ignoreInvisible", false);
@@ -308,7 +308,7 @@ for aIndex = 1:length(allAxes)
     allAxes(aIndex).XAxis.Visible = "off";
     allAxes(aIndex).YAxis.Visible = "off";
 end
-params = topoplotConfig(EEGPos, find(p_RM_channels_changeIRREG_vs_base{end} < alphaVal), 4, 16);
+params = topoplotConfig(EEGPos, find(p_RM_channels_changeIRREG_vs_base{end} < alphaVal), 0, 16);
 ax = mSubplot(FigIRREG, 3, 4, 4, "shape", "square-min");
 topoplot(mean(RM_channels_delta_changeIRREG{end}, 2), EEGPos.locs, params{:});
 scaleAxes(ax, "c", cRange, "ignoreInvisible", false);

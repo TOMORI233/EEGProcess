@@ -135,6 +135,7 @@ RM_delta_changeREG = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_changeRE
 
 %% Statistics
 statFcn = @(x, y) obtainArgoutN(@ttest, [2, 4], x', y', "Tail", "both");
+% statFcn = @(x, y) rowFcn(@(a, b) signrank(a, b, "tail", "left"), x, y, "ErrorHandler", @mErrorFcn);
 
 p_RM_channels_changeREG_vs_base = cellfun(@(x, y) statFcn(x, y), RM_channels_baseREG, RM_channels_changeREG, "UniformOutput", false);
 
@@ -145,12 +146,15 @@ p_RM_channels_changeREG_vs_base = cellfun(@(x, y) statFcn(x, y), RM_channels_bas
 
 d_RM_changeREG_vs_base = cellfun(@(x, y) cohensD(x, y), RM_baseREG, RM_changeREG);
 
+%% Bayesian t-test
+bf10_RM_change_vs_base = cellfun(@(x, y) bf.ttest(x, y), RM_baseREG, RM_changeREG);
+
 %% Topoplot of RM for all conditions
 % REG
 FigTopo = figure;
 for index = 1:length(ICIsREG)
     mSubplot(2, 5, index, "shape", "square-min");
-    params = topoplotConfig(EEGPos, find(p_RM_channels_changeREG_vs_base{index} < alphaVal), 6, 24);
+    params = topoplotConfig(EEGPos, find(p_RM_channels_changeREG_vs_base{index} < alphaVal), 0, 24);
     topoplot(mean(RM_channels_delta_changeREG{index}, 2), EEGPos.locs, params{:});
 end
 cRange = scaleAxes("c", "symOpt", "max", "ignoreInvisible", false);

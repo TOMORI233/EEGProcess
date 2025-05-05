@@ -5,6 +5,9 @@ ccc;
 ROOTPATH = getAbsPath('..\DATA\MAT DATA\pre');
 SAVEROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
 
+protocols = {'passive3'};
+matName = 'chMean.mat';
+
 % protocols = {'passive1', 'passive3'};
 % matName = 'chMean.mat';
 
@@ -14,8 +17,8 @@ SAVEROOTPATH = getAbsPath('..\DATA\MAT DATA\temp');
 % protocols = {'active1', 'active2'};
 % matName = 'chMeanC.mat';
 
-protocols = {'active1', 'active2'};
-matName = 'chMeanW.mat';
+% protocols = {'active1', 'active2'};
+% matName = 'chMeanW.mat';
 
 for pIndex = 1:length(protocols)
     disp(['Current protocol: ', protocols{pIndex}]);

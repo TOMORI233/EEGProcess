@@ -1,6 +1,11 @@
 function [data, data_erp, data_cov] = prepareFieldtripData(trialsData, window, fs, channelNames)
 % This function converts cell data to fieldtrip format.
 % For EEG data with electrode labels, specify channel names.
+% Input:
+%   [trialsData]: trial data (cell)
+%   [window]: time window, in ms
+%   [fs]: sample rate, in Hz
+%   [channelNames]: electrode labels
 
 narginchk(3, 4);
 
@@ -8,7 +13,7 @@ if isa(trialsData, "double") % single trial / ERP
     trialsData = {trialsData};
 end
 
-t = linspace(window(1), window(2), size(trialsData{1}, 2));
+t = linspace(window(1), window(2), size(trialsData{1}, 2)) / 1000; % s
 channels = (1:size(trialsData{1}, 1))';
 
 if nargin < 4
@@ -23,18 +28,18 @@ end
 
 % trial data
 cfg = [];
-% cfg.reref = 'yes';               % use re-reference
-% cfg.refmethod = 'average';       % CAR
-% cfg.refchannel = 'all';
-% cfg.trials = 'all';
+cfg.reref = 'yes';               % use re-reference
+cfg.refmethod = 'average';       % CAR
+cfg.refchannel = 'all';
+cfg.trials = 'all';
 data.trial = trialsData(:)';
 data.time = repmat({t}, 1, length(trialsData));
 data.label = channelNames;
 data.fsample = fs;
 data.trialinfo = ones(length(trialsData), 1);
 data = ft_selectdata(cfg, data);
-cfg.keeptrials = 'yes';
-data = ft_timelockanalysis(cfg, data);
+% cfg.keeptrials = 'yes';
+% data = ft_timelockanalysis(cfg, data);
 
 % ERP
 cfg = [];

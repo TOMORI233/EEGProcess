@@ -149,7 +149,7 @@ r_change_C_vs_W    = rowFcn(@(x, y) rbcc(x, y), RM_delta_changeW, RM_delta_chang
 
 %% Scatter plot of all channels
 Fig = plotScatterEEG(RM_delta_changeW, RM_delta_changeC, EEGPos, statFcn, false);
-params = topoplotConfig(EEGPos, find(p_change_C_vs_W < alphaVal), 4, 16);
+params = topoplotConfig(EEGPos, find(p_change_C_vs_W < alphaVal), 0, 16);
 ax = mSubplot(Fig, 3, 4, 4, "shape", "square-min");
 topoplot(mean(RM_delta_changeC - RM_delta_changeW, 2), EEGPos.locs, params{:});
 cb = colorbar;
@@ -162,15 +162,15 @@ exportgraphics(Fig, fullfile(FIGUREPATH, 'scatter (C vs W).jpg'), "Resolution", 
 %% Topoplot
 figure;
 mSubplot(2, 5, 1, "shape", "square-min");
-params = topoplotConfig(EEGPos, find(p_change_C_vs_base < alphaVal), 6, 24);
+params = topoplotConfig(EEGPos, find(p_change_C_vs_base < alphaVal), 0, 24);
 topoplot(mean(RM_delta_changeC, 2), EEGPos.locs, params{:});
 
 mSubplot(2, 5, 2, "shape", "square-min");
-params = topoplotConfig(EEGPos, find(p_change_W_vs_base < alphaVal), 6, 24);
+params = topoplotConfig(EEGPos, find(p_change_W_vs_base < alphaVal), 0, 24);
 topoplot(mean(RM_delta_changeW, 2), EEGPos.locs, params{:});
 
 mSubplot(2, 5, 3, "shape", "square-min");
-params = topoplotConfig(EEGPos, find(p_change_C_vs_W < alphaVal), 6, 24);
+params = topoplotConfig(EEGPos, find(p_change_C_vs_W < alphaVal), 0, 24);
 topoplot(mean(RM_delta_changeC - RM_delta_changeW, 2), EEGPos.locs, params{:});
 
 cRange = scaleAxes("c", "symOpt", "max", "ignoreInvisible", false);

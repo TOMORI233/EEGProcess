@@ -24,11 +24,11 @@ run(fullfile(pwd, "config\config_plot.m"));
 run(fullfile(pwd, "config\config_Neuroscan64.m"));
 
 % P1
-% windowChangeCT = 119 + [-25, 25] + 1000 + interval; % peak
+% windowChangeCT = 1119 + [-25, 25]; % peak
 % rmfcn = @mean;
 
 % N2
-windowChangeCT = 250 + [-25, 25] + 1000 + interval; % trough
+windowChangeCT = 1250 + [-25, 25]; % trough
 rmfcn = @mean;
 
 %% Load

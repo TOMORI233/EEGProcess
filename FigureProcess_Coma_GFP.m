@@ -229,7 +229,7 @@ ylabel("RM_{onset}");
 mSubplot(1, 2, 2, "shape", "square-min");
 X = scoreTotal;
 Y = mean(cat(2, RM_delta_onset_coma{2}), 2);
-[r_corr1, p_corr1] = corr(X(~isnan(X)), Y(~isnan(X)), "type", "Pearson");
+[bf1, r_corr1, p_corr1] = bf.corr(X(~isnan(X)), Y(~isnan(X)));
 scatter(X(~isnan(X) & idxOnset), Y(~isnan(X) & idxOnset), 100, "blue", "filled");
 hold on;
 scatter(X(~isnan(X) & ~idxOnset), Y(~isnan(X) & ~idxOnset), 100, "black", "filled");
@@ -249,7 +249,7 @@ ylabel("RM_{change}");
 mSubplot(1, 2, 2, "shape", "square-min");
 X = scoreTotal;
 Y = RM_delta_change_coma{2};
-[r_corr2, p_corr2] = corr(X(~isnan(X)), Y(~isnan(X)), "type", "Pearson");
+[bf2, r_corr2, p_corr2] = bf.corr(X(~isnan(X)), Y(~isnan(X)));
 scatter(X(~isnan(X) & idxOnset), Y(~isnan(X) & idxOnset), 100, "blue", "filled");
 hold on;
 scatter(X(~isnan(X) & ~idxOnset), Y(~isnan(X) & ~idxOnset), 100, "black", "filled");
@@ -328,30 +328,6 @@ chIdx = find(upper(EEGPos.channelNames) == "PO5");
 [t(:) - 1000, ...
  gfpComa{idx}(1, :)', ...
  gfpComa{idx}(2, :)'];
-
-figure;
-mSubplot(1, 2, 1, "shape", "square-min");
-plot(t1, res_example_coma_GFP_REG4_4, "Color", "k", "LineWidth", 2, "DisplayName", "REG 4-4");
-hold on;
-plot(t1, res_example_coma_GFP_REG4_5, "Color", "r", "LineWidth", 2, "DisplayName", "REG 4-5");
-legend;
-xlabel("Time (sec)");
-ylabel("GFP (\muV)");
-title(['Global field power of coma subject ', char(exampleID)]);
-
-mSubplot(1, 2, 2, "shape", "square-min");
-temp1 = mean(dataComa{idx}(1).chMean(chs2Avg, :), 1)';
-plot(t1, temp1, "Color", "k", "LineWidth", 2);
-hold on;
-temp2 = mean(dataComa{idx}(2).chMean(chs2Avg, :), 1)';
-plot(t1, temp2, "Color", "r", "LineWidth", 2);
-addLines2Axes(struct("X", {0; 1}));
-
-temp = dataComa{idx};
-temp(1).color = "k";
-temp(2).color = "r";
-plotRawWaveMultiEEG(temp, window, [], EEGPos_Neuracle64);
-addLines2Axes(struct("X", {0; 1000}));
 
 resComa = [t(:) / 1000 - 1, calchMean(cellfun(@(x) x(1, :), gfpComa, "UniformOutput", false))', ...
                             calchMean(cellfun(@(x) x(2, :), gfpComa, "UniformOutput", false))'];

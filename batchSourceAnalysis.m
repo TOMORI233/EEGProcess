@@ -3,11 +3,14 @@ ccc;
 cd(fileparts(mfilename("fullpath")));
 
 MATPATHs = dir("..\DATA\MAT DATA\temp\**\passive3\chMean.mat");
+% MATPATHs = dir("..\DATA\MAT DATA\pre\**\passive3\data.mat");
 MATPATHs = arrayfun(@(x) fullfile(x.folder, x.name), MATPATHs, "UniformOutput", false);
 
-SAVEPATHs = replace(MATPATHs, "chMean.mat", "source change CT.mat");
+% SAVEPATHs = replace(MATPATHs, "chMean.mat", "source change CT.mat");
+% FIGUREROOTPATH = "..\Figures\source\change CT (Reg)";
 
-FIGUREROOTPATH = "..\Figures\source\change CT";
+SAVEPATHs = replace(MATPATHs, "chMean.mat", "source change CT (Irreg).mat");
+FIGUREROOTPATH = "..\Figures\source\change CT (Irreg)";
 
 [~, SUBJECTs] = cellfun(@(x) getLastDirPath(x, 2), MATPATHs, "UniformOutput", false);
 SUBJECTs = cellfun(@(x) x{1}, SUBJECTs, "UniformOutput", false);
@@ -17,14 +20,23 @@ ft_setPath2Top;
 
 EEGPos = EEGPos_Neuroscan64;
 
-% remove M1, M2
-EEGPos.channelNames([33, 43]) = [];
-
-[elec, vol, mri, leadfield] = prepareSourceAnalysis(EEGPos);
-idx = cellfun(@(x) find(ismember(upper(EEGPos.channelNames), upper(x))), elec.label);
-
-window1 = [700, 1000]; % ms
+% change
+window1 = [1000, 1300]; % ms
 window2 = [1000, 1300]; % ms
+
+% onset
+% window1 = [-300, 0]; % ms
+% window2 = [0, 300]; % ms
+
+%% Load
+% remove M1,M2,CB1,CB2
+labels0 = EEGPos.channelNames;
+excludeChIdx0 = contains(labels0, {'M1', 'M2', 'CB1', 'CB2'});
+labels0(excludeChIdx0) = [];
+
+chIdx = ~excludeChIdx0;
+
+[elec, vol, mri, grid, atlas] = prepareSourceAnalysis(labels0);
 
 %% Batch
 for sIndex = 1:length(MATPATHs)
@@ -36,24 +48,31 @@ for sIndex = 1:length(MATPATHs)
 
     load(MATPATHs{sIndex});
 
-    % based on trial data
-    temp = {chData([chData.type] == "PT").chMean}';
-    temp = cutData(temp, window, window1);
-    temp = cellfun(@(x) x(idx, :), temp, "UniformOutput", false);
-    [~, ~, data_cov1] = prepareFieldtripData(temp, window1, fs, EEGPos.channelNames(idx));
-    source1 = mSourceAnalysis(data_cov1, elec, vol, leadfield);
+    trialsEEG1 = {chData([chData.type] == "REG" & [chData.ICI] == 4).chMean};
+    trialsEEG2 = {chData([chData.type] == "REG" & [chData.ICI] == 4.06).chMean};
+    
+    % trialsEEG1 = {chData([chData.type] == "IRREG" & [chData.ICI] == 4).chMean};
+    % trialsEEG2 = {chData([chData.type] == "IRREG" & [chData.ICI] == 4.06).chMean};
 
-    temp = {chData([chData.type] == "PT").chMean}';
-    temp = cutData(temp, window, window2);
-    temp = cellfun(@(x) x(idx, :), temp, "UniformOutput", false);
-    [~, ~, data_cov2] = prepareFieldtripData(temp, window2, fs, EEGPos.channelNames(idx));
-    source2 = mSourceAnalysis(data_cov2, elec, vol, leadfield);
+    trialsEEG1 = cutData(trialsEEG1, window, window1);
+    trialsEEG2 = cutData(trialsEEG2, window, window2);
+
+    trialsEEG1 = cellfun(@(x) x(chIdx, :), trialsEEG1, "UniformOutput", false);
+    trialsEEG2 = cellfun(@(x) x(chIdx, :), trialsEEG2, "UniformOutput", false);
+
+    % base
+    [~, ~, data_cov1] = prepareFieldtripData(trialsEEG1, window1, fs, EEGPos.channelNames(chIdx));
+    source1 = mSourceAnalysis(data_cov1, elec, vol, grid, 'eloreta');
+
+    % erp
+    [~, ~, data_cov2] = prepareFieldtripData(trialsEEG2, window2, fs, EEGPos.channelNames(chIdx));
+    source2 = mSourceAnalysis(data_cov2, elec, vol, grid, 'eloreta');
 
     cfg = [];
     cfg.parameter = 'avg.pow';
-    cfg.operation = 'subtract';
+    cfg.operation = '((x1-x2)./(x1+x2))'; % normalize
     source_diff = ft_math(cfg, source2, source1);
-    [Fig2D, Fig3D] = mSourceplot(source_diff, mri, "slice");
+    [Fig2D, Fig3D] = mSourceplot(source_diff, mri, 'slice', 'jet');
 
     save(SAVEPATHs{sIndex}, "source1", "source2");
     exportgraphics(Fig2D, fullfile(FIGUREROOTPATH, ['2D-', SUBJECTs{sIndex}, '.jpg']), "Resolution", 300);
@@ -70,8 +89,8 @@ cfg.parameter = 'avg.pow';
 source1_avg = ft_sourcegrandaverage(cfg, source1{:});
 source2_avg = ft_sourcegrandaverage(cfg, source2{:});
 
-% mSourceplot(source1_avg, mri, "slice", "Base");
-% mSourceplot(source2_avg, mri, "slice", "Onset");
+% mSourceplot(source1_avg, mri, "slice", 'hot');
+% mSourceplot(source2_avg, mri, "slice", 'hot');
 
 %% Permutation test
 cfg = [];
@@ -101,7 +120,18 @@ stat = ft_sourcestatistics(cfg, source1{:}, source2{:});
 % plot
 cfg = [];
 cfg.parameter = 'avg.pow';
-cfg.operation = 'subtract';
+cfg.operation = '((x1-x2)./(x1+x2))';
 source_diff = ft_math(cfg, source2_avg, source1_avg);
-source_diff.pow = source_diff.pow .* stat.mask;
-[Fig2D, Fig3D] = mSourceplot(source_diff, mri, "slice", "Diff-stat");
+source_diff.pow = source_diff.pow .* (stat.mask == 1);
+[~, Fig3D] = mSourceplot(source_diff, mri, 'slice', 'jet', 0.5);
+scaleAxes(Fig3D, "c", [-0.7, 0.7], "ignoreInvisible", false);
+
+ax = findobj(Fig3D, "Type", "Axes");
+% left
+exportgraphics(ax(3), fullfile(FIGUREROOTPATH, "left-population.jpg"), "Resolution", 900);
+% right
+colorbar(ax(1), "off");
+exportgraphics(ax(1), fullfile(FIGUREROOTPATH, "right-population.jpg"), "Resolution", 900);
+% colorbar
+cRange = get(ax(1), "CLim");
+exportcolorbar(cRange, fullfile(FIGUREROOTPATH, "colorbar.jpg"), "jet", "ShowZero", true);

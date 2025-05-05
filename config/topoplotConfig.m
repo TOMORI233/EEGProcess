@@ -15,6 +15,12 @@ function params = topoplotConfig(EEGPos, chsMark, size0, sizeMark)
     end
     
     chs2Plot = EEGPos.channels(~ismember(EEGPos.channels, EEGPos.ignore))';
+
+    if size0 ~= 0
+        marker = [{'emarker'}, {{'o', 'k', size0, 1}}]; % {MarkerType, Color, Size, LineWidth}
+    else
+        marker = [{'electrodes'}, {{'off'}}];
+    end
     
     if EEGPos.name == "Neuroscan64"
         params0 = [...
@@ -24,7 +30,7 @@ function params = topoplotConfig(EEGPos, chsMark, size0, sizeMark)
                    {'intrad'   }, {0.4}                                , ... % interpolate radius
                    {'conv'     }, {'on'}                               , ... % plot radius just covers maximum channel radius
                    {'colormap' }, {'jet'}                              , ... % colormap
-                   {'emarker'  }, {{'o', 'k', size0, 1}}               , ... % {MarkerType, Color, Size, LineWidth}
+                   marker
                   ];
     elseif EEGPos.name == "Neuracle64"
         % reset location
@@ -36,7 +42,7 @@ function params = topoplotConfig(EEGPos, chsMark, size0, sizeMark)
                    {'intrad'   }, {0.64}                               , ... % interpolate radius
                    {'conv'     }, {'on'}                               , ... % plot radius just covers maximum channel radius
                    {'colormap' }, {'jet'}                              , ... % colormap
-                   {'emarker'  }, {{'o', 'k', size0, 1}}               , ... % {MarkerType, Color, Size, LineWidth}
+                   marker
                   ];
     else
         error("Unsupported configuration");

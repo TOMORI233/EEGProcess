@@ -303,7 +303,7 @@ res_scatterX_IRREG = cellfun(@(x) x(1), resIRREG_A1(subjectIdxA1));
 res_scatterY_REG = cellfun(@(x) x(end), resREG_A1(subjectIdxA1));
 
 %% 
-[~, res_p_IRREG_vs_control, ~, stats_IRREG_vs_control] = ttest(res_scatterX_IRREG, cellfun(@(x) x(2), resIRREG_A1(subjectIdxA1)));
+[bf10_IRREG_vs_control, res_p_IRREG_vs_control, ~, stats_IRREG_vs_control] = bf.ttest(res_scatterX_IRREG, cellfun(@(x) x(2), resIRREG_A1(subjectIdxA1)));
 d_IRREG_vs_control = cohensD(res_scatterX_IRREG, cellfun(@(x) x(2), resIRREG_A1(subjectIdxA1)));
 
 [~, res_p_PT_vs_control, ~, stats_PT_vs_control] = ttest(cellfun(@(x) x(1), resPT_A1(subjectIdxA1)), ...

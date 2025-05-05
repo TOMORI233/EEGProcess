@@ -1,9 +1,16 @@
-function source_interp = mSourceInterp(source, mri)
-% 将源数据投影到标准脑
+function source_interp = mSourceInterp(source, mri, downsample)
+narginchk(2, 3);
+
+if nargin < 3
+    downsample = 2;
+end
+
 cfg = [];
 cfg.parameter = 'pow';
 cfg.interpmethod = 'linear';
-cfg.downsample = 2;
+% cfg.interpmethod = 'nearest';
+cfg.downsample = downsample;
+cfg.coordsys = 'mni';
 source_interp = ft_sourceinterpolate(cfg, source, mri);
 
 return;

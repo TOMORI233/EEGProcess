@@ -119,6 +119,9 @@ d_RM_change_vs_base = cellfun(@(x, y) cohensD(x, y), RM_base, RM_change);
 d_RM_change_vs_control1 = cellfun(@(x) cohensD(RM_delta_change{1}, x), RM_delta_change);
 d_RM_change_vs_control2 = cellfun(@(x) cohensD(RM_delta_change{end}, x), RM_delta_change);
 
+%% Bayesian t-test
+bf10_RM_change_vs_base = cellfun(@(x, y) bf.ttest(x, y), RM_base, RM_change);
+
 %% Tunning plot
 % compute averaged RM across all channels
 FigTuning = figure;
@@ -144,11 +147,11 @@ title("Tuning of RM_{change}");
 FigTopo = figure;
 for index = 1:length(insertN)
     mSubplot(2, length(insertN), index, "shape", "square-min");
-    params = topoplotConfig(EEGPos, find(p_RM_channels_change_vs_base{index} < alphaVal), 5, 20);
+    params = topoplotConfig(EEGPos, find(p_RM_channels_change_vs_base{index} < alphaVal), 0, 20);
     topoplot(mean(RM_channels_delta_change{index}, 2), EEGPos.locs, params{:});
 
     mSubplot(2, length(insertN), index + length(insertN), "shape", "square-min");
-    params = topoplotConfig(EEGPos, find(p_RM_channels_change_vs_control2{index} < alphaVal), 5, 20);
+    params = topoplotConfig(EEGPos, find(p_RM_channels_change_vs_control2{index} < alphaVal), 0, 20);
     topoplot(mean(RM_channels_delta_change{index}, 2), EEGPos.locs, params{:});
 end
 cRange = scaleAxes("c", "symOpt", "max", "ignoreInvisible", false);

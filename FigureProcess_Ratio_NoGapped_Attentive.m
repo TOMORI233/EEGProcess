@@ -269,13 +269,13 @@ FigTopo_REG_vs_IRREG = figure;
 clearvars ax
 for index = 1:length(ICIsREG)
     ax(index) = mSubplot(2, 5, index, "shape", "square-min");
-    params = topoplotConfig(EEGPos, find(p_RM_channels_changeREG_vs_base{index} < alphaVal), 6, 24);
+    params = topoplotConfig(EEGPos, find(p_RM_channels_changeREG_vs_base{index} < alphaVal), 0, 24);
     topoplot(mean(RM_channels_delta_changeREG{index}, 2), EEGPos.locs, params{:});
 end
 
 for index = 1:length(ICIsIRREG)
     ax(length(ICIsREG) + index) = mSubplot(2, 5, 5 + find(ICIsREG == ICIsIRREG(index)), "shape", "square-min");
-    params = topoplotConfig(EEGPos, find(p_RM_channels_changeIRREG_vs_base{index} < alphaVal), 6, 24);
+    params = topoplotConfig(EEGPos, find(p_RM_channels_changeIRREG_vs_base{index} < alphaVal), 0, 24);
     topoplot(mean(RM_channels_delta_changeIRREG{index}, 2), EEGPos.locs, params{:});
 end
 cRange = scaleAxes(ax, "c", "symOpt", "max", "ignoreInvisible", false);
@@ -289,7 +289,7 @@ exportcolorbar([-temp, temp], fullfile(FIGUREPATH, 'topo colorbar.jpg'));
 FigTopo_REG_vs_PT = figure;
 for index = 1:length(freqs)
     mSubplot(2, 5, 5 + index * 4 - 3, "shape", "square-min");
-    params = topoplotConfig(EEGPos, find(p_RM_channels_changePT_vs_base{index} < alphaVal), 6, 24);
+    params = topoplotConfig(EEGPos, find(p_RM_channels_changePT_vs_base{index} < alphaVal), 0, 24);
     topoplot(mean(RM_channels_delta_changePT{index}, 2), EEGPos.locs, params{:});
 end
 copyobj(ax(1:length(ICIsREG)), FigTopo_REG_vs_PT);

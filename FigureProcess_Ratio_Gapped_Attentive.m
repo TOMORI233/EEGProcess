@@ -213,6 +213,10 @@ SS_between = tbl_tuning{2,2};  % Sum of squares between groups
 SS_total = tbl_tuning{4,2};    % Total sum of squares
 eta_squared = SS_between / SS_total;  % Eta squared (η²)
 
+% Bayesian factor
+[~, tbl] = prepareGroupData(RM_changeREG{2:end});
+bf_ANOVA = bf.anova(tbl, 'y ~ group');
+
 %% Topoplot of RM for all conditions
 % REG vs IRREG
 figure;
