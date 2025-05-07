@@ -98,7 +98,7 @@ RM_delta_change = cellfun(@(x) mean(x(idx, :), 1), RM_channels_delta_change, "Un
 % if all(p < alphaVal)
 %     statFcn = @(x, y) obtainArgoutN(@ttest, [2, 4], x', y', "Tail", "both");
 % else
-%     statFcn = @(x, y) obtainArgoutN(@mSignrank, [1, 3, 4], x, y, "tail", "both");
+%     statFcn = @(x, y) obtainArgoutN(@mSignrank, [1, 3, 4], x', y', "tail", "both");
 % end
 statFcn = @(x, y) obtainArgoutN(@ttest, [2, 4], x', y', "Tail", "both");
 

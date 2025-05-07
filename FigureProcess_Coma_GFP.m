@@ -25,7 +25,7 @@ alphaVal = 0.01;
 % rmfcn = path2func(fullfile(matlabroot, "toolbox/signal/signal/rms.m"));
 
 %% 
-tb = readtable("CRS-R.xlsx");
+tb = readtable("Docs\CRS-R.xlsx");
 
 id = cellstr(num2str(tb.id));
 scoreTotal = tb.score;
@@ -56,7 +56,7 @@ for index = 1:2
     dataHealthy{index} = addfield(dataHealthy{index}, "chMean", arrayfun(@(x) x.chMean ./ std(x.chMean, [], 2), dataHealthy{index}, "UniformOutput", false));
 end
 
-idxOnset = ismember(subjectIDsComa, cellstr(readlines("subjects.txt")));
+idxOnset = ismember(subjectIDsComa, cellstr(readlines("Docs\subjects.txt")));
 t = linspace(window(1), window(2), size(dataComa{1}(1).chMean, 2));
 
 %% 
