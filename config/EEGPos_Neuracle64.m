@@ -27,19 +27,34 @@ EEGPos.locs = addfield(EEGPos.locs, "radius", Rd(:));
 EEGPos.channelNames = {EEGPos.locs.labels}';
 
 %% Neighbours
-th = 0.4;
+% search for root path of fieldtrip
+ftRootPath = fileparts(which("ft_defaults"));
+
+% load standard 10-20 system file
+elec  = ft_read_sens(fullfile(ftRootPath, 'template\electrode\standard_1020.elc'));
+elec  = ft_convert_units(elec,  'mm');
+
+% only include electrodes in standard 10-20 system
+idx = ismember(upper(elec.label), upper(EEGPos.channelNames));
+elec.chanpos  = elec.chanpos (idx, :);
+elec.chantype = elec.chantype(idx);
+elec.chanunit = elec.chanunit(idx);
+elec.elecpos  = elec.elecpos (idx, :);
+elec.label    = elec.label   (idx);
+
+% find neighbours
+cfg = [];
+cfg.elec = elec;
+cfg.method = 'distance';
+neighbours_temp = ft_prepare_neighbours(cfg)';
+
 neighbours = struct("label", EEGPos.channelNames);
-dists = squareform(pdist(cat(1, [EEGPos.locs.X], [EEGPos.locs.Y], [EEGPos.locs.Z])'));
-
 for index = 1:length(neighbours)
-    
-    if ismember(index, EEGPos.ignore)
-        continue;
+    idx = ismember({neighbours_temp.label}, neighbours(index).label);
+    if any(idx)
+        neighbours(index).neighblabel = neighbours_temp(idx).neighblabel;
+        neighbours(index).neighbch = find(ismember(EEGPos.channelNames, neighbours(index).neighblabel));
     end
-
-    neighbours(index).neighbch = find(dists(index, :) < th);
-    neighbours(index).neighbch(neighbours(index).neighbch == index) = [];
-    neighbours(index).neighblabel = {neighbours(neighbours(index).neighbch).label};
 end
 
 EEGPos.neighbours = neighbours;
