@@ -6,7 +6,7 @@ function [EEGDatasets, trialDatasets] = EEGPreprocessNeuroscan(ROOTPATH, opts)
         opts = [];
     end
 
-    rulesROOTPATH = fullfile(getRootDirPath(fileparts(mfilename("fullpath")), 1), "rules");
+    rulesROOTPATH = fullfile(getRootDirPath(fileparts(mfilename("fullpath")), 2), "rules");
     rulesForOneDay = dir(rulesROOTPATH);
     rulesForOneDay = {rulesForOneDay(cellfun(@(x) strcmp(obtainArgoutN(@fileparts, 3, x), '.xlsx'), {rulesForOneDay.name}')).name}';
 

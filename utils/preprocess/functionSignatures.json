@@ -1,0 +1,14 @@
+{
+    "_schemaVersion": "1.0.0",
+
+    "ICA_PopulationEEG": {
+        "inputs": [
+            {"name": "trialsEEG", "kind": "required", "type": ["cell"], "purpose": "data by trials"},
+            {"name": "fs", "kind": "required", "type": ["numeric", "positive", "numel=1"], "purpose": "sample rate"},
+            {"name": "windowICA", "kind": "required", "type": ["numeric", "numel=2"]},
+            {"name": "chs2doICA", "kind": "namevalue"},
+            {"name": "EEGPos", "kind": "namevalue", "type": ["struct", "scalar"]}
+        ]
+    }
+
+}

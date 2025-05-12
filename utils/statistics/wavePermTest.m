@@ -106,7 +106,7 @@ if iscell(data1) && iscell(data2)
         if ~isempty(EEGPos)
             labels = EEGPos.channelNames;
             cfg.neighbours = EEGPos.neighbours;
-            % cfg.minnbchan = 1; % set 1 to enable ChannelxSample clustering
+            cfg.minnbchan = 1; % set 1 to enable ChannelxSample clustering
         else
             labels = arrayfun(@num2str, channels(:), "UniformOutput", false);
         end
