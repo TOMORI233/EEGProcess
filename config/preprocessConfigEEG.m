@@ -33,6 +33,14 @@ opts.nMaxIcaTrial = 100; % If left empty, use all trials
 opts.sameICAOpt = "off"; % If set "on", apply the ICA result of one 
                          % protocol to the others for one subject
 
+% for motion sensor
+opts.load_speed = true;
+opts.fsSensor = 100; % Hz
+
+% for joint processing
+opts.sep_save = true; % save as separate mat
+opts.joint_save = true; % save as a joint mat
+
 % parse name-value pairs
 for index = 1:2:nargin
     opts.(varargin{index}) = varargin{index + 1};

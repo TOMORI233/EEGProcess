@@ -7,6 +7,5 @@ function RM = calRM(trialsData, window, windowRM, rmfcn)
         case "single"
             RM = rmfcn(cutData(trialsData, window, windowRM));
     end
-
     return;
 end

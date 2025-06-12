@@ -117,7 +117,6 @@ else
 end
 
 scaleAxes(Fig, "y", "on");
-set(Fig,'Visible', 'off');
 
 return;
 end
