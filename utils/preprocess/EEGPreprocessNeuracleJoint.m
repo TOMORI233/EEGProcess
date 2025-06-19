@@ -13,7 +13,7 @@ parseStruct(opts);
 % convert ROOTPATH to char
 ROOTPATHs = cellstr(ROOTPATHs);
 for index = 1:length(ROOTPATHs)
-    if ~endsWith(ROOTPATHs{index})
+    if ~endsWith(ROOTPATHs{index}, '\')
         ROOTPATHs{index} = [ROOTPATHs{index}, '\'];
     end
 end
@@ -36,8 +36,7 @@ for dataIndex = 1:length(ROOTPATHs)
     if numel(temp) > 1
         error("More than 1 MAT data found in your directory.");
     elseif isempty(temp)
-        warning("No MAT data found in your directory.");
-        disp('Proceed without MAT data.');
+        warning("No MAT data found in your directory. Proceed without MAT data.");
     else
         load(fullfile(temp.folder, temp.name), "rules", "trialsData");
         if ~exist("rules", "var") || ~exist("trialsData", "var")
@@ -49,22 +48,31 @@ for dataIndex = 1:length(ROOTPATHs)
     latency_temp = [EEG.event.latency]'; % unit: sample
     fs = EEG.srate; % Hz
     if exist("trialsData", "var")
-        trialAll = [trialAll; generalProcessFcn(trialsData, rules)];
+        trialAll_temp = generalProcessFcn(trialsData, rules);
     end
     
     % exclude accidental codes
     if exist("rules", "var")
         exIdx = isnan(codes) | ~ismember(codes, rules.code) | latency_temp > size(EEG.data, 2) - fix(window(2) / 1000 * fs);
         latency_temp(exIdx) = [];
+
+        if exist("trialsData", "var") && numel(trialAll_temp) > numel(latency_temp)
+            trialAll_temp = trialAll_temp(1:numel(latency_temp));
+        end
+
     end
     latency_temp = latency_temp(find(arrayfun(@(x) str2double(x.type), EEG.event) == 1, 1):end);
     latency = [latency; latency_temp];
+
+    if exist("trialsData", "var")
+        trialAll = [trialAll; trialAll_temp];
+    end
 
     % filter
     EEG.data = ECOGFilter(EEG.data, fhp, flp, fs, "Notch", "on");
     
     % epoching
-    trialsEEG = [trialsEEG; arrayfun(@(x) EEG.data(:, x + fix(window(1) / 1000 * fs):x + fix(window(2) / 1000 * fs)), latency, "UniformOutput", false)];
+    trialsEEG = [trialsEEG; arrayfun(@(x) EEG.data(:, x + fix(window(1) / 1000 * fs):x + fix(window(2) / 1000 * fs)), latency_temp, "UniformOutput", false)];
 end
 
 % ICA
@@ -84,6 +92,7 @@ if strcmpi(icaOpt, "on") && nargout >= 4
         disp('ICA result does not exist. Performing ICA on data...');
         channels = 1:size(trialsEEG{1}, 1);
         plotRawWave(calchMean(trialsEEG), calchStd(trialsEEG), window);
+        scaleAxes("y", "cutoffRange", [-20, 20]);
         bc = validateInput(['Input extra bad channels (besides ', num2str(badChs(:)'), '): '], @(x) isempty(x) || all(fix(x) == x & x > 0));
         badChs = [badChs(:); bc(:)]';
 
@@ -109,12 +118,13 @@ if strcmpi(icaOpt, "on") && nargout >= 4
         if isempty(nMaxIcaTrial)
             idx = 1:length(trialsEEG);
         else
-            idx = 1:min(length(trialsEEG), nMaxIcaTrial);
+            idx = 1:length(trialsEEG);
+            idx = idx(randperm(length(trialsEEG), min(length(trialsEEG), nMaxIcaTrial)));
         end
         
         [comp, ICs] = ICA_PopulationEEG(trialsEEG(idx), fs, window, "chs2doICA", channels, "EEGPos", EEGPos);
     end
-    
+
     % reconstruct data
     trialsEEG = cellfun(@(x) x(channels, :), trialsEEG, "UniformOutput", false);
     trialsEEG = reconstructData(trialsEEG, comp, ICs);
@@ -123,7 +133,7 @@ if strcmpi(icaOpt, "on") && nargout >= 4
 
     comp.channels = channels;
     comp.ICs = ICs;
-    comp.badChs = badChs;
+    comp.badChs = sort(badChs, "ascend");
 
     varargout{1} = comp;
 end

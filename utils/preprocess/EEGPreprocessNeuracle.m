@@ -24,13 +24,24 @@ if exist(fullfile(ROOTPATH, 'data.1.bdf'), 'file')
     EEG.data = [EEG.data, EEG1.data];
 end
 
+% read motion signal from edf data
+if opts.load_speed && exist(fullfile(ROOTPATH, 'mems.edf'), "file")
+    motiondata = readedf(fullfile(ROOTPATH, 'mems.edf')); % a(t)
+    sensor = 2; % which sensor to use, 1 for left/right, 2 for up/down, 3 for forward/backward
+    speed = cumsum(motiondata(sensor, :)) * 1/fsSensor; % v(t)
+    speed = mFilter(speed, fsSensor, "fhp", 0.5, "flp", 2);
+    varargout{2} = speed;
+else
+    disp("No mem.edf found.");
+    varargout{2} = [];
+end
+
 % load MAT data
 temp = dir(fullfile(ROOTPATH, '*.mat'));
 if numel(temp) > 1
     error("More than 1 MAT data found in your directory.");
 elseif isempty(temp)
-    warning("No MAT data found in your directory.");
-    disp('Proceed without MAT data.');
+    warning("No MAT data found in your directory. Proceed without MAT data.");
 else
     load(fullfile(temp.folder, temp.name), "rules", "trialsData");
     if ~exist("rules", "var") || ~exist("trialsData", "var")
@@ -76,6 +87,7 @@ if strcmpi(icaOpt, "on") && nargout >= 4
         disp('ICA result does not exist. Performing ICA on data...');
         channels = 1:size(trialsEEG{1}, 1);
         plotRawWave(calchMean(trialsEEG), calchStd(trialsEEG), window);
+        scaleAxes("y", [-20,20], "symOpts", "max");
         bc = validateInput(['Input extra bad channels (besides ', num2str(badChs(:)'), '): '], @(x) isempty(x) || all(fix(x) == x & x > 0));
         badChs = [badChs(:); bc(:)]';
 
@@ -101,7 +113,8 @@ if strcmpi(icaOpt, "on") && nargout >= 4
         if isempty(nMaxIcaTrial)
             idx = 1:length(trialsEEG);
         else
-            idx = 1:min(length(trialsEEG), nMaxIcaTrial);
+            idx = 1:length(trialsEEG);
+            idx = idx(randperm(length(trialsEEG), min(length(trialsEEG), nMaxIcaTrial)));
         end
         
         [comp, ICs] = ICA_PopulationEEG(trialsEEG(idx), fs, window, "chs2doICA", channels, "EEGPos", EEGPos);
@@ -115,7 +128,7 @@ if strcmpi(icaOpt, "on") && nargout >= 4
 
     comp.channels = channels;
     comp.ICs = ICs;
-    comp.badChs = badChs;
+    comp.badChs = sort(badChs, "ascend");
 
     varargout{1} = comp;
 end

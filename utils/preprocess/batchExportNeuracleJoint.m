@@ -48,9 +48,12 @@ if ~isempty(pIDs)
     DATAPATHs = DATAPATHs(ismember(pIDs0, pIDs));
 end
 
+[~, ~, SUBJECTsAll] = cellfun(@(x) getLastDirPath(x, 2), DATAPATHs, "UniformOutput", false);
+SUBJECTs = unique(SUBJECTsAll);
+
 %%% Define the folder paths where you save your MAT data
 % By replacing the root path of raw data with the root path of MAT data
-SAVEPATHs = cellfun(@(x) strrep(x, DATAROOTPATH, SAVEROOTPATH), DATAPATHs, "UniformOutput", false);
+SAVEPATHs = cellfun(@(x) fullfile(SAVEROOTPATH, x), SUBJECTs, "UniformOutput", false);
 
 %%% Create save paths
 cellfun(@mkdir, SAVEPATHs);
@@ -90,28 +93,54 @@ opts.EEGPos = EEGPos_Neuracle64();
 % If set "on", apply the ICA result of one protocol to the others for one subject
 % opts.sameICAOpt = "off"; % default
 % opts.ICAPATH = []; % default
-opts.nMaxIcaTrial = []; % [] for all trials, default=100
+% opts.nMaxIcaTrial = []; % [] for all trials, default=100
 
 %% Preprocess and save
 % Batch
-[trialsEEG0, trialAll0, fs, comp] = EEGPreprocessNeuracleJoint(DATAPATHs, opts);
-startIdx = find([trialAll0.trialNum] == 1);
-close all force;
-
-for index = 1:length(DATAPATHs)
-    % Skip preprocessing for existed MAT data
-    if exist(fullfile(SAVEPATHs{index}, "data.mat"), "file")
-        disp(['Data file exists in ', char(SAVEPATHs{index}), '. Skip']);
+for sIndex = 1:length(SUBJECTs)
+    if opts.joint_save && exist(fullfile(SAVEPATHs{sIndex}, ['joint ', char(numstrcat(pIDs, '_'))], "data.mat"), "file")
+        disp([fullfile(SAVEPATHs{sIndex}, ['joint ', char(numstrcat(pIDs, '_'))], 'data.mat'), ' exist. Skip.']);
         continue;
     end
 
-    % Separation for each protocol
-    trialAll = trialAll0(startIdx(index):startIdx(index + 1) - 1);
-    trialsEEG = trialsEEG0(startIdx(index):startIdx(index + 1) - 1);
+    DATAPATHsTemp = DATAPATHs(strcmp(SUBJECTsAll, SUBJECTs{sIndex}));
+    [~, ~, pID_temp] = cellfun(@(x) getLastDirPath(x, 1), DATAPATHsTemp, "UniformOutput", false);
 
-    parseStruct(opts, "window", "badChs");
+    [trialsEEG0, trialAll0, fs, comp] = EEGPreprocessNeuracleJoint(DATAPATHsTemp, opts);
+    close all force;
+    idx = [1, find(diff([trialAll0.pID]) ~= 0) + 1];
 
-    % Save
-    save(fullfile(SAVEPATHs{index}, "ICA res.mat"), "comp");
-    save(fullfile(SAVEPATHs{index}, "data.mat"), "trialAll", "trialsEEG", "window", "badChs", "fs");
+    window = opts.window;
+    badChs = comp.badChs;
+    
+    if opts.sep_save
+        disp("Save as separate MAT data...");
+
+        for index = 1:length(pID_temp)
+            % Skip preprocessing for existed MAT data
+            if exist(fullfile(SAVEPATHs{sIndex}, pID_temp{index}, "data.mat"), "file")
+                disp(['Data file exists in ', char(SAVEPATHs{index}), '. Skip']);
+                continue;
+            end
+        
+            % Separation for each protocol
+            trialAll = trialAll0(idx(index):idx(index + 1) - 1);
+            trialsEEG = trialsEEG0(idx(index):idx(index + 1) - 1);
+        
+            % Save
+            mkdir(fullfile(SAVEPATHs{sIndex}, pID_temp{index}));
+            save(fullfile(SAVEPATHs{sIndex}, pID_temp{index}, "ICA res.mat"), "comp");
+            save(fullfile(SAVEPATHs{sIndex}, pID_temp{index}, "data.mat"), "trialAll", "trialsEEG", "window", "badChs", "fs");
+        end
+    end
+
+    if opts.joint_save
+        disp("Save as a joint MAT data...");
+        trialAll = trialAll0;
+        trialsEEG = trialsEEG0;
+
+        mkdir(fullfile(SAVEPATHs{sIndex}, ['joint ', char(numstrcat(pIDs, '_'))]));
+        save(fullfile(SAVEPATHs{sIndex}, ['joint ', char(numstrcat(pIDs, '_'))], "ICA res.mat"), "comp");
+        save(fullfile(SAVEPATHs{sIndex}, ['joint ', char(numstrcat(pIDs, '_'))], "data.mat"), "trialAll", "trialsEEG", "window", "badChs", "fs");
+    end
 end
