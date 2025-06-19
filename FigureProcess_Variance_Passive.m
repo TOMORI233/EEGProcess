@@ -199,4 +199,5 @@ temp = arrayfun(@(x) [x.chMean(:), x.chErr(:)], chData(end:-1:1), "UniformOutput
 [t, cat(2, temp{:})];
 
 % i
+cat(1, RM_delta_change{:})';
 [Y(:), E(:)];

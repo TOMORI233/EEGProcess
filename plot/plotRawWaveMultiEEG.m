@@ -115,7 +115,7 @@ else
 
 end
 
-scaleAxes(Fig, "y", "on");
+scaleAxes(Fig, "y", "on", "autoTh", [0, 1]);
 
 return;
 end

@@ -22,6 +22,9 @@ run(fullfile(pwd, "config\config_plot.m"));
 run(fullfile(pwd, "config\config_Neuroscan64.m"));
 
 %% Load
+load("..\DATA\MAT DATA\figure\subjectIdx_A1.mat", "subjectIdxA1");
+DATAPATHs = DATAPATHs(subjectIdxA1);
+
 window = load(DATAPATHs{1}).window;
 fs = load(DATAPATHs{1}).fs;
 data = cellfun(@(x) load(x).chData, DATAPATHs, "UniformOutput", false);
@@ -226,8 +229,8 @@ cRange = scaleAxes(ax, "c", "symOpt", "max", "ignoreInvisible", false);
 set(findobj(ax, "Type", "Patch"), "FaceColor", "w");
 set(FigTopo, "Color", "w");
 temp = floor(max(cRange) * 100) / 100;
-exportgraphics(FigTopo, fullfile(FIGUREPATH, 'topo.jpg'), "Resolution", 900);
-exportcolorbar([-temp, temp], fullfile(FIGUREPATH, 'topo colorbar.jpg'));
+% exportgraphics(FigTopo, fullfile(FIGUREPATH, 'topo.jpg'), "Resolution", 900);
+% exportcolorbar([-temp, temp], fullfile(FIGUREPATH, 'topo colorbar.jpg'));
 
 %% Grand average wave plot of all channels REG4-4.06 vs IRREG4-4.06
 windowPlot = [-300, 2500]; % ms
@@ -275,7 +278,7 @@ temp = floor(max(cRange) * 100) / 100;
 cb.Ticks = [-temp, 0, temp];
 set(findobj(ax, "Type", "Patch"), "FaceColor", "w");
 set(FigREG, "Color", "w");
-exportgraphics(FigREG, fullfile(FIGUREPATH, 'REG 4-4.06.jpg'), "Resolution", 900, "BackgroundColor", "none");
+% exportgraphics(FigREG, fullfile(FIGUREPATH, 'REG 4-4.06.jpg'), "Resolution", 900, "BackgroundColor", "none");
 
 FigIRREG = plotRawWaveEEG(chDataIRREG_All(end).chMean, [], window, [], EEGPos_Neuroscan64);
 scaleAxes(FigIRREG, "x", windowPlot, "ignoreInvisible", false);
@@ -319,7 +322,7 @@ cb.Color = [0, 0, 0];
 cb.Ticks = [-temp, 0, temp];
 set(findobj(ax, "Type", "Patch"), "FaceColor", "w");
 set(FigIRREG, "Color", "w");
-exportgraphics(FigIRREG, fullfile(FIGUREPATH, 'IRREG 4-4.06.jpg'), "Resolution", 900);
+% exportgraphics(FigIRREG, fullfile(FIGUREPATH, 'IRREG 4-4.06.jpg'), "Resolution", 900);
 
 %% Scatter plot
 % All channels
@@ -358,129 +361,14 @@ scaleAxes("y", yRange);
 addLines2Axes(struct("X", {- 1000 - ICIsREG(1); 0; 1000 - ICIsREG(1)}));
 addScaleEEG(gcf, EEGPos);
 
-%% Example channel
-run(fullfile(pwd, "config\config_plot.m"));
-
-exampleChannel = "POZ";
-idx = find(upper(EEGPos.channelNames) == exampleChannel);
-
-temp10 = cellfun(@(x) x([x.ICI] == ICIsREG  (1)   & [x.type] == "REG"  ).chMean(idx, :), data, "UniformOutput", false);
-temp20 = cellfun(@(x) x([x.ICI] == ICIsIRREG(1)   & [x.type] == "IRREG").chMean(idx, :), data, "UniformOutput", false);
-temp1  = cellfun(@(x) x([x.ICI] == ICIsREG  (end) & [x.type] == "REG"  ).chMean(idx, :), data, "UniformOutput", false);
-temp2  = cellfun(@(x) x([x.ICI] == ICIsIRREG(end) & [x.type] == "IRREG").chMean(idx, :), data, "UniformOutput", false);
-
-% normalize
-temp10 = cellfun(@(x) x ./ std(x, [], 2), temp10, "UniformOutput", false);
-temp20 = cellfun(@(x) x ./ std(x, [], 2), temp20, "UniformOutput", false);
-temp1  = cellfun(@(x) x ./ std(x, [], 2), temp1,  "UniformOutput", false);
-temp2  = cellfun(@(x) x ./ std(x, [], 2), temp2,  "UniformOutput", false);
-
-p1020 = wavePermTest(temp10, temp20, nperm, "Type", "ERP", "Tail", "both");
-p110  = wavePermTest(temp1,  temp10, nperm, "Type", "ERP", "Tail", "both");
-p220  = wavePermTest(temp2,  temp20, nperm, "Type", "ERP", "Tail", "both");
-p12   = wavePermTest(temp1,  temp2,  nperm, "Type", "ERP", "Tail", "both");
-
-t = linspace(window(1), window(2), length(p_gfp_REG4o06_vs_REG4))';
-t = t - 1000 - ICIsREG(1);
-
-chDataREG = chDataREG_All;
-chDataREG = addfield(chDataREG, "chMean", arrayfun(@(x) x.chMean(idx, :), chDataREG_All, "UniformOutput", false)');
-chDataREG = addfield(chDataREG, "chErr", arrayfun(@(x) x.chErr(idx, :), chDataREG_All, "UniformOutput", false)');
-plotRawWaveMulti(chDataREG, window - 1000 - ICIsREG(1));
-xlabel("Time from change (ms)");
-ylabel("Normalized response (\muV)");
-title(['Grand-averaged wave in ', char(exampleChannel)]);
-addLines2Axes(struct("X", {- 1000 - ICIsREG(1); 0;  1000 - ICIsREG(1)}));
-scaleAxes("x", [-100, 600]);
-yRange = scaleAxes("y", "on", "symOpt", "max");
-
-chDataIRREG = chDataIRREG_All;
-chDataIRREG = addfield(chDataIRREG, "chMean", arrayfun(@(x) x.chMean(idx, :), chDataIRREG_All, "UniformOutput", false)');
-chDataIRREG = addfield(chDataIRREG, "chErr", arrayfun(@(x) x.chErr(idx, :), chDataIRREG_All, "UniformOutput", false)');
-plotRawWaveMulti(chDataIRREG, window - 1000 - ICIsREG(1));
-xlabel("Time from change (ms)");
-ylabel("Normalized response (\muV)");
-title(['Grand-averaged wave in ', char(exampleChannel)]);
-addLines2Axes(struct("X", {- 1000 - ICIsREG(1); 0;  1000 - ICIsREG(1)}));
-scaleAxes("x", [-100, 600]);
-scaleAxes("y", yRange);
-
-clearvars chData
-chData(1) = chDataREG(1);
-chData(2) = chDataREG(end);
-chData(3) = chDataIRREG(1);
-chData(4) = chDataIRREG(end);
-chData = addfield(chData, "color", {[1, 0.5, 0.5]; ...
-                                    [1, 0, 0]; ...
-                                    [0.5, 0.5, 1]; ...
-                                    [0, 0, 1]});
-plotRawWaveMulti(chData, window - 1000 - ICIsREG(1));
-xlabel("Time from change (ms)");
-ylabel("Normalized response (\muV)");
-title(['Grand-averaged wave in ', char(exampleChannel)]);
-addLines2Axes(struct("X", {- 1000 - ICIsREG(1); 0;  1000 - ICIsREG(1)}));
-scaleAxes("x", [-100, 400]);
-scaleAxes("y", [-2, 2]);
-yRange = get(gca, "YLim");
-
-idx = p1020 < alphaVal;
-c = mixColors(chData(1).color, chData(3).color);
-h1 = bar(t(idx), ones(sum(idx), 1) * yRange(1), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-h2 = bar(t(idx), ones(sum(idx), 1) * yRange(2), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-setLegendOff([h1, h2]);
-
-idx = p110 < alphaVal;
-c = mixColors(chData(1).color, chData(2).color);
-h1 = bar(t(idx), ones(sum(idx), 1) * yRange(1), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-h2 = bar(t(idx), ones(sum(idx), 1) * yRange(2), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-setLegendOff([h1, h2]);
-
-idx = p220 < alphaVal;
-c = mixColors(chData(3).color, chData(4).color);
-h1 = bar(t(idx), ones(sum(idx), 1) * yRange(1), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-h2 = bar(t(idx), ones(sum(idx), 1) * yRange(2), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-setLegendOff([h1, h2]);
-
-idx = p12 < alphaVal;
-c = mixColors(chData(2).color, chData(4).color);
-h1 = bar(t(idx), ones(sum(idx), 1) * yRange(1), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-h2 = bar(t(idx), ones(sum(idx), 1) * yRange(2), 1000 / fs, "FaceColor", c, "FaceAlpha", 0.1, "EdgeColor", "none");
-setLegendOff([h1, h2]);
-
 %% save for comparison
 params0 = [fieldnames(getVarsFromWorkspace('RM_\W*')); ...
            fieldnames(getVarsFromWorkspace('p_\W*')); ...
            fieldnames(getVarsFromWorkspace('window\W*'))];
-save(['..\DATA\MAT DATA\figure\Res P3 (', char(area), ').mat'], ...
+save(['..\DATA\MAT DATA\figure\Res P3 (', char(area), ') - Compare with A1.mat'], ...
      "fs", ...
      "ICIsREG", ...
      "ICIsIRREG", ...
      "chDataREG_All", ...
      "chDataIRREG_All", ...
      params0{:});
-
-%% Results of figures
-% Figure 1
-% c,d
-[t(:), chDataREG(end).chMean(:), chDataREG(end).chErr(:), chDataIRREG(end).chMean(:), chDataIRREG(end).chErr(:)]; % wave
-[t(p12 < alphaVal), 3 * ones(sum(p12 < alphaVal), 1)]; % bar
-
-% e
-[RM_delta_changeIRREG{end}(:), RM_delta_changeREG{end}(:)];
-
-% SFigure 1
-% c
-[t(:), gfpDataREG(end).chMean(:), gfpDataREG(end).chErr(:), gfpDataREG(1).chMean(:), gfpDataREG(1).chErr(:)]; % wave
-[t(p_gfp_REG4o06_vs_REG4 < alphaVal), ones(sum(p_gfp_REG4o06_vs_REG4 < alphaVal), 1) * 2]; % bar
-
-% d
-[t(:), gfpDataIRREG(end).chMean(:), gfpDataIRREG(end).chErr(:), gfpDataIRREG(1).chMean(:), gfpDataIRREG(1).chErr(:)]; % wave
-
-% Figure 3
-% e
-temp = arrayfun(@(x) [x.chMean(:), x.chErr(:)], chDataREG, "UniformOutput", false);
-[t, cat(2, temp{:})];
-
-% f
-cat(1, RM_delta_changeREG{:})';
-[cellfun(@mean, RM_delta_changeREG), cellfun(@SE, RM_delta_changeREG)];

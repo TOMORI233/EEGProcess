@@ -6,11 +6,11 @@ MATPATHs = dir("..\DATA\MAT DATA\temp\**\passive3\chMean.mat");
 % MATPATHs = dir("..\DATA\MAT DATA\pre\**\passive3\data.mat");
 MATPATHs = arrayfun(@(x) fullfile(x.folder, x.name), MATPATHs, "UniformOutput", false);
 
-% SAVEPATHs = replace(MATPATHs, "chMean.mat", "source change CT.mat");
-% FIGUREROOTPATH = "..\Figures\source\change CT (Reg)";
+SAVEPATHs = replace(MATPATHs, "chMean.mat", "source change CT.mat");
+FIGUREROOTPATH = "..\Figures\source\change CT (Reg)";
 
-SAVEPATHs = replace(MATPATHs, "chMean.mat", "source change CT (Irreg).mat");
-FIGUREROOTPATH = "..\Figures\source\change CT (Irreg)";
+% SAVEPATHs = replace(MATPATHs, "chMean.mat", "source change CT (Irreg).mat");
+% FIGUREROOTPATH = "..\Figures\source\change CT (Irreg)";
 
 [~, SUBJECTs] = cellfun(@(x) getLastDirPath(x, 2), MATPATHs, "UniformOutput", false);
 SUBJECTs = cellfun(@(x) x{1}, SUBJECTs, "UniformOutput", false);
@@ -89,9 +89,6 @@ cfg.parameter = 'avg.pow';
 source1_avg = ft_sourcegrandaverage(cfg, source1{:});
 source2_avg = ft_sourcegrandaverage(cfg, source2{:});
 
-% mSourceplot(source1_avg, mri, "slice", 'hot');
-% mSourceplot(source2_avg, mri, "slice", 'hot');
-
 %% Permutation test
 cfg = [];
 cfg.method = 'montecarlo';
@@ -123,7 +120,7 @@ cfg.parameter = 'avg.pow';
 cfg.operation = '((x1-x2)./(x1+x2))';
 source_diff = ft_math(cfg, source2_avg, source1_avg);
 source_diff.pow = source_diff.pow .* (stat.mask == 1);
-[~, Fig3D] = mSourceplot(source_diff, mri, 'slice', 'jet', 0.5);
+[~, Fig3D] = mSourceplot(source_diff, mri, 'slice', flipud(slanCM('RdYlBu')), 0.5);
 scaleAxes(Fig3D, "c", [-0.7, 0.7], "ignoreInvisible", false);
 
 ax = findobj(Fig3D, "Type", "Axes");

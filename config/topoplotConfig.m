@@ -29,7 +29,7 @@ function params = topoplotConfig(EEGPos, chsMark, size0, sizeMark)
                    {'headrad'  }, {max([EEGPos.locs(chs2Plot).radius])}, ... % head radius
                    {'intrad'   }, {0.4}                                , ... % interpolate radius
                    {'conv'     }, {'on'}                               , ... % plot radius just covers maximum channel radius
-                   {'colormap' }, {'jet'}                              , ... % colormap
+                   {'colormap' }, {flipud(slanCM('RdYlBu'))}           , ... % colormap
                    marker
                   ];
     elseif EEGPos.name == "Neuracle64"
@@ -41,7 +41,7 @@ function params = topoplotConfig(EEGPos, chsMark, size0, sizeMark)
                    {'headrad'  }, {0.58}                               , ... % head radius
                    {'intrad'   }, {0.64}                               , ... % interpolate radius
                    {'conv'     }, {'on'}                               , ... % plot radius just covers maximum channel radius
-                   {'colormap' }, {'jet'}                              , ... % colormap
+                   {'colormap' }, {flipud(slanCM('RdYlBu'))}           , ... % colormap
                    marker
                   ];
     else

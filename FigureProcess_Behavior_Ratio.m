@@ -303,19 +303,20 @@ res_scatterX_IRREG = cellfun(@(x) x(1), resIRREG_A1(subjectIdxA1));
 res_scatterY_REG = cellfun(@(x) x(end), resREG_A1(subjectIdxA1));
 
 %% 
-[bf10_IRREG_vs_control, res_p_IRREG_vs_control, ~, stats_IRREG_vs_control] = bf.ttest(res_scatterX_IRREG, cellfun(@(x) x(2), resIRREG_A1(subjectIdxA1)));
-d_IRREG_vs_control = cohensD(res_scatterX_IRREG, cellfun(@(x) x(2), resIRREG_A1(subjectIdxA1)));
+[res_p_IRREG_vs_control, stats_IRREG_vs_control, efsz_IRREG_vs_control, bf10_IRREG_vs_control] = mstat.ttest(res_scatterX_IRREG, cellfun(@(x) x(2), resIRREG_A1(subjectIdxA1)));
 
-[~, res_p_PT_vs_control, ~, stats_PT_vs_control] = ttest(cellfun(@(x) x(1), resPT_A1(subjectIdxA1)), ...
-                                                         cellfun(@(x) x(2), resPT_A1(subjectIdxA1)));
-d_PT_vs_control = cohensD(cellfun(@(x) x(1), resPT_A1(subjectIdxA1)), ...
-                          cellfun(@(x) x(2), resPT_A1(subjectIdxA1)));
+[res_p_PT_vs_control, stats_PT_vs_control, efsz_PT_vs_control] = mstat.ttest(cellfun(@(x) x(1), resPT_A1(subjectIdxA1)), ...
+                                                                             cellfun(@(x) x(2), resPT_A1(subjectIdxA1)));
 
-[~, res_p_REG_vs_PT, ~, stats_REG_vs_PT] = ttest(res_scatterX_PT, res_scatterY_REG);
-d_REG_vs_PT = cohensD(res_scatterX_PT, res_scatterY_REG);
+[res_p_REG_vs_PT, stats_REG_vs_PT, efsz_REG_vs_PT, ~] = mstat.ttest(res_scatterX_PT, res_scatterY_REG);
 
-[~, res_p_REG_vs_IRREG, ~, stats_REG_vs_IRREG] = ttest(res_scatterX_IRREG, res_scatterY_REG);
-d_REG_vs_IRREG = cohensD(res_scatterX_IRREG, res_scatterY_REG);
+[res_p_REG_vs_IRREG, stats_REG_vs_IRREG, efsz_REG_vs_IRREG, ~] = mstat.ttest(res_scatterX_IRREG, res_scatterY_REG);
 
-[~, res_p_th_A1_vs_A2, ~, stats_th_A1_vs_A2] = ttest(thREG_A1(idxBoth), thREG_A2(idxBoth));
-d_th_A1_vs_A2 = cohensD(thREG_A1(idxBoth), thREG_A2(idxBoth));
+[res_p_th_A1_vs_A2, stats_th_A1_vs_A2, efsz_th_A1_vs_A2, ~] = mstat.ttest(thREG_A1(idxBoth), thREG_A2(idxBoth));
+
+cat(1, resREG_A1{subjectIdxA1});
+cat(1, resIRREG_A1{subjectIdxA1});
+cat(1, resPT_A1{subjectIdxA1});
+
+cat(1, resREG_A1{subjectIdxA1 & subjectIdxA2});
+cat(1, resREG_A2{subjectIdxA1 & subjectIdxA2});

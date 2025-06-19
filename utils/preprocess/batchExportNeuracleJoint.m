@@ -95,6 +95,7 @@ opts.nMaxIcaTrial = []; % [] for all trials, default=100
 %% Preprocess and save
 % Batch
 [trialsEEG0, trialAll0, fs, comp] = EEGPreprocessNeuracleJoint(DATAPATHs, opts);
+startIdx = find([trialAll0.trialNum] == 1);
 close all force;
 
 for index = 1:length(DATAPATHs)
@@ -105,9 +106,8 @@ for index = 1:length(DATAPATHs)
     end
 
     % Separation for each protocol
-    idx = find([trialAll0.trialNum] == 1);
-    trialAll = trialAll0(idx(index):idx(index + 1) - 1);
-    trialsEEG = trialsEEG0(idx(index):idx(index + 1) - 1);
+    trialAll = trialAll0(startIdx(index):startIdx(index + 1) - 1);
+    trialsEEG = trialsEEG0(startIdx(index):startIdx(index + 1) - 1);
 
     parseStruct(opts, "window", "badChs");
 

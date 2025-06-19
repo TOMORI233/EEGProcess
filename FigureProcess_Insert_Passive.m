@@ -195,3 +195,6 @@ save(['..\DATA\MAT DATA\figure\Res insert (', char(area), ').mat'], ...
 % b
 temp = arrayfun(@(x) [x.chMean(:), x.chErr(:)], chData, "UniformOutput", false);
 [t, cat(2, temp{:})];
+
+% c
+cat(1, RM_delta_change{:})';

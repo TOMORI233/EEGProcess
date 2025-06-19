@@ -364,7 +364,9 @@ scaleAxes("y", yRange);
 % Figure 5
 % d
 temp = arrayfun(@(x) [x.chMean(:), x.chErr(:)], chDataREG, "UniformOutput", false);
+t = linspace(window(1), window(2), size(chDataREG(1).chMean, 2))' - 1000 - ICIsREG(1);
 [t, cat(2, temp{:})];
 
 % f,g
+cat(1, RM_delta_changeREG{:})';
 [cellfun(@mean, RM_delta_changeREG), cellfun(@SE, RM_delta_changeREG)];
