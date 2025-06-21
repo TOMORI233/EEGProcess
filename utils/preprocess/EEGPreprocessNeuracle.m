@@ -54,7 +54,7 @@ codes = arrayfun(@(x) str2double(x.type), EEG.event); % marker
 latency = [EEG.event.latency]'; % unit: sample
 fs = EEG.srate; % Hz
 if exist("trialsData", "var")
-    trialAll = generalProcessFcn(trialsData, rules);
+    trialAll = opts.behaviorProcessFcn(trialsData, rules);
 end
 
 % exclude accidental codes

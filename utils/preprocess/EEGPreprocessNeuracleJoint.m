@@ -48,7 +48,7 @@ for dataIndex = 1:length(ROOTPATHs)
     latency_temp = [EEG.event.latency]'; % unit: sample
     fs = EEG.srate; % Hz
     if exist("trialsData", "var")
-        trialAll_temp = generalProcessFcn(trialsData, rules);
+        trialAll_temp = opts.behaviorProcessFcn(trialsData, rules);
     end
     
     % exclude accidental codes

@@ -3,8 +3,14 @@ function opts = preprocessConfigEEG(varargin)
 % You can change parameters with input name-value pairs.
 % Copy this file to 'config\local' folder as your local config file.
 
+% skip existed files
+opts.skipExisted = true; % set false to re-export data
+
 % EEG pos file
 opts.EEGPos = [];
+
+% for behavior process
+opts.behaviorProcessFcn = @generalProcessFcn;
 
 % for trial segmentation
 opts.window = [-1000, 3000]; % ms
@@ -28,7 +34,8 @@ opts.badChs = [];
 
 % for ICA
 opts.icaOpt = "on";
-opts.ICAPATH = [];
+opts.ICAPATH = []; % If [ICA res.mat] already exists in the SAVEPATH, ICA 
+                   % will not be done
 opts.nMaxIcaTrial = 100; % If left empty, use all trials
 opts.sameICAOpt = "off"; % If set "on", apply the ICA result of one 
                          % protocol to the others for one subject
