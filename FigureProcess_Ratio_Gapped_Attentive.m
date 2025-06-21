@@ -345,4 +345,5 @@ temp = arrayfun(@(x) [x.chMean(:), x.chErr(:)], chDataREG, "UniformOutput", fals
 [t, cat(2, temp{:})];
 
 % f,g
+cat(1, RM_delta_changeREG{:})';
 [cellfun(@mean, RM_delta_changeREG), cellfun(@SE, RM_delta_changeREG)];

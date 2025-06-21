@@ -2,7 +2,7 @@ function varargout = mSourceplot(source, mri, method2D, cm, th)
 narginchk(2, 5)
 
 if nargin < 3
-    method2D = 'slice';
+    method2D = 'slice'; % or 'ortho'
 end
 
 if nargin < 4
