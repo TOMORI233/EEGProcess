@@ -105,7 +105,7 @@ for index = 1:length(DATAPATHs)
     close all force;
 
     % Skip preprocessing for existed MAT data
-    if exist(fullfile(SAVEPATHs{index}, "data.mat"), "file")
+    if opts.skipExisted && exist(fullfile(SAVEPATHs{index}, "data.mat"), "file")
         disp(['Data file exists in ', char(SAVEPATHs{index}), '. Skip']);
         continue;
     end
