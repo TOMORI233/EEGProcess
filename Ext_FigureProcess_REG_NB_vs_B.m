@@ -142,7 +142,7 @@ scaleAxes(FigCompare2, "y", "symOpt", "max");
 addLines2Axes(FigCompare2, struct("Y", 0, "style", "-", "width", 0.5));
 
 for dIndex = 1:length(ICIs)
-    mSubplot(FigCompare2, length(ICIs), 1, dIndex, "nSize", [1/5, 1], "alignment", "center-right");
+    mSubplot(FigCompare2, length(ICIs), 1, dIndex, "nSize", [1/5, 1], "alignment", "right-center");
     imagesc("XData", t, "YData", EEGPos.channels, "CData", stats(dIndex).stat);
     set(gca, "XLimitMethod", "tight");
     set(gca, "YLimitMethod", "tight");

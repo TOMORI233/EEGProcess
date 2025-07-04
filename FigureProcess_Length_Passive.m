@@ -14,7 +14,7 @@ SUBJECTs = strrep(SUBJECTs, '\', '');
 FIGUREPATH = getAbsPath("..\Figures\healthy\population\Length Passive");
 
 %% Params
-colors = flip(cellfun(@(x) x / 255, {[0 0 0], [0 0 255], [255 128 0], [255 0 0]}, "UniformOutput", false));
+colors = flip(cellfun(@(x) x / 255, {[0 0 0], [0 100 255], [255 128 0], [255 100 100]}, "UniformOutput", false));
 
 interval = 0;
 run(fullfile(pwd, "config\config_plot.m"));
