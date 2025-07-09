@@ -98,13 +98,13 @@ opts.EEGPos = EEGPos_Neuracle64();
 %% Preprocess and save
 % Batch
 for sIndex = 1:length(SUBJECTs)
-    if opts.joint_save && exist(fullfile(SAVEPATHs{sIndex}, ['joint ', char(numstrcat(pIDs, '_'))], "data.mat"), "file")
-        disp([fullfile(SAVEPATHs{sIndex}, ['joint ', char(numstrcat(pIDs, '_'))], 'data.mat'), ' exist. Skip.']);
-        continue;
-    end
-
     DATAPATHsTemp = DATAPATHs(strcmp(SUBJECTsAll, SUBJECTs{sIndex}));
     [~, ~, pID_temp] = cellfun(@(x) getLastDirPath(x, 1), DATAPATHsTemp, "UniformOutput", false);
+
+    if opts.skipExisted && ((opts.joint_save && exist(fullfile(SAVEPATHs{sIndex}, ['joint ', char(numstrcat(pIDs, '_'))], "data.mat"), "file")) || ...
+       all(cellfun(@(x) exist(fullfile(SAVEPATHs{sIndex}, x, "data.mat"), "file"), pID_temp)))
+        continue;
+    end
 
     [trialsEEG0, trialAll0, fs, comp] = EEGPreprocessNeuracleJoint(DATAPATHsTemp, opts);
     close all force;
@@ -118,14 +118,19 @@ for sIndex = 1:length(SUBJECTs)
 
         for index = 1:length(pID_temp)
             % Skip preprocessing for existed MAT data
-            if exist(fullfile(SAVEPATHs{sIndex}, pID_temp{index}, "data.mat"), "file")
+            if opts.skipExisted && exist(fullfile(SAVEPATHs{sIndex}, pID_temp{index}, "data.mat"), "file")
                 disp(['Data file exists in ', char(SAVEPATHs{index}), '. Skip']);
                 continue;
             end
         
             % Separation for each protocol
-            trialAll = trialAll0(idx(index):idx(index + 1) - 1);
-            trialsEEG = trialsEEG0(idx(index):idx(index + 1) - 1);
+            if index < length(pID_temp)
+                trialAll = trialAll0(idx(index):idx(index + 1) - 1);
+                trialsEEG = trialsEEG0(idx(index):idx(index + 1) - 1);
+            else
+                trialAll = trialAll0(idx(index):end);
+                trialsEEG = trialsEEG0(idx(index):end);
+            end
         
             % Save
             mkdir(fullfile(SAVEPATHs{sIndex}, pID_temp{index}));
